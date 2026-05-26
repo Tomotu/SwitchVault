@@ -68,7 +68,7 @@
     /* === HERO === */
     .hero {
       position: relative;
-      padding: clamp(40px, 8vw, 80px) clamp(20px, 5vw, 60px) clamp(32px, 6vw, 60px);
+      padding: clamp(28px, 6vw, 56px) clamp(20px, 5vw, 60px) clamp(20px, 4vw, 36px);
       text-align: center;
       overflow: hidden;
       background:
@@ -103,7 +103,7 @@
       font-family: 'Anton', sans-serif;
       font-style: normal;
       font-weight: 400;
-      font-size: clamp(48px, 15vw, 112px);
+      font-size: clamp(42px, 13vw, 100px);
       letter-spacing: .02em;
       text-transform: uppercase;
       line-height: 0.9;
@@ -118,33 +118,43 @@
     }
     .hero-desc {
       color: var(--txt2);
-      font-size: clamp(13px, 2vw, 15px);
-      max-width: 500px;
-      margin: 16px auto 24px;
+      font-size: 13px;
+      max-width: 440px;
+      margin: 12px auto 18px;
       position: relative;
       z-index: 1;
+      opacity: .75;
     }
     .hstats {
       display: flex;
       justify-content: center;
-      gap: clamp(16px, 4vw, 40px);
-      margin-bottom: 20px;
+      gap: 8px;
+      margin-bottom: 18px;
       position: relative;
       z-index: 1;
+      flex-wrap: wrap;
     }
-    .hst { text-align: center; }
+    .hst {
+      text-align: center;
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--b1);
+      border-radius: var(--r);
+      padding: 10px 14px;
+      min-width: 58px;
+    }
     .hst-n {
-      font-size: clamp(20px, 4vw, 32px);
-      font-weight: 600;
+      font-family: 'Anton', sans-serif;
+      font-size: clamp(20px, 4vw, 28px);
+      font-weight: 400;
       color: var(--txt);
       line-height: 1;
     }
     .hst-l {
-      font-size: 11px;
+      font-size: 9px;
       color: var(--txt2);
       text-transform: uppercase;
-      letter-spacing: .06em;
-      margin-top: 2px;
+      letter-spacing: .08em;
+      margin-top: 4px;
     }
     .streak-badge {
       display: inline-block;
@@ -175,9 +185,9 @@
     }
     .prog-top b { color: var(--txt); font-weight: 600; }
     .prog-track {
-      height: 6px;
+      height: 8px;
       background: var(--b1);
-      border-radius: 3px;
+      border-radius: 4px;
       overflow: hidden;
     }
     .prog-fill {
@@ -297,11 +307,13 @@
       border-radius: var(--r);
       color: var(--txt2);
       cursor: pointer;
-      font-size: 14px;
-      padding: 7px 10px;
+      font-size: 15px;
+      padding: 8px 11px;
       white-space: nowrap;
       transition: all .15s;
       line-height: 1;
+      min-height: 38px;
+      min-width: 38px;
     }
     .tbtn:hover { background: var(--s3); border-color: var(--b2); }
     .tbtn-acc {
@@ -311,9 +323,40 @@
       font-weight: 600;
     }
     .tbtn-acc:hover { opacity: .85; }
+    /* Grouped toolbar buttons */
+    .tbtn-group {
+      display: flex;
+      background: var(--s1);
+      border: 1px solid var(--b1);
+      border-radius: var(--r);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .tbtn-group .tbtn {
+      border: none;
+      border-right: 1px solid var(--b1);
+      border-radius: 0;
+      background: transparent;
+    }
+    .tbtn-group .tbtn:last-child { border-right: none; }
+    .tbtn-group .tbtn:hover { background: var(--b1); }
     .tbtn.on { background: rgba(200,168,112,.14); border-color: rgba(200,168,112,.3); color: var(--gold2); }
     .tbtn.on-teal { background: rgba(106,138,88,.12); border-color: rgba(106,138,88,.28); color: var(--teal); }
     .tbtn.on-pur { background: rgba(160,69,63,.12); border-color: rgba(160,69,63,.28); color: var(--acc); }
+    .chips-outer {
+      position: relative;
+    }
+    .chips-outer::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 2px;
+      width: 48px;
+      background: linear-gradient(to right, transparent, var(--s2));
+      pointer-events: none;
+      z-index: 1;
+    }
     .chips {
       display: flex;
       gap: 6px;
@@ -330,7 +373,7 @@
       cursor: pointer;
       font-size: 12px;
       font-weight: 500;
-      padding: 4px 12px;
+      padding: 5px 13px;
       white-space: nowrap;
       transition: all .15s;
     }
@@ -351,28 +394,40 @@
       font-size: 12px;
       color: var(--txt2);
       gap: 8px;
-      flex-wrap: wrap;
+      overflow-x: auto;
+      scrollbar-width: none;
+      flex-wrap: nowrap;
     }
+    .statusbar::-webkit-scrollbar { display: none; }
     .vis-num { color: var(--txt); font-weight: 600; }
     .right-ctrls {
       display: flex;
       align-items: center;
-      gap: 4px;
-      flex-wrap: wrap;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .ctrl-group {
+      display: flex;
+      background: var(--b0);
+      border: 1px solid var(--b1);
+      border-radius: 6px;
+      overflow: hidden;
     }
     .dash-toggle, .sbtn {
       background: none;
-      border: 1px solid var(--b1);
-      border-radius: 6px;
+      border: none;
       color: var(--txt2);
       cursor: pointer;
       font-size: 11px;
-      padding: 3px 8px;
+      padding: 4px 9px;
       transition: all .15s;
       white-space: nowrap;
     }
-    .dash-toggle:hover, .sbtn:hover { background: var(--s2); border-color: var(--b2); color: var(--txt); }
-    .sbtn.on { background: var(--s2); border-color: var(--b2); color: var(--txt); }
+    .dash-toggle { border: 1px solid var(--b1); border-radius: 6px; }
+    .ctrl-group .sbtn { border-right: 1px solid var(--b1); border-radius: 0; }
+    .ctrl-group .sbtn:last-child { border-right: none; }
+    .dash-toggle:hover, .sbtn:hover { background: var(--s2); color: var(--txt); }
+    .sbtn.on { background: var(--s2); color: var(--txt); }
     .dash-toggle.on { background: var(--s2); color: var(--txt); }
 
     /* === SELECT BAR === */
@@ -467,15 +522,15 @@
     .select-mode .card-check { display: flex; }
     .card.selected .card-check { background: var(--acc); border-color: var(--acc); color: white; }
     .cnum {
-      font-size: 12px;
-      color: var(--mut2);
+      font-size: 10px;
+      color: var(--mut);
       font-variant-numeric: tabular-nums;
       flex-shrink: 0;
-      margin-top: 2px;
-      min-width: 28px;
+      margin-top: 3px;
+      min-width: 24px;
     }
     .cbody { flex: 1; min-width: 0; }
-    .ctitle { font-size: 13px; font-weight: 400; color: var(--txt); line-height: 1.4; }
+    .ctitle { font-size: 13px; font-weight: 500; color: var(--txt); line-height: 1.4; }
     .list.compact .card { margin-bottom: 3px; }
     .list.compact .card-inner { padding: 7px 12px; }
     .list.compact .ctitle { font-size: 12px; }
@@ -512,17 +567,22 @@
     .cpri.med  { background: rgba(200,168,112,.14); color: var(--gold2); }
     .cpri.low  { background: rgba(106,138,88,.12); color: #90B880; }
 
-    .card-acts { display: flex; gap: 3px; align-items: flex-start; flex-shrink: 0; }
+    .card-acts { display: flex; gap: 2px; align-items: flex-start; flex-shrink: 0; }
     .cact {
       background: none;
       border: 1px solid transparent;
       border-radius: 6px;
       color: var(--mut);
       cursor: pointer;
-      font-size: 13px;
-      padding: 3px 5px;
+      font-size: 14px;
+      padding: 5px 6px;
       transition: all .12s;
       line-height: 1;
+      min-width: 30px;
+      min-height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .cact:hover { background: var(--b1); border-color: var(--b2); color: var(--txt2); }
     .fav-btn.on  { color: var(--gold2); }
@@ -865,28 +925,32 @@
         <input id="search" type="text" placeholder="Search ideas…" autocomplete="off" spellcheck="false"/>
         <button class="sbox-clear" id="search-clear">✕</button>
       </div>
-      <button class="tbtn tbtn-def" id="btn-fav" title="Show starred only">⭐</button>
-      <button class="tbtn tbtn-def" id="btn-done" title="Show done only">✓</button>
-      <button class="tbtn tbtn-def" id="btn-pri" title="Show priority only">🔴</button>
-      <button class="tbtn tbtn-def" id="btn-inspire" title="Inspire mode (I)">✦</button>
+      <div class="tbtn-group">
+        <button class="tbtn tbtn-def" id="btn-fav" title="Show starred only">⭐</button>
+        <button class="tbtn tbtn-def" id="btn-done" title="Show done only">✓</button>
+        <button class="tbtn tbtn-def" id="btn-pri" title="Show priority only">🔴</button>
+      </div>
       <button class="tbtn tbtn-acc" id="btn-rand" title="Random pick (R)">🎲</button>
+      <button class="tbtn tbtn-def" id="btn-inspire" title="Inspire mode (I)">✦</button>
       <button class="tbtn tbtn-def" id="btn-copy" title="Copy visible ideas">📋</button>
     </div>
-    <div class="chips" id="chips">
-      <button class="chip on" data-f="all">All</button>
-      <button class="chip" data-f="gaming">🕹 Gaming</button>
-      <button class="chip" data-f="gear">🎮 Gear</button>
-      <button class="chip" data-f="series">📺 Series</button>
-      <button class="chip" data-f="education">📚 Education</button>
-      <button class="chip" data-f="story">📖 Story</button>
-      <button class="chip" data-f="lifestyle">🎒 Lifestyle</button>
-      <button class="chip" data-f="review">⭐ Review</button>
-      <button class="chip" data-f="tutorial">🛠 Tutorial</button>
-      <button class="chip" data-f="comedy">😂 Comedy</button>
-      <button class="chip" data-f="challenge">💥 Challenge</button>
-      <button class="chip" data-f="collab">🤝 Collab</button>
-      <button class="chip" data-f="reaction">😲 Reaction</button>
-      <button class="chip" data-f="trend">🔥 Trend</button>
+    <div class="chips-outer">
+      <div class="chips" id="chips">
+        <button class="chip on" data-f="all">All</button>
+        <button class="chip" data-f="gaming">🕹 Gaming</button>
+        <button class="chip" data-f="gear">🎮 Gear</button>
+        <button class="chip" data-f="series">📺 Series</button>
+        <button class="chip" data-f="education">📚 Education</button>
+        <button class="chip" data-f="story">📖 Story</button>
+        <button class="chip" data-f="lifestyle">🎒 Lifestyle</button>
+        <button class="chip" data-f="review">⭐ Review</button>
+        <button class="chip" data-f="tutorial">🛠 Tutorial</button>
+        <button class="chip" data-f="comedy">😂 Comedy</button>
+        <button class="chip" data-f="challenge">💥 Challenge</button>
+        <button class="chip" data-f="collab">🤝 Collab</button>
+        <button class="chip" data-f="reaction">😲 Reaction</button>
+        <button class="chip" data-f="trend">🔥 Trend</button>
+      </div>
     </div>
   </div>
 
@@ -896,14 +960,18 @@
     <div class="right-ctrls">
       <button class="dash-toggle" id="dash-toggle">📊 Stats</button>
       <button class="sbtn" id="btn-select-mode">☐ Select</button>
-      <button class="sbtn" data-v="normal" id="vn">Normal</button>
-      <button class="sbtn on" data-v="compact" id="vc">Compact</button>
-      <button class="sbtn on" data-s="num">№</button>
-      <button class="sbtn" data-s="az">A–Z</button>
-      <button class="sbtn" data-s="fav">★</button>
-      <button class="sbtn" data-s="undone">Todo</button>
-      <button class="sbtn" data-s="sched">📅</button>
-      <button class="sbtn" data-s="pri">🔴</button>
+      <div class="ctrl-group">
+        <button class="sbtn" data-v="normal" id="vn">Normal</button>
+        <button class="sbtn on" data-v="compact" id="vc">Compact</button>
+      </div>
+      <div class="ctrl-group">
+        <button class="sbtn on" data-s="num">№</button>
+        <button class="sbtn" data-s="az">A–Z</button>
+        <button class="sbtn" data-s="fav">★</button>
+        <button class="sbtn" data-s="undone">Todo</button>
+        <button class="sbtn" data-s="sched">📅</button>
+        <button class="sbtn" data-s="pri">🔴</button>
+      </div>
     </div>
   </div>
 

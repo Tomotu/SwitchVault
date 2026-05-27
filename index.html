@@ -161,6 +161,8 @@
       letter-spacing: .08em;
       margin-top: 4px;
     }
+    #hc-done { color: var(--teal); }
+    .app-logo { flex-shrink: 0; display: flex; align-items: center; opacity: .92; }
     .streak-badge {
       display: inline-block;
       font-size: 12px;
@@ -199,7 +201,7 @@
       height: 100%;
       width: 0%;
       border-radius: 3px;
-      background: linear-gradient(90deg, var(--acc), var(--acc2), var(--gold));
+      background: linear-gradient(90deg, var(--teal), var(--blue), var(--gold));
       background-size: 200% 100%;
       animation: shimmer 3s linear infinite;
       transition: width .5s cubic-bezier(.4,0,.2,1);
@@ -292,7 +294,7 @@
       transition: border-color .15s;
     }
     #search::placeholder { color: var(--mut); }
-    #search:focus { border-color: var(--acc); }
+    #search:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(106,138,88,.12); }
     .sbox-clear {
       position: absolute;
       right: 8px;
@@ -383,7 +385,7 @@
       transition: all .15s;
     }
     .chip:hover { background: var(--s3); border-color: var(--b2); }
-    .chip.on { background: rgba(160,69,63,.12); border-color: rgba(160,69,63,.3); color: var(--acc); }
+    .chip.on { background: rgba(106,138,88,.12); border-color: rgba(106,138,88,.28); color: var(--teal); }
 
     /* === STATUS BAR === */
     .statusbar {
@@ -948,13 +950,13 @@
     .fab {
       position: fixed; bottom: 80px; right: 20px; z-index: 200;
       width: 52px; height: 52px; border-radius: 50%;
-      background: var(--acc); border: none; color: #fff;
+      background: var(--teal); border: none; color: #fff;
       font-size: 24px; cursor: pointer;
-      box-shadow: 0 4px 16px rgba(160,69,63,.4);
+      box-shadow: 0 4px 16px rgba(106,138,88,.4);
       transition: transform .15s, box-shadow .15s;
       display: flex; align-items: center; justify-content: center;
     }
-    .fab:hover { transform: scale(1.08); box-shadow: 0 6px 20px rgba(160,69,63,.5); }
+    .fab:hover { transform: scale(1.08); box-shadow: 0 6px 20px rgba(106,138,88,.5); }
     @media (max-width: 640px) { .fab { bottom: 72px; } }
 
     /* === BOTTOM SHEET === */
@@ -1194,7 +1196,7 @@
       padding: 4px 8px; font-size: 18px; transition: color .15s; min-width: 48px;
     }
     .bnav-btn span { font-size: 9px; font-weight: 600; letter-spacing: .04em; }
-    .bnav-btn.active { color: var(--acc); }
+    .bnav-btn.active { color: var(--teal); }
 
     /* === PULL-TO-REFRESH === */
     .ptr-indicator {
@@ -1488,6 +1490,17 @@
   <!-- Toolbar -->
   <div class="toolbar" id="toolbar">
     <div class="row1">
+      <div class="app-logo" title="SwitchVault">
+        <svg viewBox="0 0 40 26" width="34" height="22" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="0" y="3" width="11" height="20" rx="5.5" fill="#A0453F"/>
+          <circle cx="5.5" cy="9" r="2" fill="rgba(0,0,0,.3)"/>
+          <rect x="10" y="0" width="20" height="26" rx="2" fill="#282523"/>
+          <rect x="12" y="3" width="16" height="20" rx="1.5" fill="#141412"/>
+          <polygon points="17.5,10.5 23.5,13 17.5,15.5" fill="#6A8A58" opacity=".9"/>
+          <rect x="29" y="3" width="11" height="20" rx="5.5" fill="#6A8A58"/>
+          <circle cx="34.5" cy="17" r="2" fill="rgba(0,0,0,.3)"/>
+        </svg>
+      </div>
       <div class="sbox">
         <span class="sbox-ico">⌕</span>
         <input id="search" type="text" placeholder="Search ideas…" autocomplete="off" spellcheck="false"/>

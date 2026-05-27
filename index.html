@@ -388,7 +388,7 @@
     /* === STATUS BAR === */
     .statusbar {
       position: sticky;
-      top: 71px;
+      top: var(--toolbar-h, 88px);
       z-index: 99;
       background: var(--s1);
       border-bottom: 1px solid var(--b0);
@@ -999,43 +999,6 @@
     .sheet-btn.prime { background: var(--acc); border-color: var(--acc); color: #fff; }
     .sheet-btn:hover { opacity: .85; }
 
-    /* === QUALITY RATING === */
-    .crating { display: inline-block; font-size: 10px; font-weight: 600; padding: 1px 5px; border-radius: 3px; margin-left: 5px; vertical-align: middle; cursor: pointer; }
-    .crating.hot  { background: rgba(200,96,88,.15); color: #E08080; }
-    .crating.solid{ background: rgba(200,168,112,.12); color: var(--gold); }
-    .crating.weak { background: rgba(106,138,88,.1); color: var(--teal); }
-    .rating-menu {
-      position: fixed; display: none; z-index: 300;
-      background: var(--s2); border: 1px solid var(--b2);
-      border-radius: var(--r); box-shadow: 0 8px 32px rgba(0,0,0,.5);
-      min-width: 150px; overflow: hidden;
-    }
-    .rating-menu.open { display: block; }
-    .rating-opt {
-      display: flex; align-items: center; gap: 10px;
-      padding: 9px 14px; cursor: pointer; font-size: 13px;
-      color: var(--txt2); transition: background .12s;
-    }
-    .rating-opt:hover { background: var(--s3); color: var(--txt); }
-
-    /* === CUSTOM STATUS === */
-    .cstatus { display: inline-block; font-size: 10px; font-weight: 600; padding: 1px 7px; border-radius: 10px; margin-left: 5px; vertical-align: middle; cursor: pointer; }
-    .cstatus.filming  { background: rgba(160,69,63,.12); color: var(--acc); }
-    .cstatus.editing  { background: rgba(200,168,112,.12); color: var(--gold); }
-    .cstatus.posted   { background: rgba(106,138,88,.12); color: var(--teal); }
-    .status-menu {
-      position: fixed; display: none; z-index: 300;
-      background: var(--s2); border: 1px solid var(--b2);
-      border-radius: var(--r); box-shadow: 0 8px 32px rgba(0,0,0,.5);
-      min-width: 140px; overflow: hidden;
-    }
-    .status-menu.open { display: block; }
-    .status-opt {
-      display: flex; align-items: center; gap: 10px;
-      padding: 9px 14px; cursor: pointer; font-size: 13px;
-      color: var(--txt2); transition: background .12s;
-    }
-    .status-opt:hover { background: var(--s3); color: var(--txt); }
 
     /* === SERIES LABEL === */
     .cseries { font-size: 10px; color: var(--blue); margin-left: 5px; font-style: italic; }
@@ -1535,12 +1498,12 @@
         </div>
       </div>
       <div class="tbtn-group">
-        <button class="tbtn tbtn-def" id="btn-fav" title="Starred only">★</button>
-        <button class="tbtn tbtn-def" id="btn-done" title="Done only">✓</button>
-        <button class="tbtn tbtn-def" id="btn-pri" title="Priority only">◈</button>
+        <button class="tbtn tbtn-def" id="btn-fav" title="Starred only" style="font-size:12px">Starred</button>
+        <button class="tbtn tbtn-def" id="btn-done" title="Done only" style="font-size:12px">Done</button>
+        <button class="tbtn tbtn-def" id="btn-pri" title="Priority only" style="font-size:12px">Priority</button>
       </div>
       <button class="tbtn tbtn-acc" id="btn-rand" title="Random pick (R)">🎲</button>
-      <button class="tbtn tbtn-def" id="btn-filter-row" title="More filters">⊞</button>
+      <button class="tbtn tbtn-def" id="btn-filter-row" title="More filters" style="font-size:12px">Filters ▾</button>
     </div>
     <!-- Collapsible filter row -->
     <div class="filter-row" id="filter-row" style="display:none">
@@ -1743,21 +1706,6 @@
     </div>
   </div>
 
-  <!-- Priority context menu -->
-  <div class="rating-menu" id="rating-menu">
-    <div class="rating-opt" data-r="hot">🔥 Hot</div>
-    <div class="rating-opt" data-r="solid">👍 Solid</div>
-    <div class="rating-opt" data-r="weak">💤 Weak</div>
-    <div class="rating-opt" data-r="">✕ Clear</div>
-  </div>
-
-  <!-- Status context menu -->
-  <div class="status-menu" id="status-menu">
-    <div class="status-opt" data-s="filming">🎬 Filming</div>
-    <div class="status-opt" data-s="editing">✂️ Editing</div>
-    <div class="status-opt" data-s="posted">✅ Posted</div>
-    <div class="status-opt" data-s="">✕ Clear</div>
-  </div>
 
   <!-- Duration context menu -->
   <div class="dur-menu" id="dur-menu">
@@ -1930,9 +1878,6 @@
       scheds:   'sv_scheds',
       streak:   'sv_streak',
       custom:   'sv_custom',
-      ratings:  'sv_ratings',
-      statuses: 'sv_statuses',
-      series:   'sv_series',
       sfilters: 'sv_sfilters',
       sortpref: 'sv_sortpref',
       hcats:    'sv_hcats',
@@ -1956,9 +1901,6 @@
     let scheds = {};
     let streakData = {};
     let customIdeas = [];
-    let ratings = {};
-    let statuses = {};
-    let seriesLabels = {};
     let savedFilters = [];
     let hiddenCats = new Set();
     let pinned = new Set();
@@ -1991,8 +1933,6 @@
     let insPool = [];
     let insIdx = 0;
     let priTarget = null;
-    let ratingTarget = null;
-    let statusTarget = null;
     let focusPool = [];
     let focusIdx = 0;
     let undoStack = [];
@@ -2004,6 +1944,9 @@
     }
     function lsSet(key, val) {
       try { localStorage.setItem(key, val); } catch(e) {}
+    }
+    function getIdea(i) {
+      return i < window.ALL_IDEAS.length ? window.ALL_IDEAS[i] : customIdeas[i - window.ALL_IDEAS.length];
     }
 
     const catList = ['gaming','gear','series','education','story','lifestyle','review','tutorial','comedy','challenge','collab','reaction','trend'];
@@ -2085,7 +2028,6 @@
       list.appendChild(dr);
     });
 
-    document.getElementById('hc-total').textContent = cards.length.toLocaleString();
 
     // === UI APPLIERS ===
     function _setFavUI(i, on) {
@@ -2350,7 +2292,7 @@
           const tEl = c.querySelector('.ctitle');
           if (!tEl || !tEl.querySelector('mark')) return;
           const i = +c.dataset.idx;
-          const idea = i < window.ALL_IDEAS.length ? window.ALL_IDEAS[i] : customIdeas[i - window.ALL_IDEAS.length];
+          const idea = getIdea(i);
           if (idea) tEl.textContent = idea.t;
           delete tEl.dataset.plain;
           if (pris[i]) _setPriUI(i, pris[i]);
@@ -2385,28 +2327,6 @@
     }
 
     // === NEW UI APPLIERS ===
-    function _setRatingUI(i, r) {
-      cards[i].querySelectorAll('.crating').forEach(e => e.remove());
-      if (r) {
-        const s = document.createElement('span');
-        s.className = `crating ${r}`;
-        s.dataset.i = i;
-        s.textContent = r === 'hot' ? '🔥 Hot' : r === 'solid' ? '👍 Solid' : '💤 Weak';
-        cards[i].querySelector('.ctitle')?.appendChild(s);
-      }
-    }
-
-    function _setStatusUI(i, st) {
-      cards[i].querySelectorAll('.cstatus').forEach(e => e.remove());
-      if (st) {
-        const s = document.createElement('span');
-        s.className = `cstatus ${st}`;
-        s.dataset.i = i;
-        s.textContent = st === 'filming' ? '🎬 Filming' : st === 'editing' ? '✂️ Editing' : '✅ Posted';
-        cards[i].querySelector('.ctitle')?.appendChild(s);
-      }
-    }
-
     function _setSeriesUI(i, label) {
       cards[i].querySelectorAll('.cseries').forEach(e => e.remove());
       if (label) {
@@ -2415,20 +2335,6 @@
         s.textContent = `📺 ${label}`;
         cards[i].querySelector('.ctitle')?.appendChild(s);
       }
-    }
-
-    function applyRating(i, r) {
-      if (r) ratings[i] = r; else delete ratings[i];
-      _setRatingUI(i, r);
-      saveAll();
-      showToast(r ? `Rated: ${r}` : 'Rating cleared');
-    }
-
-    function applyStatus(i, st) {
-      if (st) statuses[i] = st; else delete statuses[i];
-      _setStatusUI(i, st);
-      saveAll();
-      showToast(st ? `Status: ${st}` : 'Status cleared');
     }
 
     function applyPin(i, state) {
@@ -2606,7 +2512,7 @@
       bar.classList.toggle('visible', recentTouched.length > 0);
       chips.innerHTML = '';
       recentTouched.forEach(i => {
-        const idea = i < window.ALL_IDEAS.length ? window.ALL_IDEAS[i] : customIdeas[i - window.ALL_IDEAS.length];
+        const idea = getIdea(i);
         if (!idea) return;
         const ch = document.createElement('button');
         ch.className = 'recent-chip';
@@ -2764,7 +2670,7 @@
       if (!scheduled.length) { items.innerHTML = '<div style="font-size:12px;color:var(--txt2);text-align:center;padding:12px">No ideas scheduled for this day.</div>'; return; }
       scheduled.forEach(([idxStr]) => {
         const i = +idxStr;
-        const idea = i < window.ALL_IDEAS.length ? window.ALL_IDEAS[i] : customIdeas[i - window.ALL_IDEAS.length];
+        const idea = getIdea(i);
         if (!idea) return;
         const d = document.createElement('div'); d.className = 'cal-item';
         d.innerHTML = `<div class="cal-item-date">${ds}</div>${idea.t}`;
@@ -2811,11 +2717,11 @@
 
     // === EXPORT ===
     function exportStarredCSV() {
-      const rows = [['#','Title','Tags','Note','Date','Priority','Rating','Status']];
+      const rows = [['#','Title','Tags','Note','Date','Priority']];
       [...favs].sort((a,b) => a-b).forEach(i => {
-        const idea = i < window.ALL_IDEAS.length ? window.ALL_IDEAS[i] : customIdeas[i - window.ALL_IDEAS.length];
+        const idea = getIdea(i);
         if (!idea) return;
-        rows.push([i+1, `"${idea.t.replace(/"/g,'""')}"`, idea.tags.join(';'), notes[i]||'', scheds[i]||'', pris[i]||'', ratings[i]||'', statuses[i]||'']);
+        rows.push([i+1, `"${idea.t.replace(/"/g,'""')}"`, idea.tags.join(';'), notes[i]||'', scheds[i]||'', pris[i]||'']);
       });
       const csv = rows.map(r => r.join(',')).join('\n');
       const a = document.createElement('a');
@@ -2837,7 +2743,7 @@
         if (items.length) {
           items.forEach(([idxStr]) => {
             const i = +idxStr;
-            const idea = i < window.ALL_IDEAS.length ? window.ALL_IDEAS[i] : customIdeas[i - window.ALL_IDEAS.length];
+            const idea = getIdea(i);
             if (idea) lines.push(`  • ${idea.t}`);
           });
         } else { lines.push('  (nothing scheduled)'); }
@@ -2860,7 +2766,7 @@
       ctx.font = '12px Arial';
       vis.forEach((c, k) => {
         const i = +c.dataset.idx;
-        const idea = i < window.ALL_IDEAS.length ? window.ALL_IDEAS[i] : customIdeas[i - window.ALL_IDEAS.length];
+        const idea = getIdea(i);
         if (!idea) return;
         const x = col === 0 ? 40 : 420;
         ctx.fillStyle = done.has(i) ? '#6A8A58' : '#C8A870';
@@ -2981,7 +2887,7 @@
 
     // === SHARE ===
     function shareIdea(i) {
-      const idea = i < window.ALL_IDEAS.length ? window.ALL_IDEAS[i] : customIdeas[i - window.ALL_IDEAS.length];
+      const idea = getIdea(i);
       if (!idea) return;
       const parts = [
         `💡 ${idea.t}`,
@@ -3110,9 +3016,6 @@
         if (favs.has(i))  _setFavUI(i, true);
         if (done.has(i))  _setDoneUI(i, true);
         if (pris[i])      _setPriUI(i, pris[i]);
-        if (ratings[i])   _setRatingUI(i, ratings[i]);
-        if (statuses[i])  _setStatusUI(i, statuses[i]);
-        if (seriesLabels[i]) _setSeriesUI(i, seriesLabels[i]);
         if (pinned.has(i))  { c.classList.add('pinned'); c.querySelector('.pin-btn')?.classList.add('on'); }
         if (durations[i]) _setDurUI(i, durations[i]);
         if (hooks[i])     { const hEl = c.querySelector('.chook'); if(hEl){hEl.textContent='🎣 '+hooks[i].slice(0,60)+(hooks[i].length>60?'…':''); hEl.classList.add('visible');} c.querySelector('.hook-btn')?.classList.add('on'); const hrow=list.querySelector(`.hook-row[data-hfor="${i}"]`); if(hrow) hrow.querySelector('.hook-input').value=hooks[i]; }
@@ -3139,9 +3042,6 @@
       lsSet(KEYS.scheds,    JSON.stringify(scheds));
       lsSet(KEYS.streak,    JSON.stringify(streakData));
       lsSet(KEYS.custom,    JSON.stringify(customIdeas));
-      lsSet(KEYS.ratings,   JSON.stringify(ratings));
-      lsSet(KEYS.statuses,  JSON.stringify(statuses));
-      lsSet(KEYS.series,    JSON.stringify(seriesLabels));
       lsSet(KEYS.sfilters,  JSON.stringify(savedFilters));
       lsSet(KEYS.sortpref,  sortMode);
       lsSet(KEYS.hcats,     JSON.stringify([...hiddenCats]));
@@ -3165,9 +3065,6 @@
       try { const v = lsGet(KEYS.scheds);    if(v) scheds        = JSON.parse(v); } catch(e) {}
       try { const v = lsGet(KEYS.streak);    if(v) streakData    = JSON.parse(v); } catch(e) {}
       try { const v = lsGet(KEYS.custom);    if(v) customIdeas   = JSON.parse(v); } catch(e) {}
-      try { const v = lsGet(KEYS.ratings);   if(v) ratings       = JSON.parse(v); } catch(e) {}
-      try { const v = lsGet(KEYS.statuses);  if(v) statuses      = JSON.parse(v); } catch(e) {}
-      try { const v = lsGet(KEYS.series);    if(v) seriesLabels  = JSON.parse(v); } catch(e) {}
       try { const v = lsGet(KEYS.sfilters);  if(v) savedFilters  = JSON.parse(v); } catch(e) {}
       try { const v = lsGet(KEYS.sortpref);  if(v) sortMode      = v; } catch(e) {}
       try { const v = lsGet(KEYS.hcats);     if(v) hiddenCats    = new Set(JSON.parse(v)); } catch(e) {}
@@ -3256,8 +3153,7 @@
       if (fb) {
         const i=+fb.dataset.i; const was=favs.has(i);
         applyFav(i, !was);
-        showToast(favs.has(i) ? '⭐ Starred' : 'Unstarred');
-        pushUndo(favs.has(i) ? 'Starred idea' : 'Unstarred idea', () => { applyFav(i, was); });
+        pushUndo(favs.has(i) ? 'Starred' : 'Unstarred', () => { applyFav(i, was); });
         return;
       }
 
@@ -3265,7 +3161,6 @@
       if (db) {
         const i=+db.dataset.i; const was=done.has(i);
         applyDone(i, !was);
-        showToast(done.has(i) ? '✓ Done' : 'Marked todo');
         pushUndo(done.has(i) ? 'Marked done' : 'Unmarked done', () => { applyDone(i, was); });
         return;
       }
@@ -3295,12 +3190,6 @@
         row.classList.remove('visible');
         saveAll(); showToast(val ? '📝 Note saved' : 'Note cleared'); return;
       }
-
-      const rb = e.target.closest('.rating-btn');
-      if (rb) { ratingTarget = +rb.dataset.i; openCtxMenu('rating-menu', rb); return; }
-
-      const stb = e.target.closest('.status-btn');
-      if (stb) { statusTarget = +stb.dataset.i; openCtxMenu('status-menu', stb); return; }
 
       const pinb = e.target.closest('.pin-btn');
       if (pinb) {
@@ -3357,7 +3246,7 @@
       const dupb = e.target.closest('.dup-btn');
       if (dupb) {
         const i = +dupb.dataset.i;
-        const src = i < window.ALL_IDEAS.length ? window.ALL_IDEAS[i] : customIdeas[i - window.ALL_IDEAS.length];
+        const src = getIdea(i);
         if (src) {
           customIdeas.push({ t: src.t + ' (copy)', tags: [...src.tags] });
           saveAll();
@@ -3367,12 +3256,6 @@
         }
         return;
       }
-
-      // Rating/status label click on card
-      const ratingEl = e.target.closest('.crating');
-      if (ratingEl && ratingEl.dataset.i !== undefined) { ratingTarget = +ratingEl.dataset.i; openCtxMenu('rating-menu', ratingEl); return; }
-      const statusEl = e.target.closest('.cstatus');
-      if (statusEl && statusEl.dataset.i !== undefined) { statusTarget = +statusEl.dataset.i; openCtxMenu('status-menu', statusEl); return; }
 
       const datebtn = e.target.closest('.date-btn');
       if (datebtn) {
@@ -3409,10 +3292,12 @@
     // Search
     const searchEl = document.getElementById('search');
     const clearBtn = document.getElementById('search-clear');
+    let searchDebounce;
     searchEl.addEventListener('input', e => {
       q = e.target.value.toLowerCase().trim();
       clearBtn.classList.toggle('visible', q.length > 0);
-      render();
+      clearTimeout(searchDebounce);
+      searchDebounce = setTimeout(render, 120);
     });
     searchEl.addEventListener('keydown', e => {
       if (e.key === 'Enter' && q.length >= 2) {
@@ -3483,12 +3368,18 @@
     }
 
     // === FILTER ROW TOGGLE ===
+    function syncToolbarHeight() {
+      const tb = document.getElementById('toolbar');
+      if (tb) document.documentElement.style.setProperty('--toolbar-h', tb.offsetHeight + 'px');
+    }
     document.getElementById('btn-filter-row')?.addEventListener('click', function() {
       const row = document.getElementById('filter-row');
       const open = row.style.display === 'flex';
       row.style.display = open ? 'none' : 'flex';
       this.classList.toggle('on', !open);
+      requestAnimationFrame(syncToolbarHeight);
     });
+    requestAnimationFrame(syncToolbarHeight);
 
     // === NEW TOOLBAR BUTTONS ===
     document.getElementById('btn-hide-done').addEventListener('click', function() {
@@ -3662,7 +3553,6 @@
 
     // === CONTEXT MENU HELPER ===
     function openCtxMenu(menuId, btn) {
-      document.querySelectorAll('.rating-menu,.status-menu').forEach(m => m.classList.remove('open'));
       const m = document.getElementById(menuId);
       const r = btn.getBoundingClientRect();
       m.style.top  = (r.bottom + 4) + 'px';
@@ -3670,23 +3560,6 @@
       m.style.left = 'auto';
       m.classList.add('open');
     }
-
-    document.getElementById('rating-menu').addEventListener('click', e => {
-      const opt = e.target.closest('.rating-opt'); if (!opt) return;
-      if (ratingTarget !== null) applyRating(ratingTarget, opt.dataset.r);
-      document.getElementById('rating-menu').classList.remove('open');
-    });
-    document.getElementById('status-menu').addEventListener('click', e => {
-      const opt = e.target.closest('.status-opt'); if (!opt) return;
-      if (statusTarget !== null) applyStatus(statusTarget, opt.dataset.s);
-      document.getElementById('status-menu').classList.remove('open');
-    });
-    document.addEventListener('click', e => {
-      if (!document.getElementById('rating-menu').contains(e.target) && !e.target.closest('.rating-btn') && !e.target.closest('.crating'))
-        document.getElementById('rating-menu').classList.remove('open');
-      if (!document.getElementById('status-menu').contains(e.target) && !e.target.closest('.status-btn') && !e.target.closest('.cstatus'))
-        document.getElementById('status-menu').classList.remove('open');
-    });
 
     // === DURATION MENU ===
     document.getElementById('dur-menu').addEventListener('click', e => {
@@ -3727,9 +3600,6 @@
       if (name && collections[name] !== undefined) { addSelectedToCollection(name); exitSelectMode(); }
     });
 
-    // Collection filter in render
-    const _origRender = render;
-
     // === HASHTAGS ===
     document.getElementById('btn-hashtags')?.addEventListener('click', () => {
       renderHashSections(); document.getElementById('hash-overlay').classList.add('open');
@@ -3738,10 +3608,9 @@
     document.getElementById('hash-overlay')?.addEventListener('click', e => { if(e.target===document.getElementById('hash-overlay')) document.getElementById('hash-overlay').classList.remove('open'); });
 
     // === SEARCH HISTORY ===
-    const searchEl2 = document.getElementById('search');
     const histPanel = document.getElementById('search-hist');
-    searchEl2?.addEventListener('focus', () => { renderSearchHistory(); });
-    searchEl2?.addEventListener('blur', () => { setTimeout(() => histPanel?.classList.remove('visible'), 200); });
+    searchEl.addEventListener('focus', () => { renderSearchHistory(); });
+    searchEl.addEventListener('blur', () => { setTimeout(() => histPanel?.classList.remove('visible'), 200); });
 
     // === THEME TOGGLE ===
     document.getElementById('theme-toggle').addEventListener('click', function() {
@@ -3775,7 +3644,7 @@
     document.getElementById('sel-export-csv')?.addEventListener('click', () => {
       const rows = [['#','Title','Tags','Note','Date','Priority']];
       [...selected].sort((a,b) => a-b).forEach(i => {
-        const idea = i < window.ALL_IDEAS.length ? window.ALL_IDEAS[i] : customIdeas[i - window.ALL_IDEAS.length];
+        const idea = getIdea(i);
         if (!idea) return;
         rows.push([i+1, `"${idea.t.replace(/"/g,'""')}"`, idea.tags.join(';'), notes[i]||'', scheds[i]||'', pris[i]||'']);
       });

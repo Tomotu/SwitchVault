@@ -615,6 +615,10 @@
     .done-btn.on { color: var(--teal); }
     .pri-btn.on  { color: #ff8080; }
     .note-btn.on { color: var(--blue); }
+    .rej-btn { color: var(--mut); }
+    .rej-btn.on { color: var(--acc); }
+    .card.is-rejected .ctitle { text-decoration: line-through; color: var(--txt2); }
+    .card.is-rejected .card-edge { background: var(--mut2) !important; }
 
     /* Note row */
     .note-row {
@@ -1183,6 +1187,31 @@
     .cal-item:hover { background: var(--s3); }
     .cal-item-date { font-size: 10px; color: var(--txt2); margin-bottom: 3px; }
 
+    /* === APPROVED PAGE === */
+    .approved-body { padding: 16px clamp(12px,3vw,24px); overflow-y: auto; max-height: calc(90vh - 60px); }
+    .appr-section { margin-bottom: 24px; }
+    .appr-section-hdr { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--txt2); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--b1); display: flex; align-items: center; gap: 8px; }
+    .appr-section-hdr span { background: var(--b1); border-radius: 10px; padding: 1px 7px; font-size: 10px; }
+    .appr-card { background: var(--s2); border: 1px solid var(--b1); border-radius: var(--r); padding: 12px 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; transition: background .12s; }
+    .appr-card:hover { background: var(--s3); }
+    .appr-card-edge { width: 3px; height: 36px; border-radius: 2px; flex-shrink: 0; }
+    .appr-card-body { flex: 1; min-width: 0; }
+    .appr-card-title { font-size: 13px; font-weight: 500; color: var(--txt); margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .appr-card-tags { font-size: 11px; color: var(--txt2); }
+    .appr-card-actions { display: flex; gap: 6px; flex-shrink: 0; }
+    .appr-btn { background: var(--s1); border: 1px solid var(--b2); border-radius: 6px; color: var(--txt2); cursor: pointer; font-size: 11px; padding: 5px 10px; white-space: nowrap; transition: all .15s; font-weight: 500; }
+    .appr-btn:hover { background: var(--s3); color: var(--txt); }
+    .appr-btn.green { background: rgba(106,138,88,.12); border-color: rgba(106,138,88,.3); color: var(--teal); }
+    .appr-btn.green:hover { background: rgba(106,138,88,.2); }
+    .appr-btn.red { background: rgba(160,69,63,.1); border-color: rgba(160,69,63,.3); color: var(--acc); }
+    .appr-empty { text-align: center; color: var(--txt2); font-size: 13px; padding: 40px 16px; }
+    .prod-badge { display: inline-block; font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--teal); background: rgba(106,138,88,.12); border: 1px solid rgba(106,138,88,.25); border-radius: 4px; padding: 1px 5px; margin-left: 6px; vertical-align: middle; }
+    .overlay-hdr { display: flex; align-items: center; justify-content: space-between; padding: 16px clamp(12px,3vw,24px) 0; }
+    .overlay-title { font-family: 'Anton',sans-serif; font-size: 20px; font-weight: 400; color: var(--txt); }
+    .overlay-close { background: var(--s1); border: 1px solid var(--b2); border-radius: 8px; color: var(--txt2); cursor: pointer; font-size: 14px; padding: 5px 10px; }
+    .overlay-close:hover { color: var(--txt); }
+    .overlay-inner { background: var(--s2); border: 1px solid var(--b2); border-radius: 16px; width: 92%; max-width: 520px; max-height: 90vh; overflow: hidden; display: flex; flex-direction: column; }
+
     /* === BOTTOM TAB BAR === */
     .bottom-nav {
       display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 150;
@@ -1532,6 +1561,7 @@
       </div>
       <button class="tbtn tbtn-def" id="btn-inspire" title="Inspire mode (I)" style="font-size:12px">✦ Inspire</button>
       <button class="tbtn tbtn-def" id="btn-copy" title="Copy visible" style="font-size:12px">📋 Copy</button>
+      <button class="tbtn tbtn-def" id="btn-show-rej" style="font-size:12px">Rejected</button>
     </div>
     <div class="chips-outer">
       <div class="chips" id="chips">
@@ -1857,11 +1887,22 @@
   <!-- Bottom navigation (mobile) -->
   <nav class="bottom-nav" id="bottom-nav">
     <button class="bnav-btn active" id="bnav-home" data-bnav="home"><span>🏠</span><span>Home</span></button>
-    <button class="bnav-btn" id="bnav-star" data-bnav="star"><span>⭐</span><span>Starred</span></button>
+    <button class="bnav-btn" id="bnav-star" data-bnav="star"><span>✓</span><span>Approved</span></button>
     <button class="bnav-btn" id="bnav-rand" data-bnav="rand"><span>🎲</span><span>Random</span></button>
     <button class="bnav-btn" id="bnav-charts" data-bnav="charts"><span>📊</span><span>Stats</span></button>
     <button class="bnav-btn" id="bnav-ach" data-bnav="ach"><span>🏆</span><span>Badges</span></button>
   </nav>
+
+  <!-- Approved Ideas Overlay -->
+  <div class="overlay" id="approved-overlay">
+    <div class="overlay-inner">
+      <div class="overlay-hdr">
+        <span class="overlay-title">Approved Ideas</span>
+        <button class="overlay-close" id="approved-close">✕</button>
+      </div>
+      <div id="approved-body" class="approved-body"></div>
+    </div>
+  </div>
 
   <!-- DATA BLOCK -->
   <script src="data.js"></script>
@@ -1906,10 +1947,14 @@
       thumbs:   'sv_thumbs',
       colls:    'sv_collections',
       srchist:  'sv_srchist',
+      rejected: 'sv_rejected',
+      producing:'sv_producing',
     };
 
     let favs = new Set();
     let done = new Set();
+    let rejected = new Set();
+    let producing = new Set();
     let notes = {};
     let pris = {};
     let scheds = {};
@@ -1937,6 +1982,7 @@
     let showPriOnly = false;
     let hideDone = false;
     let showUnstarredOnly = false;
+    let showRejected = false;
     let dateRangeFilter = '';
     let sortMode = 'num';
     let spotlight = null;
@@ -2001,7 +2047,8 @@
             <div class="ctags">${tagsHtml}</div>
           </div>
           <div class="card-acts">
-            <button class="cact fav-btn"    data-i="${i}" title="Star">★</button>
+            <button class="cact fav-btn"    data-i="${i}" title="Approve">★</button>
+            <button class="cact rej-btn"    data-i="${i}" title="Reject">✕</button>
             <button class="cact done-btn"   data-i="${i}" title="Mark done">✓</button>
             <button class="cact pri-btn"    data-i="${i}" title="Priority">◈</button>
             <button class="cact dur-btn"    data-i="${i}" title="Filming time">⏱</button>
@@ -2047,6 +2094,19 @@
     function _setFavUI(i, on) {
       cards[i].classList.toggle('faved', on);
       cards[i].querySelector('.fav-btn')?.classList.toggle('on', on);
+    }
+
+    function _setRejUI(i, on) {
+      cards[i]?.classList.toggle('is-rejected', on);
+      cards[i]?.querySelector('.rej-btn')?.classList.toggle('on', on);
+    }
+
+    function _setProdUI(i, on) {
+      const existing = cards[i]?.querySelector('.prod-badge');
+      if (on && !existing) {
+        const title = cards[i]?.querySelector('.ctitle');
+        if (title) { const b = document.createElement('span'); b.className = 'prod-badge'; b.textContent = 'Filming'; title.appendChild(b); }
+      } else if (!on && existing) existing.remove();
     }
 
     function _setDoneUI(i, on) {
@@ -2265,11 +2325,12 @@
         const mhide = !hideDone || !done.has(i);
         const munsT = !showUnstarredOnly || !favs.has(i);
         const mColl = !activeCollection || (collections[activeCollection] || []).includes(i);
+        const mrej  = showRejected || !rejected.has(i);
         let mdr = true;
         if (dateRangeFilter === 'today') mdr = scheds[i] === today;
         else if (dateRangeFilter === 'week') mdr = scheds[i] && scheds[i] >= today && scheds[i] <= weekEnd;
         else if (dateRangeFilter === 'month') mdr = scheds[i] && scheds[i] >= today && scheds[i] <= monthEnd;
-        const show  = mf && mcat && mq && mfav && mdone && mpri && mhide && munsT && mdr && mColl;
+        const show  = mf && mcat && mq && mfav && mdone && mpri && mhide && munsT && mdr && mColl && mrej;
         card.classList.toggle('hidden', !show);
         const nr  = list.querySelector(`.note-row[data-for="${i}"]`);
         const hr  = list.querySelector(`.hook-row[data-hfor="${i}"]`);
@@ -2537,6 +2598,45 @@
         });
         chips.appendChild(ch);
       });
+    }
+
+    // === APPROVED PAGE ===
+    function renderApprovedPage() {
+      const body = document.getElementById('approved-body');
+      if (!body) return;
+      const bank = [...favs].filter(i => !producing.has(i) && !done.has(i));
+      const inProd = [...producing].filter(i => !done.has(i));
+      const completed = [...favs].filter(i => done.has(i));
+      let html = '';
+      if (!favs.size) {
+        body.innerHTML = '<div class="appr-empty">No approved ideas yet.<br>Star ideas on the main page to approve them.</div>';
+        return;
+      }
+      if (bank.length) {
+        html += `<div class="appr-section"><div class="appr-section-hdr" style="color:var(--gold)">Ready to Film <span>${bank.length}</span></div>`;
+        bank.forEach(i => {
+          const idea = getIdea(i); if (!idea) return;
+          html += `<div class="appr-card"><div class="appr-card-edge" style="background:var(--gold)"></div><div class="appr-card-body"><div class="appr-card-title">${idea.t}</div><div class="appr-card-tags">${idea.tags.map(t => '#'+t).join(' ')}</div></div><div class="appr-card-actions"><button class="appr-btn green" data-appr-prod="${i}">Select →</button><button class="appr-btn" data-appr-unappr="${i}">✕</button></div></div>`;
+        });
+        html += '</div>';
+      }
+      if (inProd.length) {
+        html += `<div class="appr-section"><div class="appr-section-hdr" style="color:var(--teal)">In Production <span>${inProd.length}</span></div>`;
+        inProd.forEach(i => {
+          const idea = getIdea(i); if (!idea) return;
+          html += `<div class="appr-card"><div class="appr-card-edge" style="background:var(--teal)"></div><div class="appr-card-body"><div class="appr-card-title">${idea.t}</div><div class="appr-card-tags">${idea.tags.map(t => '#'+t).join(' ')}</div></div><div class="appr-card-actions"><button class="appr-btn green" data-appr-done="${i}">✓ Done</button><button class="appr-btn" data-appr-unprod="${i}">← Back</button></div></div>`;
+        });
+        html += '</div>';
+      }
+      if (completed.length) {
+        html += `<div class="appr-section"><div class="appr-section-hdr">Done <span>${completed.length}</span></div>`;
+        completed.forEach(i => {
+          const idea = getIdea(i); if (!idea) return;
+          html += `<div class="appr-card" style="opacity:.6"><div class="appr-card-edge" style="background:var(--mut)"></div><div class="appr-card-body"><div class="appr-card-title" style="text-decoration:line-through">${idea.t}</div></div></div>`;
+        });
+        html += '</div>';
+      }
+      body.innerHTML = html;
     }
 
     // === GOAL WIDGET ===
@@ -3027,8 +3127,10 @@
     // === APPLY STORED STATE ===
     function applyStoredState() {
       cards.forEach((c, i) => {
-        if (favs.has(i))  _setFavUI(i, true);
-        if (done.has(i))  _setDoneUI(i, true);
+        if (favs.has(i))      _setFavUI(i, true);
+        if (done.has(i))      _setDoneUI(i, true);
+        if (rejected.has(i))  _setRejUI(i, true);
+        if (producing.has(i)) _setProdUI(i, true);
         if (pris[i])      _setPriUI(i, pris[i]);
         if (pinned.has(i))  { c.classList.add('pinned'); c.querySelector('.pin-btn')?.classList.add('on'); }
         if (durations[i]) _setDurUI(i, durations[i]);
@@ -3069,6 +3171,8 @@
       lsSet(KEYS.thumbs,    JSON.stringify(thumbs));
       lsSet(KEYS.colls,     JSON.stringify(collections));
       lsSet(KEYS.srchist,   JSON.stringify(searchHistory));
+      lsSet(KEYS.rejected,  JSON.stringify([...rejected]));
+      lsSet(KEYS.producing, JSON.stringify([...producing]));
     }
 
     async function loadAll() { // returns Promise
@@ -3092,6 +3196,8 @@
       try { const v = lsGet(KEYS.thumbs);    if(v) thumbs        = JSON.parse(v); } catch(e) {}
       try { const v = lsGet(KEYS.colls);     if(v) collections   = JSON.parse(v); } catch(e) {}
       try { const v = lsGet(KEYS.srchist);   if(v) searchHistory = JSON.parse(v); } catch(e) {}
+      try { const v = lsGet(KEYS.rejected);  if(v) rejected      = new Set(JSON.parse(v)); } catch(e) {}
+      try { const v = lsGet(KEYS.producing); if(v) producing     = new Set(JSON.parse(v)); } catch(e) {}
 
       const lightOn = lsGet(KEYS.light) === '1';
       document.documentElement.classList.toggle('light', lightOn);
@@ -3535,7 +3641,8 @@
             <div class="ctags">${tagsHtml}</div>
           </div>
           <div class="card-acts">
-            <button class="cact fav-btn"    data-i="${globalIdx}" title="Star">★</button>
+            <button class="cact fav-btn"    data-i="${globalIdx}" title="Approve">★</button>
+            <button class="cact rej-btn"    data-i="${globalIdx}" title="Reject">✕</button>
             <button class="cact done-btn"   data-i="${globalIdx}" title="Mark done">✓</button>
             <button class="cact pri-btn"    data-i="${globalIdx}" title="Priority">◈</button>
             <button class="cact dur-btn"    data-i="${globalIdx}" title="Filming time">⏱</button>

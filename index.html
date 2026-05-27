@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ContentVault — Nintendo Switch TikTok</title>
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#111110">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="ContentVault">
   <style>
     :root {
       --bg:    #111110;
@@ -541,9 +546,13 @@
     .list.compact .pri-btn,
     .list.compact .rating-btn,
     .list.compact .status-btn,
+    .list.compact .dur-btn,
+    .list.compact .hook-btn,
+    .list.compact .thumb-btn,
     .list.compact .note-btn,
     .list.compact .date-btn,
     .list.compact .pin-btn,
+    .list.compact .share-btn,
     .list.compact .dup-btn { display: none; }
 
     /* Filter row (collapsible) */
@@ -1319,6 +1328,145 @@
 
     /* === HIDDEN CAT CHIP === */
     .chip.cat-hidden { opacity: .4; text-decoration: line-through; }
+    /* === HOOK ROW === */
+    .hook-row {
+      display: none; background: rgba(160,69,63,.05); border: 1px solid rgba(160,69,63,.15);
+      border-top: none; border-radius: 0 0 var(--r) var(--r);
+      padding: 8px 12px; margin-bottom: 6px; margin-top: -6px; gap: 8px; align-items: flex-start;
+      flex-direction: column;
+    }
+    .hook-row.visible { display: flex; }
+    .hook-label { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--acc); }
+    .hook-input {
+      width: 100%; background: var(--s1); border: 1px solid var(--b2); border-radius: 6px;
+      color: var(--txt); font-family: 'Inter',sans-serif; font-size: 13px; font-style: italic;
+      min-height: 52px; outline: none; padding: 6px 10px; resize: vertical;
+    }
+    .hook-input:focus { border-color: var(--acc); }
+    .hook-input::placeholder { color: var(--mut); }
+    .hook-save {
+      background: var(--acc); border: none; border-radius: 6px; color: #fff;
+      cursor: pointer; font-size: 12px; font-weight: 600; padding: 5px 12px; align-self: flex-end;
+    }
+    .chook { font-size: 11px; color: var(--acc); margin-top: 3px; font-style: italic; opacity: .9; display: none; }
+    .chook.visible { display: block; }
+    .hook-btn.on { color: var(--acc) !important; }
+
+    /* === THUMB ROW === */
+    .thumb-row {
+      display: none; background: rgba(106,138,88,.04); border: 1px solid rgba(106,138,88,.12);
+      border-top: none; border-radius: 0 0 var(--r) var(--r);
+      padding: 8px 12px; margin-bottom: 6px; margin-top: -6px;
+      gap: 8px; align-items: flex-start; flex-direction: column;
+    }
+    .thumb-row.visible { display: flex; }
+    .thumb-input {
+      width: 100%; background: var(--s1); border: 1px solid var(--b2); border-radius: 6px;
+      color: var(--txt); font-family: 'Inter',sans-serif; font-size: 13px;
+      outline: none; padding: 6px 10px;
+    }
+    .thumb-input:focus { border-color: var(--teal); }
+    .thumb-input::placeholder { color: var(--mut); }
+    .thumb-actions { display: flex; gap: 6px; align-self: flex-end; }
+    .thumb-save {
+      background: var(--teal); border: none; border-radius: 6px; color: #fff;
+      cursor: pointer; font-size: 12px; font-weight: 600; padding: 5px 12px;
+    }
+    .thumb-clear {
+      background: none; border: 1px solid var(--b2); border-radius: 6px; color: var(--txt2);
+      cursor: pointer; font-size: 12px; padding: 5px 10px;
+    }
+    .cthumb { font-size: 10px; color: var(--teal); margin-top: 2px; display: none; }
+    .cthumb.visible { display: block; }
+    .thumb-btn.on { color: var(--teal) !important; }
+
+    /* === DURATION BADGE === */
+    .cdur { display: inline-block; font-size: 9px; font-weight: 700; padding: 1px 6px; border-radius: 3px; margin-left: 5px; vertical-align: middle; cursor: pointer; }
+    .cdur.quick  { background: rgba(106,138,88,.14); color: var(--teal); }
+    .cdur.medium { background: rgba(200,168,112,.14); color: var(--gold); }
+    .cdur.full   { background: rgba(160,69,63,.14); color: var(--acc); }
+    .dur-menu {
+      position: fixed; display: none; z-index: 300; background: var(--s2);
+      border: 1px solid var(--b2); border-radius: var(--r); box-shadow: 0 8px 32px rgba(0,0,0,.5);
+      min-width: 170px; overflow: hidden;
+    }
+    .dur-menu.open { display: block; }
+    .dur-opt {
+      display: flex; align-items: center; gap: 10px; padding: 9px 14px; cursor: pointer;
+      font-size: 13px; color: var(--txt2); transition: background .12s;
+    }
+    .dur-opt:hover { background: var(--s3); color: var(--txt); }
+    .dur-btn.on { color: var(--gold) !important; }
+
+    /* === VERY OVERDUE BADGE === */
+    .card.very-overdue .cdate { color: #E05050 !important; font-weight: 700; }
+    .card.very-overdue { border-left: 3px solid #E05050 !important; }
+    .overdue-badge {
+      display: inline-block; font-size: 9px; font-weight: 700;
+      background: rgba(200,80,80,.15); color: #E06060; border-radius: 3px;
+      padding: 1px 5px; margin-left: 5px; vertical-align: middle;
+    }
+
+    /* === COLLECTIONS === */
+    .coll-modal {
+      background: var(--s2); border: 1px solid var(--b2); border-radius: 16px;
+      padding: 28px; max-width: 440px; width: 92%; max-height: 82vh; overflow-y: auto;
+    }
+    .coll-modal h2 { font-family: 'Anton',sans-serif; font-size: 22px; font-weight: 400; color: var(--acc); margin-bottom: 16px; }
+    .coll-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+    .coll-item {
+      background: var(--s1); border: 1px solid var(--b1); border-radius: var(--r);
+      padding: 10px 14px; cursor: pointer; display: flex; align-items: center;
+      justify-content: space-between; transition: background .12s;
+    }
+    .coll-item:hover { background: var(--s3); }
+    .coll-item.active { border-color: rgba(160,69,63,.4); background: rgba(160,69,63,.06); }
+    .coll-name { font-size: 13px; font-weight: 600; color: var(--txt); }
+    .coll-count { font-size: 11px; color: var(--txt2); }
+    .coll-add-row { display: flex; gap: 8px; }
+    .coll-chip {
+      background: rgba(160,69,63,.1); border: 1px solid rgba(160,69,63,.25);
+      border-radius: 20px; color: var(--acc); cursor: pointer;
+      font-size: 11px; padding: 4px 10px; white-space: nowrap;
+    }
+
+    /* === HASHTAG MODAL === */
+    .hash-modal {
+      background: var(--s2); border: 1px solid var(--b2); border-radius: 16px;
+      padding: 24px; max-width: 440px; width: 92%; max-height: 80vh; overflow-y: auto;
+    }
+    .hash-modal h2 { font-family: 'Anton',sans-serif; font-size: 22px; font-weight: 400; color: var(--acc); margin-bottom: 16px; }
+    .hash-section { margin-bottom: 16px; }
+    .hash-section-title { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--txt2); margin-bottom: 6px; }
+    .hash-text {
+      background: var(--s1); border: 1px solid var(--b1); border-radius: var(--r);
+      padding: 8px 12px; font-size: 12px; color: var(--blue); font-family: monospace;
+      word-break: break-all; line-height: 1.6; cursor: pointer; transition: background .12s;
+    }
+    .hash-text:hover { background: var(--s3); }
+    .hash-copy-hint { font-size: 10px; color: var(--txt2); margin-top: 4px; }
+
+    /* === SEARCH HISTORY === */
+    .search-hist {
+      position: absolute; top: 100%; left: 0; right: 0; z-index: 200;
+      background: var(--s2); border: 1px solid var(--b2); border-top: none;
+      border-radius: 0 0 var(--r) var(--r); padding: 8px; display: none;
+      box-shadow: 0 4px 16px rgba(0,0,0,.3);
+    }
+    .search-hist.visible { display: block; }
+    .search-hist-label { font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--txt2); margin-bottom: 6px; padding: 0 4px; }
+    .search-hist-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+    .search-hist-chip {
+      background: var(--s1); border: 1px solid var(--b1); border-radius: 12px;
+      color: var(--txt2); cursor: pointer; font-size: 11px; padding: 3px 10px;
+      transition: all .12s;
+    }
+    .search-hist-chip:hover { background: var(--s3); color: var(--txt); }
+
+    /* === DAYS SINCE LAST POST === */
+    .hst.days-since .hst-n { color: var(--txt2); }
+    .hst.days-since .hst-n.recent { color: var(--teal); }
+    .hst.days-since .hst-n.stale  { color: #E06060; }
   </style>
 </head>
 <body>
@@ -1346,6 +1494,7 @@
       <div class="hst"><div class="hst-n" id="hc-pri">0</div><div class="hst-l">Priority</div></div>
       <div class="hst"><div class="hst-n" id="hc-sched">0</div><div class="hst-l">Scheduled</div></div>
       <div class="hst best-cat"><div class="hst-n" id="hc-best">—</div><div class="hst-l">Best Cat</div></div>
+      <div class="hst days-since"><div class="hst-n" id="hc-days">—</div><div class="hst-l">Days Since</div></div>
     </div>
     <div class="streak-badge hidden" id="streak-badge"><span id="streak-flame"></span> <span id="streak-num">0</span>-day done streak</div>
     <div class="prog-wrap">
@@ -1380,6 +1529,10 @@
         <span class="sbox-ico">⌕</span>
         <input id="search" type="text" placeholder="Search ideas…" autocomplete="off" spellcheck="false"/>
         <button class="sbox-clear" id="search-clear">✕</button>
+        <div class="search-hist" id="search-hist">
+          <div class="search-hist-label">Recent searches</div>
+          <div class="search-hist-chips" id="search-hist-chips"></div>
+        </div>
       </div>
       <div class="tbtn-group">
         <button class="tbtn tbtn-def" id="btn-fav" title="Starred only">★</button>
@@ -1432,6 +1585,8 @@
       <button class="dash-toggle" id="btn-cal">Cal</button>
       <button class="dash-toggle" id="btn-ach">Badges</button>
       <button class="dash-toggle" id="btn-sfilters">Filters</button>
+      <button class="dash-toggle" id="btn-collections">Collections</button>
+      <button class="dash-toggle" id="btn-hashtags">Hashtags</button>
       <button class="sbtn" id="btn-week-strip">7d Strip</button>
       <button class="sbtn" id="btn-select-mode">Select</button>
       <div class="ctrl-group">
@@ -1455,7 +1610,8 @@
     <button class="sel-btn" id="sel-star">⭐ Star all</button>
     <button class="sel-btn" id="sel-done">✓ Done all</button>
     <button class="sel-btn" id="sel-copy">📋 Copy</button>
-    <button class="sel-btn" id="sel-sched">📅 Schedule</button>
+    <button class="sel-btn" id="sel-sched">Schedule</button>
+    <button class="sel-btn" id="sel-add-coll">+ Collection</button>
     <button class="sel-btn" id="sel-export-csv">⬇ CSV</button>
     <button class="sel-btn danger" id="sel-clear-done">✕ Unmark done</button>
     <button class="sel-btn cancel" id="sel-cancel">Cancel</button>
@@ -1601,6 +1757,37 @@
     <div class="status-opt" data-s="editing">✂️ Editing</div>
     <div class="status-opt" data-s="posted">✅ Posted</div>
     <div class="status-opt" data-s="">✕ Clear</div>
+  </div>
+
+  <!-- Duration context menu -->
+  <div class="dur-menu" id="dur-menu">
+    <div class="dur-opt" data-d="quick">⚡ Quick — 15 min</div>
+    <div class="dur-opt" data-d="medium">⏳ Medium — 1 hr</div>
+    <div class="dur-opt" data-d="full">🎬 Full day shoot</div>
+    <div class="dur-opt" data-d="">✕ Clear</div>
+  </div>
+
+  <!-- Collections modal -->
+  <div class="overlay" id="coll-overlay">
+    <div class="coll-modal">
+      <h2>📁 Collections</h2>
+      <div class="coll-list" id="coll-list"></div>
+      <div class="coll-add-row">
+        <input class="sheet-input" id="coll-name-input" placeholder="New collection name…" style="flex:1;margin:0" maxlength="40"/>
+        <button class="mbtn prime" id="coll-create">Create</button>
+      </div>
+      <div style="margin-top:10px;font-size:11px;color:var(--txt2)">Tip: Use Select mode to add ideas to a collection.</div>
+      <div style="text-align:center;margin-top:16px"><button class="mbtn prime" id="coll-close">Done</button></div>
+    </div>
+  </div>
+
+  <!-- Hashtag sets modal -->
+  <div class="overlay" id="hash-overlay">
+    <div class="hash-modal">
+      <h2># Hashtag Sets</h2>
+      <div id="hash-sections"></div>
+      <div style="text-align:center;margin-top:12px"><button class="mbtn prime" id="hash-close">Close</button></div>
+    </div>
   </div>
 
   <!-- Keyboard shortcuts modal -->
@@ -1755,6 +1942,11 @@
       light:    'sv_light',
       recent:   'sv_recent',
       streakhist:'sv_streakhist',
+      hooks:    'sv_hooks',
+      durations:'sv_durations',
+      thumbs:   'sv_thumbs',
+      colls:    'sv_collections',
+      srchist:  'sv_srchist',
     };
 
     let favs = new Set();
@@ -1774,6 +1966,13 @@
     let goalTarget = 3;
     let recentTouched = [];
     let streakHistory = [];
+    let hooks = {};
+    let durations = {};
+    let thumbs = {};
+    let collections = {};
+    let searchHistory = [];
+    let durTarget = null;
+    let activeCollection = '';
 
     let filt = 'all';
     let q = '';
@@ -1840,17 +2039,21 @@
             <div class="ctitle">${idea.t}</div>
             <div class="cdate"></div>
             <div class="cnote"></div>
+            <div class="chook"></div>
+            <div class="cthumb"></div>
             <div class="ctags">${tagsHtml}</div>
           </div>
           <div class="card-acts">
             <button class="cact fav-btn"    data-i="${i}" title="Star">★</button>
             <button class="cact done-btn"   data-i="${i}" title="Mark done">✓</button>
-            <button class="cact pri-btn"    data-i="${i}" title="Set priority">◈</button>
-            <button class="cact rating-btn" data-i="${i}" title="Rate">🔥</button>
-            <button class="cact status-btn" data-i="${i}" title="Status">🎬</button>
+            <button class="cact pri-btn"    data-i="${i}" title="Priority">◈</button>
+            <button class="cact dur-btn"    data-i="${i}" title="Filming time">⏱</button>
+            <button class="cact hook-btn"   data-i="${i}" title="Write hook">🎣</button>
+            <button class="cact thumb-btn"  data-i="${i}" title="Thumbnail concept">🖼</button>
             <button class="cact note-btn"   data-i="${i}" title="Add note">✎</button>
             <button class="cact date-btn"   data-i="${i}" title="Schedule">📅</button>
             <button class="cact pin-btn"    data-i="${i}" title="Pin to top">📌</button>
+            <button class="cact share-btn"  data-i="${i}" title="Share idea">↗</button>
             <button class="cact dup-btn"    data-i="${i}" title="Duplicate">⧉</button>
           </div>
         </div>`;
@@ -1862,6 +2065,18 @@
       nr.dataset.for = i;
       nr.innerHTML = `<textarea class="note-input" placeholder="Add a note for this idea…"></textarea><button class="note-save" data-i="${i}">Save</button>`;
       list.appendChild(nr);
+
+      const hr = document.createElement('div');
+      hr.className = 'hook-row';
+      hr.dataset.hfor = i;
+      hr.innerHTML = `<div class="hook-label">🎣 Hook — first 3 seconds</div><textarea class="hook-input" placeholder="e.g. "You've been playing Switch wrong your whole life…""></textarea><button class="hook-save" data-i="${i}">Save</button>`;
+      list.appendChild(hr);
+
+      const tr = document.createElement('div');
+      tr.className = 'thumb-row';
+      tr.dataset.tfor = i;
+      tr.innerHTML = `<div class="hook-label">🖼 Thumbnail concept</div><input class="thumb-input" type="text" placeholder="e.g. Shocked face, controller closeup, text: INSANE…" maxlength="200"><button class="thumb-save" data-i="${i}">Save</button><button class="thumb-clear" data-i="${i}">Clear</button>`;
+      list.appendChild(tr);
 
       const dr = document.createElement('div');
       dr.className = 'date-row';
@@ -1903,7 +2118,17 @@
       const today = new Date(); today.setHours(0,0,0,0);
       const diff = Math.round((d - today) / 86400000);
       let cls = '', label = '';
-      if (diff < 0)        { cls = 'overdue'; label = `⚠ Overdue: ${dateStr}`; }
+      cards[i].classList.remove('very-overdue');
+      cards[i].querySelectorAll('.overdue-badge').forEach(b => b.remove());
+      if (diff < 0)        {
+        cls = 'overdue'; label = `⚠ Overdue: ${dateStr}`;
+        if (diff <= -7) {
+          cards[i].classList.add('very-overdue');
+          const badge = document.createElement('span');
+          badge.className = 'overdue-badge'; badge.textContent = `${-diff}d late`;
+          cards[i].querySelector('.ctitle')?.appendChild(badge);
+        }
+      }
       else if (diff === 0) { cls = 'soon';    label = '📅 Film today'; }
       else if (diff <= 3)  { cls = 'soon';    label = `📅 In ${diff} day${diff === 1 ? '' : 's'}`; }
       else                 {                  label = `📅 ${dateStr}`; }
@@ -2017,6 +2242,19 @@
       });
       const bestEl = document.getElementById('hc-best');
       if (bestEl) bestEl.textContent = bestCat ? TC[bestCat]?.l || bestCat : '—';
+
+      // Days since last post
+      const daysEl = document.getElementById('hc-days');
+      if (daysEl) {
+        const daysSince = streakData.lastDate
+          ? Math.floor((Date.now() - new Date(streakData.lastDate + 'T00:00:00')) / 86400000)
+          : null;
+        daysEl.textContent = daysSince !== null ? daysSince : '—';
+        const hstDays = daysEl.closest('.hst');
+        if (hstDays) {
+          daysEl.className = 'hst-n' + (daysSince === null ? '' : daysSince <= 1 ? ' recent' : daysSince >= 7 ? ' stale' : '');
+        }
+      }
     }
 
     // === SORT ===
@@ -2070,25 +2308,30 @@
         const mpri  = !showPriOnly || pris[i];
         const mhide = !hideDone || !done.has(i);
         const munsT = !showUnstarredOnly || !favs.has(i);
+        const mColl = !activeCollection || (collections[activeCollection] || []).includes(i);
         let mdr = true;
         if (dateRangeFilter === 'today') mdr = scheds[i] === today;
         else if (dateRangeFilter === 'week') mdr = scheds[i] && scheds[i] >= today && scheds[i] <= weekEnd;
         else if (dateRangeFilter === 'month') mdr = scheds[i] && scheds[i] >= today && scheds[i] <= monthEnd;
-        const show  = mf && mcat && mq && mfav && mdone && mpri && mhide && munsT && mdr;
+        const show  = mf && mcat && mq && mfav && mdone && mpri && mhide && munsT && mdr && mColl;
         card.classList.toggle('hidden', !show);
-        const nr = list.querySelector(`.note-row[data-for="${i}"]`);
-        const dr = list.querySelector(`.date-row[data-dfor="${i}"]`);
-        if (nr) nr.style.display = show ? '' : 'none';
-        if (dr) dr.style.display = show ? '' : 'none';
+        const nr  = list.querySelector(`.note-row[data-for="${i}"]`);
+        const hr  = list.querySelector(`.hook-row[data-hfor="${i}"]`);
+        const tr  = list.querySelector(`.thumb-row[data-tfor="${i}"]`);
+        const dr  = list.querySelector(`.date-row[data-dfor="${i}"]`);
+        [nr, hr, tr, dr].forEach(el => { if (el) el.style.display = show ? '' : 'none'; });
         if (show) {
           vis++;
           list.appendChild(card);
           if (nr) list.appendChild(nr);
+          if (hr) list.appendChild(hr);
+          if (tr) list.appendChild(tr);
           if (dr) list.appendChild(dr);
         }
       });
       document.getElementById('vis-n').textContent = vis.toLocaleString();
       document.getElementById('empty').classList.toggle('show', vis === 0);
+      updateCollectionIndicator();
 
       cards.forEach(c => c.classList.remove('spotlight'));
       if (spotlight !== null) { cards[spotlight]?.classList.add('spotlight'); spotlight = null; }
@@ -2700,6 +2943,167 @@
       }, { passive: true });
     })();
 
+    // === DURATION ===
+    const DUR_LABELS = { quick:'⚡ Quick', medium:'⏳ Medium', full:'🎬 Full day' };
+    function _setDurUI(i, d) {
+      cards[i]?.querySelectorAll('.cdur').forEach(e => e.remove());
+      cards[i]?.querySelector('.dur-btn')?.classList.toggle('on', !!d);
+      if (d) {
+        const s = document.createElement('span');
+        s.className = `cdur ${d}`; s.dataset.i = i;
+        s.textContent = DUR_LABELS[d] || d;
+        cards[i]?.querySelector('.ctitle')?.appendChild(s);
+      }
+    }
+    function applyDuration(i, d) {
+      if (d) durations[i] = d; else delete durations[i];
+      _setDurUI(i, d); saveAll();
+      showToast(d ? `${DUR_LABELS[d]} set` : 'Duration cleared');
+    }
+
+    // === HOOK ===
+    function saveHook(i, text) {
+      if (text) hooks[i] = text; else delete hooks[i];
+      const hEl = cards[i]?.querySelector('.chook');
+      if (hEl) { hEl.textContent = text ? '🎣 ' + text.slice(0,60)+(text.length>60?'…':'') : ''; hEl.classList.toggle('visible', !!text); }
+      cards[i]?.querySelector('.hook-btn')?.classList.toggle('on', !!text);
+      saveAll(); showToast(text ? '🎣 Hook saved' : 'Hook cleared');
+    }
+
+    // === THUMBNAIL ===
+    function saveThumb(i, text) {
+      if (text) thumbs[i] = text; else delete thumbs[i];
+      const tEl = cards[i]?.querySelector('.cthumb');
+      if (tEl) { tEl.textContent = text ? '🖼 ' + text : ''; tEl.classList.toggle('visible', !!text); }
+      cards[i]?.querySelector('.thumb-btn')?.classList.toggle('on', !!text);
+      saveAll(); showToast(text ? '🖼 Thumbnail saved' : 'Thumbnail cleared');
+    }
+
+    // === SHARE ===
+    function shareIdea(i) {
+      const idea = i < window.ALL_IDEAS.length ? window.ALL_IDEAS[i] : customIdeas[i - window.ALL_IDEAS.length];
+      if (!idea) return;
+      const parts = [
+        `💡 ${idea.t}`,
+        idea.tags.map(t => TC[t]?.l || t).join(' · '),
+      ];
+      if (hooks[i])   parts.push(`\n🎣 Hook: "${hooks[i]}"`);
+      if (thumbs[i])  parts.push(`🖼 Thumbnail: ${thumbs[i]}`);
+      if (notes[i])   parts.push(`📝 ${notes[i]}`);
+      if (scheds[i])  parts.push(`📅 Scheduled: ${scheds[i]}`);
+      parts.push('\n— via SwitchVault');
+      const text = parts.join('\n');
+      if (navigator.share) {
+        navigator.share({ title: idea.t, text }).catch(() => {});
+      } else {
+        navigator.clipboard?.writeText(text).then(() => showToast('📋 Copied to clipboard'));
+      }
+    }
+
+    // === COLLECTIONS ===
+    function renderCollList() {
+      const container = document.getElementById('coll-list');
+      if (!container) return;
+      container.innerHTML = '';
+      const names = Object.keys(collections);
+      if (!names.length) {
+        container.innerHTML = '<div style="font-size:12px;color:var(--txt2);padding:8px 0">No collections yet. Create one below.</div>';
+        return;
+      }
+      names.forEach(name => {
+        const ids = collections[name] || [];
+        const d = document.createElement('div');
+        d.className = 'coll-item' + (activeCollection === name ? ' active' : '');
+        d.innerHTML = `<span class="coll-name">${name}</span><div style="display:flex;align-items:center;gap:8px"><span class="coll-count">${ids.length} ideas</span><button style="background:none;border:none;color:var(--txt2);cursor:pointer;font-size:11px" data-del="${name}">✕</button></div>`;
+        d.addEventListener('click', e => {
+          if (e.target.dataset.del) {
+            delete collections[e.target.dataset.del];
+            if (activeCollection === e.target.dataset.del) { activeCollection = ''; render(); }
+            saveAll(); renderCollList(); return;
+          }
+          activeCollection = activeCollection === name ? '' : name;
+          render(); renderCollList();
+          document.getElementById('coll-overlay').classList.remove('open');
+        });
+        container.appendChild(d);
+      });
+      if (activeCollection) {
+        const clear = document.createElement('button');
+        clear.className = 'mbtn'; clear.textContent = 'Clear collection filter';
+        clear.style.cssText = 'margin-top:8px;font-size:12px';
+        clear.addEventListener('click', () => { activeCollection = ''; render(); renderCollList(); document.getElementById('coll-overlay').classList.remove('open'); });
+        container.appendChild(clear);
+      }
+    }
+
+    function addSelectedToCollection(name) {
+      if (!collections[name]) collections[name] = [];
+      const arr = collections[name];
+      selected.forEach(i => { if (!arr.includes(i)) arr.push(i); });
+      saveAll(); showToast(`Added ${selected.size} ideas to "${name}"`);
+    }
+
+    // === HASHTAG SETS ===
+    const HASHTAG_SETS = {
+      Gaming:    '#NintendoSwitch #SwitchGaming #Nintendo #NintendoTikTok #GamingTikTok #Gamer #VideoGames #SwitchPlayer #NintendoGamer #GamersOfTikTok',
+      Gear:      '#NintendoSwitch #SwitchSetup #GamingSetup #SwitchAccessories #GamingGear #SwitchAccessory #GameRoom #GamingRoom #SwitchMods',
+      Tutorial:  '#NintendoSwitch #SwitchTips #GamingTips #NintendoTips #TechTips #SwitchHacks #GamingHacks #LearnOnTikTok #SwitchTutorial',
+      Review:    '#NintendoSwitch #SwitchReview #GamingReview #HonestReview #SwitchGames #NintendoReview #GameReview #SwitchLife',
+      Lifestyle: '#NintendoSwitch #GamerLife #SwitchLife #GamingLifestyle #NintendoLife #GamerGirl #GamerBoy #CasualGamer',
+      Trend:     '#NintendoSwitch #GamingTrend #TikTokGaming #TrendingGames #ViralGaming #FYP #GamingFYP #SwitchFYP',
+      Comedy:    '#NintendoSwitch #GamingComedy #FunnyGaming #GamingMoments #SwitchFunny #GameFail #GamingLife #FYP',
+      Challenge: '#NintendoSwitch #GamingChallenge #SwitchChallenge #NintendoChallenge #GameChallenge #FYP',
+      Collab:    '#NintendoSwitch #GamingCollab #TwoPlayers #SwitchMultiplayer #CoopGaming #GamingWithFriends',
+      Reaction:  '#NintendoSwitch #GamingReaction #SwitchReaction #NintendoReaction #GamingMoments #SwitchMoments',
+      Education: '#NintendoSwitch #LearnWithMe #LearnOnTikTok #GamingFacts #SwitchFacts #DidYouKnow #NintendoFacts',
+      Story:     '#NintendoSwitch #GamingStory #GamingJourney #SwitchStory #NintendoMemories #GamerStory',
+      Series:    '#NintendoSwitch #GamingSeries #SwitchSeries #NintendoSeries #ContentSeries #SeriesContent',
+    };
+
+    function renderHashSections() {
+      const container = document.getElementById('hash-sections');
+      if (!container) return;
+      container.innerHTML = '';
+      Object.entries(HASHTAG_SETS).forEach(([cat, tags]) => {
+        const sec = document.createElement('div');
+        sec.className = 'hash-section';
+        sec.innerHTML = `<div class="hash-section-title">${cat}</div><div class="hash-text" title="Click to copy">${tags}</div><div class="hash-copy-hint">Click to copy</div>`;
+        sec.querySelector('.hash-text').addEventListener('click', () => {
+          navigator.clipboard?.writeText(tags).then(() => showToast(`# ${cat} hashtags copied!`));
+        });
+        container.appendChild(sec);
+      });
+    }
+
+    // === SEARCH HISTORY ===
+    function addSearchHistory(term) {
+      if (!term || term.length < 2) return;
+      searchHistory = [term, ...searchHistory.filter(s => s !== term)].slice(0, 8);
+      saveAll();
+    }
+
+    function renderSearchHistory() {
+      const hist = document.getElementById('search-hist');
+      const chips = document.getElementById('search-hist-chips');
+      if (!hist || !chips) return;
+      if (!searchHistory.length) { hist.classList.remove('visible'); return; }
+      chips.innerHTML = '';
+      searchHistory.forEach(term => {
+        const ch = document.createElement('button');
+        ch.className = 'search-hist-chip';
+        ch.textContent = term;
+        ch.addEventListener('mousedown', e => { // mousedown to fire before blur
+          e.preventDefault();
+          const searchEl = document.getElementById('search');
+          searchEl.value = term; q = term.toLowerCase();
+          document.getElementById('search-clear').classList.add('visible');
+          hist.classList.remove('visible'); render();
+        });
+        chips.appendChild(ch);
+      });
+      hist.classList.add('visible');
+    }
+
     // === APPLY STORED STATE ===
     function applyStoredState() {
       cards.forEach((c, i) => {
@@ -2709,7 +3113,10 @@
         if (ratings[i])   _setRatingUI(i, ratings[i]);
         if (statuses[i])  _setStatusUI(i, statuses[i]);
         if (seriesLabels[i]) _setSeriesUI(i, seriesLabels[i]);
-        if (pinned.has(i))  c.classList.add('pinned'), c.querySelector('.pin-btn')?.classList.add('on');
+        if (pinned.has(i))  { c.classList.add('pinned'); c.querySelector('.pin-btn')?.classList.add('on'); }
+        if (durations[i]) _setDurUI(i, durations[i]);
+        if (hooks[i])     { const hEl = c.querySelector('.chook'); if(hEl){hEl.textContent='🎣 '+hooks[i].slice(0,60)+(hooks[i].length>60?'…':''); hEl.classList.add('visible');} c.querySelector('.hook-btn')?.classList.add('on'); const hrow=list.querySelector(`.hook-row[data-hfor="${i}"]`); if(hrow) hrow.querySelector('.hook-input').value=hooks[i]; }
+        if (thumbs[i])    { const thEl = c.querySelector('.cthumb'); if(thEl){thEl.textContent='🖼 '+thumbs[i]; thEl.classList.add('visible');} c.querySelector('.thumb-btn')?.classList.add('on'); const trow=list.querySelector(`.thumb-row[data-tfor="${i}"]`); if(trow) trow.querySelector('.thumb-input').value=thumbs[i]; }
         if (notes[i]) {
           const nd = c.querySelector('.cnote');
           if (nd) { nd.textContent = notes[i]; nd.classList.add('visible'); }
@@ -2743,6 +3150,11 @@
       lsSet(KEYS.goal,      String(goalTarget));
       lsSet(KEYS.recent,    JSON.stringify(recentTouched));
       lsSet(KEYS.streakhist,JSON.stringify(streakHistory));
+      lsSet(KEYS.hooks,     JSON.stringify(hooks));
+      lsSet(KEYS.durations, JSON.stringify(durations));
+      lsSet(KEYS.thumbs,    JSON.stringify(thumbs));
+      lsSet(KEYS.colls,     JSON.stringify(collections));
+      lsSet(KEYS.srchist,   JSON.stringify(searchHistory));
     }
 
     async function loadAll() { // returns Promise
@@ -2764,6 +3176,11 @@
       try { const v = lsGet(KEYS.goal);      if(v) goalTarget    = parseInt(v)||3; } catch(e) {}
       try { const v = lsGet(KEYS.recent);    if(v) recentTouched = JSON.parse(v); } catch(e) {}
       try { const v = lsGet(KEYS.streakhist);if(v) streakHistory = JSON.parse(v); } catch(e) {}
+      try { const v = lsGet(KEYS.hooks);     if(v) hooks         = JSON.parse(v); } catch(e) {}
+      try { const v = lsGet(KEYS.durations); if(v) durations     = JSON.parse(v); } catch(e) {}
+      try { const v = lsGet(KEYS.thumbs);    if(v) thumbs        = JSON.parse(v); } catch(e) {}
+      try { const v = lsGet(KEYS.colls);     if(v) collections   = JSON.parse(v); } catch(e) {}
+      try { const v = lsGet(KEYS.srchist);   if(v) searchHistory = JSON.parse(v); } catch(e) {}
 
       const lightOn = lsGet(KEYS.light) === '1';
       document.documentElement.classList.toggle('light', lightOn);
@@ -2792,6 +3209,23 @@
       renderSavedFilterChips();
       checkAchievements(false);
       render();
+      updateCollectionIndicator();
+    }
+
+    function updateCollectionIndicator() {
+      let el = document.getElementById('coll-indicator');
+      if (activeCollection) {
+        if (!el) {
+          el = document.createElement('div');
+          el.id = 'coll-indicator';
+          el.style.cssText = 'padding:4px clamp(12px,3vw,24px);background:rgba(160,69,63,.08);border-bottom:1px solid rgba(160,69,63,.2);font-size:12px;color:var(--acc);display:flex;align-items:center;gap:8px';
+          const todayStrip = document.getElementById('today-strip');
+          todayStrip?.after(el);
+        }
+        el.innerHTML = `📁 Collection: <b>${activeCollection}</b> &nbsp;<button onclick="activeCollection='';render();updateCollectionIndicator();" style="background:none;border:none;color:var(--txt2);cursor:pointer;font-size:11px;padding:0">✕ Clear</button>`;
+      } else if (el) {
+        el.remove();
+      }
     }
 
     // === EVENT: main list (delegated) ===
@@ -2875,6 +3309,51 @@
         showToast(pinned.has(i) ? '📌 Pinned' : 'Unpinned'); return;
       }
 
+      const durb = e.target.closest('.dur-btn');
+      if (durb) { durTarget = +durb.dataset.i; openCtxMenu('dur-menu', durb); return; }
+      const durEl = e.target.closest('.cdur');
+      if (durEl && durEl.dataset.i !== undefined) { durTarget = +durEl.dataset.i; openCtxMenu('dur-menu', durEl); return; }
+
+      const hookb = e.target.closest('.hook-btn');
+      if (hookb) {
+        const i = +hookb.dataset.i;
+        const row = list.querySelector(`.hook-row[data-hfor="${i}"]`);
+        if (row) { const open = row.classList.toggle('visible'); if (open) row.querySelector('.hook-input').focus(); }
+        return;
+      }
+      const hooksave = e.target.closest('.hook-save');
+      if (hooksave) {
+        const i = +hooksave.dataset.i;
+        const row = list.querySelector(`.hook-row[data-hfor="${i}"]`);
+        if (row) { saveHook(i, row.querySelector('.hook-input').value.trim()); row.classList.remove('visible'); }
+        return;
+      }
+
+      const thumbb = e.target.closest('.thumb-btn');
+      if (thumbb) {
+        const i = +thumbb.dataset.i;
+        const row = list.querySelector(`.thumb-row[data-tfor="${i}"]`);
+        if (row) { const open = row.classList.toggle('visible'); if (open) row.querySelector('.thumb-input').focus(); }
+        return;
+      }
+      const thumbsave = e.target.closest('.thumb-save');
+      if (thumbsave) {
+        const i = +thumbsave.dataset.i;
+        const row = list.querySelector(`.thumb-row[data-tfor="${i}"]`);
+        if (row) { saveThumb(i, row.querySelector('.thumb-input').value.trim()); row.classList.remove('visible'); }
+        return;
+      }
+      const thumbclear = e.target.closest('.thumb-clear');
+      if (thumbclear) {
+        const i = +thumbclear.dataset.i;
+        const row = list.querySelector(`.thumb-row[data-tfor="${i}"]`);
+        if (row) { row.querySelector('.thumb-input').value = ''; saveThumb(i, ''); row.classList.remove('visible'); }
+        return;
+      }
+
+      const shareb = e.target.closest('.share-btn');
+      if (shareb) { shareIdea(+shareb.dataset.i); return; }
+
       const dupb = e.target.closest('.dup-btn');
       if (dupb) {
         const i = +dupb.dataset.i;
@@ -2935,7 +3414,14 @@
       clearBtn.classList.toggle('visible', q.length > 0);
       render();
     });
+    searchEl.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && q.length >= 2) {
+        addSearchHistory(searchEl.value.trim());
+        document.getElementById('search-hist')?.classList.remove('visible');
+      }
+    });
     clearBtn.addEventListener('click', () => {
+      if (q.length >= 2) addSearchHistory(searchEl.value.trim());
       searchEl.value = ''; q = '';
       clearBtn.classList.remove('visible');
       render(); searchEl.focus();
@@ -3146,12 +3632,14 @@
           <div class="card-acts">
             <button class="cact fav-btn"    data-i="${globalIdx}" title="Star">★</button>
             <button class="cact done-btn"   data-i="${globalIdx}" title="Mark done">✓</button>
-            <button class="cact pri-btn"    data-i="${globalIdx}" title="Set priority">◈</button>
-            <button class="cact rating-btn" data-i="${globalIdx}" title="Rate">🔥</button>
-            <button class="cact status-btn" data-i="${globalIdx}" title="Status">🎬</button>
+            <button class="cact pri-btn"    data-i="${globalIdx}" title="Priority">◈</button>
+            <button class="cact dur-btn"    data-i="${globalIdx}" title="Filming time">⏱</button>
+            <button class="cact hook-btn"   data-i="${globalIdx}" title="Write hook">🎣</button>
+            <button class="cact thumb-btn"  data-i="${globalIdx}" title="Thumbnail concept">🖼</button>
             <button class="cact note-btn"   data-i="${globalIdx}" title="Add note">✎</button>
             <button class="cact date-btn"   data-i="${globalIdx}" title="Schedule">📅</button>
             <button class="cact pin-btn"    data-i="${globalIdx}" title="Pin to top">📌</button>
+            <button class="cact share-btn"  data-i="${globalIdx}" title="Share idea">↗</button>
             <button class="cact dup-btn"    data-i="${globalIdx}" title="Duplicate">⧉</button>
           </div>
         </div>`;
@@ -3199,6 +3687,61 @@
       if (!document.getElementById('status-menu').contains(e.target) && !e.target.closest('.status-btn') && !e.target.closest('.cstatus'))
         document.getElementById('status-menu').classList.remove('open');
     });
+
+    // === DURATION MENU ===
+    document.getElementById('dur-menu').addEventListener('click', e => {
+      const opt = e.target.closest('.dur-opt'); if (!opt) return;
+      if (durTarget !== null) applyDuration(durTarget, opt.dataset.d);
+      document.getElementById('dur-menu').classList.remove('open');
+    });
+    document.addEventListener('click', e => {
+      if (!document.getElementById('dur-menu').contains(e.target) && !e.target.closest('.dur-btn') && !e.target.closest('.cdur'))
+        document.getElementById('dur-menu').classList.remove('open');
+    });
+
+    // === HOOK + THUMB + SHARE via delegated list click ===
+    // (injected into existing list click handler below via the new button checks)
+
+    // === COLLECTIONS ===
+    document.getElementById('btn-collections')?.addEventListener('click', () => {
+      renderCollList(); document.getElementById('coll-overlay').classList.add('open');
+    });
+    document.getElementById('coll-close')?.addEventListener('click', () => document.getElementById('coll-overlay').classList.remove('open'));
+    document.getElementById('coll-overlay')?.addEventListener('click', e => { if(e.target===document.getElementById('coll-overlay')) document.getElementById('coll-overlay').classList.remove('open'); });
+    document.getElementById('coll-create')?.addEventListener('click', () => {
+      const name = document.getElementById('coll-name-input').value.trim();
+      if (!name) return;
+      if (!collections[name]) collections[name] = [];
+      saveAll(); renderCollList(); document.getElementById('coll-name-input').value = '';
+      showToast(`📁 Collection "${name}" created`);
+    });
+    document.getElementById('coll-name-input')?.addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('coll-create').click();
+    });
+
+    // "Add to collection" in select bar
+    document.getElementById('sel-add-coll')?.addEventListener('click', () => {
+      const names = Object.keys(collections);
+      if (!names.length) { renderCollList(); document.getElementById('coll-overlay').classList.add('open'); return; }
+      const name = names.length === 1 ? names[0] : prompt('Collection name:\n' + names.join(', '));
+      if (name && collections[name] !== undefined) { addSelectedToCollection(name); exitSelectMode(); }
+    });
+
+    // Collection filter in render
+    const _origRender = render;
+
+    // === HASHTAGS ===
+    document.getElementById('btn-hashtags')?.addEventListener('click', () => {
+      renderHashSections(); document.getElementById('hash-overlay').classList.add('open');
+    });
+    document.getElementById('hash-close')?.addEventListener('click', () => document.getElementById('hash-overlay').classList.remove('open'));
+    document.getElementById('hash-overlay')?.addEventListener('click', e => { if(e.target===document.getElementById('hash-overlay')) document.getElementById('hash-overlay').classList.remove('open'); });
+
+    // === SEARCH HISTORY ===
+    const searchEl2 = document.getElementById('search');
+    const histPanel = document.getElementById('search-hist');
+    searchEl2?.addEventListener('focus', () => { renderSearchHistory(); });
+    searchEl2?.addEventListener('blur', () => { setTimeout(() => histPanel?.classList.remove('visible'), 200); });
 
     // === THEME TOGGLE ===
     document.getElementById('theme-toggle').addEventListener('click', function() {
@@ -3510,6 +4053,8 @@
         document.getElementById('ach-overlay').classList.remove('open');
         document.getElementById('cal-overlay').classList.remove('open');
         document.getElementById('sfilter-overlay').classList.remove('open');
+        document.getElementById('coll-overlay').classList.remove('open');
+        document.getElementById('hash-overlay').classList.remove('open');
         if (selectMode) exitSelectMode();
       }
       else if (e.key === 'ArrowRight') {
@@ -3521,6 +4066,11 @@
         else if (focusOpen) { focusIdx = (focusIdx-1+focusPool.length) % focusPool.length; renderFocus(); }
       }
     });
+
+    // === PWA SERVICE WORKER ===
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/SwitchVault/sw.js').catch(() => {});
+    }
 
     // === STAGGER ANIMATION ON LOAD ===
     function staggerCards() {

@@ -878,6 +878,431 @@
       .card-acts { gap: 1px; }
       .cact { padding: 3px 4px; font-size: 12px; }
     }
+
+    /* === LIGHT MODE === */
+    html.light {
+      --bg:#F4F1EC; --s1:#FFFDF9; --s2:#F0EDE6; --s3:#E8E4DC;
+      --b0:#E0DCD2; --b1:#D4CEC4; --b2:#C0BAB0; --b3:#A8A298;
+      --txt:#2A2520; --txt2:#706860; --mut:#A09080; --mut2:#D4CEC4;
+      --hi:#3A3028;
+    }
+    html.light body::before { opacity:.02; }
+    html.light #search { color-scheme: light; }
+    html.light .date-input { color-scheme: light; }
+
+    /* === CARD STAGGER ANIMATION === */
+    @keyframes card-in {
+      from { opacity:0; transform:translateY(12px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    .card.stagger-anim { animation: card-in .28s ease both; }
+
+    /* === CARD RIPPLE === */
+    .card { position: relative; }
+    .ripple {
+      position: absolute; border-radius: 50%;
+      background: rgba(255,255,255,.12);
+      transform: scale(0); animation: ripple-go .5s linear;
+      pointer-events: none; z-index: 10;
+    }
+    @keyframes ripple-go { to { transform:scale(4); opacity:0; } }
+
+    /* === SKELETON LOADING === */
+    .skeleton-card {
+      background: var(--s2); border: 1px solid var(--b1);
+      border-radius: var(--r); margin-bottom: 6px; height: 48px;
+      overflow: hidden; position: relative;
+    }
+    .skeleton-card::after {
+      content:''; position:absolute; inset:0;
+      background: linear-gradient(90deg,transparent 30%,rgba(255,255,255,.05) 50%,transparent 70%);
+      background-size: 200% 100%;
+      animation: skel-shimmer 1.2s ease infinite;
+    }
+    @keyframes skel-shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+    /* === FAB === */
+    .fab {
+      position: fixed; bottom: 80px; right: 20px; z-index: 200;
+      width: 52px; height: 52px; border-radius: 50%;
+      background: var(--acc); border: none; color: #fff;
+      font-size: 24px; cursor: pointer;
+      box-shadow: 0 4px 16px rgba(160,69,63,.4);
+      transition: transform .15s, box-shadow .15s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .fab:hover { transform: scale(1.08); box-shadow: 0 6px 20px rgba(160,69,63,.5); }
+    @media (max-width: 640px) { .fab { bottom: 72px; } }
+
+    /* === BOTTOM SHEET === */
+    .sheet-overlay {
+      position: fixed; inset: 0; z-index: 450;
+      background: rgba(0,0,0,.6);
+      opacity: 0; pointer-events: none; transition: opacity .2s;
+    }
+    .sheet-overlay.open { opacity: 1; pointer-events: all; }
+    .bottom-sheet {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 460;
+      background: var(--s2); border-radius: 16px 16px 0 0;
+      border: 1px solid var(--b2); border-bottom: none;
+      padding: 20px 20px 32px;
+      transform: translateY(100%); transition: transform .25s cubic-bezier(.34,1.3,.64,1);
+    }
+    .bottom-sheet.open { transform: translateY(0); }
+    .sheet-handle {
+      width: 40px; height: 4px; background: var(--b3);
+      border-radius: 2px; margin: 0 auto 16px;
+    }
+    .sheet-title { font-size: 14px; font-weight: 600; color: var(--txt); margin-bottom: 14px; }
+    .sheet-input {
+      width: 100%; background: var(--s1); border: 1px solid var(--b2);
+      border-radius: var(--r); color: var(--txt); font-family: 'Inter',sans-serif;
+      font-size: 14px; padding: 10px 14px; outline: none; margin-bottom: 10px;
+    }
+    .sheet-input:focus { border-color: var(--acc); }
+    .sheet-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+    .sheet-chip {
+      background: var(--s1); border: 1px solid var(--b1);
+      border-radius: 20px; color: var(--txt2); cursor: pointer;
+      font-size: 12px; padding: 5px 12px; transition: all .12s;
+    }
+    .sheet-chip.on { background: rgba(160,69,63,.12); border-color: rgba(160,69,63,.3); color: var(--acc); }
+    .sheet-actions { display: flex; gap: 8px; justify-content: flex-end; }
+    .sheet-btn {
+      background: var(--s1); border: 1px solid var(--b2);
+      border-radius: var(--r); color: var(--txt2); cursor: pointer;
+      font-size: 13px; padding: 8px 16px; font-weight: 500;
+    }
+    .sheet-btn.prime { background: var(--acc); border-color: var(--acc); color: #fff; }
+    .sheet-btn:hover { opacity: .85; }
+
+    /* === QUALITY RATING === */
+    .crating { display: inline-block; font-size: 10px; font-weight: 600; padding: 1px 5px; border-radius: 3px; margin-left: 5px; vertical-align: middle; cursor: pointer; }
+    .crating.hot  { background: rgba(200,96,88,.15); color: #E08080; }
+    .crating.solid{ background: rgba(200,168,112,.12); color: var(--gold); }
+    .crating.weak { background: rgba(106,138,88,.1); color: var(--teal); }
+    .rating-menu {
+      position: fixed; display: none; z-index: 300;
+      background: var(--s2); border: 1px solid var(--b2);
+      border-radius: var(--r); box-shadow: 0 8px 32px rgba(0,0,0,.5);
+      min-width: 150px; overflow: hidden;
+    }
+    .rating-menu.open { display: block; }
+    .rating-opt {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 14px; cursor: pointer; font-size: 13px;
+      color: var(--txt2); transition: background .12s;
+    }
+    .rating-opt:hover { background: var(--s3); color: var(--txt); }
+
+    /* === CUSTOM STATUS === */
+    .cstatus { display: inline-block; font-size: 10px; font-weight: 600; padding: 1px 7px; border-radius: 10px; margin-left: 5px; vertical-align: middle; cursor: pointer; }
+    .cstatus.filming  { background: rgba(160,69,63,.12); color: var(--acc); }
+    .cstatus.editing  { background: rgba(200,168,112,.12); color: var(--gold); }
+    .cstatus.posted   { background: rgba(106,138,88,.12); color: var(--teal); }
+    .status-menu {
+      position: fixed; display: none; z-index: 300;
+      background: var(--s2); border: 1px solid var(--b2);
+      border-radius: var(--r); box-shadow: 0 8px 32px rgba(0,0,0,.5);
+      min-width: 140px; overflow: hidden;
+    }
+    .status-menu.open { display: block; }
+    .status-opt {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 14px; cursor: pointer; font-size: 13px;
+      color: var(--txt2); transition: background .12s;
+    }
+    .status-opt:hover { background: var(--s3); color: var(--txt); }
+
+    /* === SERIES LABEL === */
+    .cseries { font-size: 10px; color: var(--blue); margin-left: 5px; font-style: italic; }
+
+    /* === WEEKLY STRIP === */
+    .week-strip {
+      background: var(--s1); border-bottom: 1px solid var(--b1);
+      padding: 8px clamp(12px,3vw,24px);
+      display: none;
+    }
+    .week-strip.visible { display: block; }
+    .week-days { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+    .week-days::-webkit-scrollbar { display: none; }
+    .wday {
+      flex: 1; min-width: 44px; background: var(--s2); border: 1px solid var(--b1);
+      border-radius: var(--r); padding: 6px 4px; text-align: center; cursor: pointer;
+      transition: all .12s; position: relative;
+    }
+    .wday:hover { background: var(--s3); }
+    .wday.today { border-color: var(--acc); }
+    .wday.has-sched { background: rgba(106,138,88,.08); border-color: rgba(106,138,88,.2); }
+    .wday-name { font-size: 9px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--txt2); }
+    .wday-num  { font-size: 14px; font-weight: 600; color: var(--txt); margin: 2px 0; }
+    .wday-dot  { width: 5px; height: 5px; border-radius: 50%; background: var(--teal); margin: 0 auto; }
+    .wday-dot.hidden { display: none; }
+    .wday.today .wday-num { color: var(--acc); }
+
+    /* === TODAY STRIP above list === */
+    .today-strip {
+      background: rgba(106,138,88,.07); border-bottom: 1px solid rgba(106,138,88,.2);
+      padding: 6px clamp(12px,3vw,24px); display: none;
+      font-size: 12px; color: var(--teal); font-weight: 600;
+    }
+    .today-strip.visible { display: flex; align-items: center; gap: 8px; }
+    .today-strip-count { background: rgba(106,138,88,.15); border-radius: 10px; padding: 2px 8px; font-size: 11px; }
+
+    /* === GOAL WIDGET === */
+    .goal-widget {
+      max-width: 420px; margin: 12px auto 0; position: relative; z-index: 1;
+    }
+    .goal-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .goal-label { font-size: 11px; color: var(--txt2); flex: 1; }
+    .goal-input {
+      background: var(--s2); border: 1px solid var(--b2); border-radius: 4px;
+      color: var(--txt); font-family: 'Inter',sans-serif; font-size: 12px;
+      padding: 3px 8px; width: 56px; text-align: center; outline: none;
+    }
+    .goal-input:focus { border-color: var(--acc); }
+    .goal-bar { height: 6px; background: var(--b1); border-radius: 3px; overflow: hidden; }
+    .goal-fill { height: 100%; border-radius: 3px; background: var(--teal); transition: width .4s; }
+
+    /* === RECENTLY TOUCHED BAR === */
+    .recent-bar {
+      background: var(--s1); border-bottom: 1px solid var(--b0);
+      padding: 6px clamp(12px,3vw,24px);
+      display: none; align-items: center; gap: 8px; overflow-x: auto; scrollbar-width: none;
+    }
+    .recent-bar.visible { display: flex; }
+    .recent-bar::-webkit-scrollbar { display: none; }
+    .recent-label { font-size: 10px; color: var(--txt2); white-space: nowrap; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+    .recent-chip {
+      background: var(--s2); border: 1px solid var(--b1); border-radius: 12px;
+      color: var(--txt2); cursor: pointer; font-size: 11px; padding: 3px 10px;
+      white-space: nowrap; transition: all .12s; flex-shrink: 0;
+    }
+    .recent-chip:hover { background: var(--s3); color: var(--txt); }
+
+    /* === UNDO TOAST === */
+    .undo-toast {
+      position: fixed; bottom: 80px; left: 50%;
+      transform: translateX(-50%) translateY(60px);
+      z-index: 600; background: var(--s2); border: 1px solid var(--b2);
+      border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,.5);
+      padding: 10px 16px; display: flex; align-items: center; gap: 12px;
+      font-size: 13px; color: var(--txt); transition: transform .22s cubic-bezier(.34,1.56,.64,1);
+      white-space: nowrap;
+    }
+    .undo-toast.show { transform: translateX(-50%) translateY(0); }
+    .undo-btn {
+      background: var(--acc); border: none; border-radius: 6px;
+      color: #fff; cursor: pointer; font-size: 12px; font-weight: 600;
+      padding: 4px 10px;
+    }
+
+    /* === KEYBOARD SHORTCUT MODAL === */
+    .kbd-modal {
+      background: var(--s2); border: 1px solid var(--b2);
+      border-radius: 16px; padding: 28px; max-width: 440px;
+      width: 90%; max-height: 80vh; overflow-y: auto;
+    }
+    .kbd-modal h2 { font-family: 'Anton',sans-serif; font-size: 22px; font-weight: 400; color: var(--acc); margin-bottom: 16px; }
+    .kbd-section { margin-bottom: 16px; }
+    .kbd-section-title { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--txt2); margin-bottom: 8px; }
+    .kbd-row { display: flex; align-items: center; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid var(--b1); font-size: 12px; color: var(--txt2); }
+    .kbd-row:last-child { border-bottom: none; }
+    .kbd-keys { display: flex; gap: 4px; }
+
+    /* === CHARTS MODAL === */
+    .charts-modal {
+      background: var(--s2); border: 1px solid var(--b2);
+      border-radius: 16px; padding: 28px; max-width: 520px;
+      width: 92%; max-height: 85vh; overflow-y: auto;
+    }
+    .charts-modal h2 { font-family: 'Anton',sans-serif; font-size: 22px; font-weight: 400; color: var(--acc); margin-bottom: 20px; }
+    .chart-section { margin-bottom: 24px; }
+    .chart-title { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--txt2); margin-bottom: 12px; }
+    .bar-chart { display: flex; flex-direction: column; gap: 6px; }
+    .bar-row { display: flex; align-items: center; gap: 8px; font-size: 11px; }
+    .bar-label { width: 70px; color: var(--txt2); text-align: right; flex-shrink: 0; font-size: 10px; }
+    .bar-track { flex: 1; height: 16px; background: var(--b1); border-radius: 3px; overflow: hidden; }
+    .bar-fill  { height: 100%; border-radius: 3px; background: var(--acc); transition: width .4s; }
+    .bar-val   { width: 24px; color: var(--txt2); font-size: 10px; }
+    .donut-wrap { display: flex; flex-wrap: wrap; gap: 8px; }
+    .donut-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--txt2); }
+    .donut-swatch { width: 12px; height: 12px; border-radius: 2px; flex-shrink: 0; }
+    .donut-bar-wrap { flex: 1; min-width: 140px; }
+    .donut-bar-label { display: flex; justify-content: space-between; font-size: 10px; color: var(--txt2); margin-bottom: 3px; }
+
+    /* === ACHIEVEMENT BADGES === */
+    .achievements-modal {
+      background: var(--s2); border: 1px solid var(--b2);
+      border-radius: 16px; padding: 28px; max-width: 460px;
+      width: 92%; max-height: 85vh; overflow-y: auto;
+    }
+    .achievements-modal h2 { font-family: 'Anton',sans-serif; font-size: 22px; font-weight: 400; color: var(--acc); margin-bottom: 20px; }
+    .badge-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px,1fr)); gap: 10px; }
+    .badge-item {
+      background: var(--s1); border: 1px solid var(--b1); border-radius: var(--r);
+      padding: 12px 10px; text-align: center; transition: all .15s;
+    }
+    .badge-item.earned { border-color: rgba(200,168,112,.3); background: rgba(200,168,112,.05); }
+    .badge-item.locked { opacity: .45; filter: grayscale(.7); }
+    .badge-ico  { font-size: 28px; margin-bottom: 6px; }
+    .badge-name { font-size: 11px; font-weight: 600; color: var(--txt); margin-bottom: 3px; }
+    .badge-desc { font-size: 10px; color: var(--txt2); }
+
+    /* === IDEA OF THE DAY === */
+    .iotd-card {
+      max-width: 420px; margin: 12px auto 0; position: relative; z-index: 1;
+      background: rgba(160,69,63,.07); border: 1px solid rgba(160,69,63,.2);
+      border-radius: var(--r); padding: 10px 14px; cursor: pointer; transition: background .15s;
+    }
+    .iotd-card:hover { background: rgba(160,69,63,.1); }
+    .iotd-label { font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--acc); margin-bottom: 4px; }
+    .iotd-title { font-size: 13px; font-weight: 500; color: var(--txt); }
+
+    /* === CALENDAR MODAL === */
+    .cal-modal {
+      background: var(--s2); border: 1px solid var(--b2);
+      border-radius: 16px; padding: 24px; max-width: 460px;
+      width: 94%; max-height: 85vh; overflow-y: auto;
+    }
+    .cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .cal-month-title { font-family: 'Anton',sans-serif; font-size: 20px; font-weight: 400; color: var(--txt); }
+    .cal-nav { background: var(--s1); border: 1px solid var(--b2); border-radius: 6px; color: var(--txt2); cursor: pointer; font-size: 14px; padding: 5px 10px; }
+    .cal-nav:hover { color: var(--txt); }
+    .cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 3px; }
+    .cal-dow { font-size: 9px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--txt2); text-align: center; padding: 4px 0; }
+    .cal-day {
+      aspect-ratio: 1; background: var(--s1); border: 1px solid var(--b1);
+      border-radius: 4px; display: flex; flex-direction: column; align-items: center;
+      justify-content: center; font-size: 12px; cursor: pointer; transition: all .12s;
+      position: relative;
+    }
+    .cal-day:hover { background: var(--s3); }
+    .cal-day.today { border-color: var(--acc); color: var(--acc); font-weight: 700; }
+    .cal-day.has-items::after {
+      content: ''; position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%);
+      width: 5px; height: 5px; border-radius: 50%; background: var(--teal);
+    }
+    .cal-day.empty { background: transparent; border-color: transparent; cursor: default; }
+    .cal-items { margin-top: 16px; display: flex; flex-direction: column; gap: 6px; }
+    .cal-item {
+      background: var(--s1); border: 1px solid var(--b1); border-radius: var(--r);
+      padding: 8px 12px; font-size: 12px; cursor: pointer; transition: background .12s;
+    }
+    .cal-item:hover { background: var(--s3); }
+    .cal-item-date { font-size: 10px; color: var(--txt2); margin-bottom: 3px; }
+
+    /* === BOTTOM TAB BAR === */
+    .bottom-nav {
+      display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 150;
+      background: var(--s2); border-top: 1px solid var(--b1);
+      padding: 6px 0 env(safe-area-inset-bottom,6px);
+      justify-content: space-around; align-items: center;
+    }
+    @media (max-width: 640px) { .bottom-nav { display: flex; } body { padding-bottom: 64px; } }
+    .bnav-btn {
+      background: none; border: none; color: var(--txt2); cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+      padding: 4px 8px; font-size: 18px; transition: color .15s; min-width: 48px;
+    }
+    .bnav-btn span { font-size: 9px; font-weight: 600; letter-spacing: .04em; }
+    .bnav-btn.active { color: var(--acc); }
+
+    /* === PULL-TO-REFRESH === */
+    .ptr-indicator {
+      text-align: center; padding: 12px; font-size: 12px; color: var(--txt2);
+      display: none; background: var(--s1); border-bottom: 1px solid var(--b0);
+    }
+    .ptr-indicator.visible { display: block; }
+
+    /* === CONFETTI === */
+    .confetti-piece {
+      position: fixed; z-index: 9999; pointer-events: none;
+      width: 8px; height: 8px; border-radius: 2px;
+      animation: confetti-fall 1.8s ease-in forwards;
+    }
+    @keyframes confetti-fall {
+      0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+
+    /* === STREAK FLAME === */
+    .streak-flame {
+      display: inline-block; font-size: 18px;
+      animation: flame-pulse 1s ease-in-out infinite alternate;
+    }
+    @keyframes flame-pulse { 0% { transform:scale(1) rotate(-3deg); } 100% { transform:scale(1.2) rotate(3deg); } }
+
+    /* === FOCUS MODE === */
+    .focus-overlay {
+      position: fixed; inset: 0; z-index: 550;
+      background: var(--bg); opacity: 0; pointer-events: none; transition: opacity .3s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .focus-overlay.open { opacity: 1; pointer-events: all; }
+    .focus-inner { max-width: 600px; width: 90%; padding: 40px 20px; text-align: center; }
+    .focus-count { font-size: 11px; color: var(--txt2); margin-bottom: 12px; letter-spacing: .08em; text-transform: uppercase; }
+    .focus-title { font-family: 'Anton',sans-serif; font-size: clamp(24px,7vw,52px); letter-spacing: .02em; text-transform: uppercase; color: var(--txt); line-height: 1.15; margin-bottom: 20px; }
+    .focus-tags { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; margin-bottom: 28px; }
+    .focus-btns { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+    .focus-nav-row { display: flex; justify-content: center; gap: 12px; margin-bottom: 16px; }
+    .focus-close { position: absolute; top: 16px; right: 16px; background: var(--s2); border: 1px solid var(--b2); border-radius: 8px; color: var(--txt2); cursor: pointer; font-size: 13px; padding: 6px 10px; }
+
+    /* === VISUAL PULSE on action buttons === */
+    @keyframes btn-pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.18)} }
+    .cact.pulse { animation: btn-pulse .25s ease; }
+
+    /* === SAVED FILTERS === */
+    .sfilter-chip {
+      background: var(--s1); border: 1px solid var(--gold);
+      border-radius: 20px; color: var(--gold); cursor: pointer;
+      font-size: 11px; padding: 4px 10px; white-space: nowrap;
+      transition: all .12s; display: flex; align-items: center; gap: 5px;
+    }
+    .sfilter-chip:hover { background: rgba(200,168,112,.1); }
+    .sfilter-del { color: var(--txt2); font-size: 10px; line-height: 1; }
+
+    /* === PRINT VIEW === */
+    @media print {
+      .toolbar, .statusbar, .select-bar, .hero, .dashboard,
+      .bottom-nav, .fab, .toast, .undo-toast, .recent-bar,
+      .week-strip, .today-strip, .footer, .card-acts,
+      .note-row, .date-row { display: none !important; }
+      body { background: white; color: black; font-size: 12px; }
+      .card { break-inside: avoid; border: 1px solid #ccc; margin-bottom: 4px; background: white; }
+      .ctitle { color: black; }
+      .cnum { color: #999; }
+    }
+
+    /* === MILESTONE in progress bar === */
+    .milestone-msg {
+      font-size: 11px; color: var(--gold); font-weight: 600;
+      text-align: center; margin-top: 6px; animation: card-in .4s ease;
+    }
+
+    /* === SWIPE INDICATORS === */
+    .card-swipe-hint {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      font-size: 16px; opacity: 0; transition: opacity .15s; pointer-events: none;
+      z-index: 5;
+    }
+    .card-swipe-hint.left  { right: 12px; }
+    .card-swipe-hint.right { left: 12px; }
+
+    /* === PINNED === */
+    .card.pinned { border-left: 3px solid var(--gold) !important; }
+    .pin-btn.on { color: var(--gold) !important; }
+
+    /* === SORT CHIP DRAG === */
+    .chip[draggable] { cursor: grab; }
+    .chip[draggable]:active { cursor: grabbing; opacity: .7; }
+    .chip.drag-over { border-color: var(--acc); background: rgba(160,69,63,.1); }
+
+    /* === BEST CAT STAT === */
+    .hst.best-cat .hst-n { font-size: 14px; }
+
+    /* === HIDDEN CAT CHIP === */
+    .chip.cat-hidden { opacity: .4; text-decoration: line-through; }
   </style>
 </head>
 <body>
@@ -890,22 +1315,37 @@
     <div class="pri-opt" data-pri=""><div class="pri-dot-n"></div> No priority</div>
   </div>
 
+  <!-- Light mode toggle -->
+  <button id="theme-toggle" title="Toggle light/dark" style="position:fixed;top:12px;right:12px;z-index:200;background:var(--s2);border:1px solid var(--b2);border-radius:8px;color:var(--txt2);cursor:pointer;font-size:15px;padding:5px 9px;transition:all .15s;">🌙</button>
+
   <!-- Hero -->
   <div class="hero">
     <div class="hero-tag">🎮 Nintendo Switch · TikTok Creator</div>
     <h1><span>Content</span>Vault</h1>
-    <p class="hero-desc">1,694 ideas. Star favourites, mark done, set priorities, schedule dates, add notes. Everything saved.</p>
+    <p class="hero-desc">Your Nintendo Switch TikTok content command centre. Star, schedule, prioritise, and track every idea.</p>
     <div class="hstats">
       <div class="hst"><div class="hst-n" id="hc-total">—</div><div class="hst-l">Ideas</div></div>
       <div class="hst"><div class="hst-n" id="hc-fav">0</div><div class="hst-l">Starred</div></div>
       <div class="hst"><div class="hst-n" id="hc-done">0</div><div class="hst-l">Done</div></div>
       <div class="hst"><div class="hst-n" id="hc-pri">0</div><div class="hst-l">Priority</div></div>
       <div class="hst"><div class="hst-n" id="hc-sched">0</div><div class="hst-l">Scheduled</div></div>
+      <div class="hst best-cat"><div class="hst-n" id="hc-best">—</div><div class="hst-l">Best Cat</div></div>
     </div>
-    <div class="streak-badge hidden" id="streak-badge">🔥 <span id="streak-num">0</span>-day done streak</div>
+    <div class="streak-badge hidden" id="streak-badge"><span id="streak-flame"></span> <span id="streak-num">0</span>-day done streak</div>
     <div class="prog-wrap">
       <div class="prog-top"><span>Progress</span><b id="prog-label">0 / 0 done</b></div>
       <div class="prog-track"><div class="prog-fill" id="prog-fill"></div></div>
+      <div class="milestone-msg" id="milestone-msg" style="display:none"></div>
+    </div>
+    <div class="iotd-card" id="iotd-card">
+      <div class="iotd-label">✦ Idea of the Day</div>
+      <div class="iotd-title" id="iotd-title">Loading…</div>
+    </div>
+    <div class="goal-widget" id="goal-widget">
+      <div class="goal-row">
+        <div class="goal-label">Weekly posting goal: <b id="goal-cur">0</b> / <input class="goal-input" id="goal-target" type="number" min="1" max="99" value="3"> this week</div>
+      </div>
+      <div class="goal-bar"><div class="goal-fill" id="goal-fill" style="width:0%"></div></div>
     </div>
   </div>
 
@@ -929,6 +1369,13 @@
         <button class="tbtn tbtn-def" id="btn-fav" title="Show starred only">⭐</button>
         <button class="tbtn tbtn-def" id="btn-done" title="Show done only">✓</button>
         <button class="tbtn tbtn-def" id="btn-pri" title="Show priority only">🔴</button>
+        <button class="tbtn tbtn-def" id="btn-hide-done" title="Hide done">🚫</button>
+        <button class="tbtn tbtn-def" id="btn-unstarred" title="Unstarred only">☆</button>
+      </div>
+      <div class="tbtn-group">
+        <button class="tbtn tbtn-def" id="btn-date-today" title="Film today">📆</button>
+        <button class="tbtn tbtn-def" id="btn-date-week" title="This week">7d</button>
+        <button class="tbtn tbtn-def" id="btn-date-month" title="This month">Mo</button>
       </div>
       <button class="tbtn tbtn-acc" id="btn-rand" title="Random pick (R)">🎲</button>
       <button class="tbtn tbtn-def" id="btn-inspire" title="Inspire mode (I)">✦</button>
@@ -959,6 +1406,12 @@
     <div>Showing <span class="vis-num" id="vis-n">—</span></div>
     <div class="right-ctrls">
       <button class="dash-toggle" id="dash-toggle">📊 Stats</button>
+      <button class="dash-toggle" id="btn-charts">📈 Charts</button>
+      <button class="dash-toggle" id="btn-cal">📅 Cal</button>
+      <button class="dash-toggle" id="btn-ach">🏆</button>
+      <button class="dash-toggle" id="btn-sfilters">🔖</button>
+      <button class="sbtn" id="btn-week-strip">7d</button>
+      <button class="sbtn" id="btn-focus">⊞ Focus</button>
       <button class="sbtn" id="btn-select-mode">☐ Select</button>
       <div class="ctrl-group">
         <button class="sbtn" data-v="normal" id="vn">Normal</button>
@@ -971,6 +1424,7 @@
         <button class="sbtn" data-s="undone">Todo</button>
         <button class="sbtn" data-s="sched">📅</button>
         <button class="sbtn" data-s="pri">🔴</button>
+        <button class="sbtn" data-s="pin">📌</button>
       </div>
     </div>
   </div>
@@ -981,9 +1435,38 @@
     <button class="sel-btn" id="sel-star">⭐ Star all</button>
     <button class="sel-btn" id="sel-done">✓ Done all</button>
     <button class="sel-btn" id="sel-copy">📋 Copy</button>
+    <button class="sel-btn" id="sel-sched">📅 Schedule</button>
+    <button class="sel-btn" id="sel-export-csv">⬇ CSV</button>
     <button class="sel-btn danger" id="sel-clear-done">✕ Unmark done</button>
     <button class="sel-btn cancel" id="sel-cancel">Cancel</button>
   </div>
+  <!-- Bulk schedule date picker (hidden) -->
+  <div id="bulk-sched-row" style="display:none;padding:6px clamp(12px,3vw,24px);background:var(--s1);border-bottom:1px solid var(--b0);align-items:center;gap:8px">
+    <span style="font-size:12px;color:var(--txt2)">Schedule selected:</span>
+    <input type="date" class="date-input" id="bulk-date"/>
+    <button class="date-save" id="bulk-date-apply">Apply</button>
+    <button class="date-clear" id="bulk-date-cancel">Cancel</button>
+  </div>
+
+  <!-- Week strip -->
+  <div class="week-strip" id="week-strip">
+    <div class="week-days" id="week-days"></div>
+  </div>
+
+  <!-- Today strip -->
+  <div class="today-strip" id="today-strip">
+    <span>📅 Scheduled for today</span>
+    <span class="today-strip-count" id="today-strip-count">0</span>
+  </div>
+
+  <!-- Recently touched bar -->
+  <div class="recent-bar" id="recent-bar">
+    <div class="recent-label">Recent</div>
+    <div id="recent-chips"></div>
+  </div>
+
+  <!-- Saved filter chips (inline row) -->
+  <div id="sfilter-row" style="display:none;padding:5px clamp(12px,3vw,24px);background:var(--s1);border-bottom:1px solid var(--b0);gap:6px;overflow-x:auto;scrollbar-width:none;flex-wrap:nowrap"></div>
 
   <!-- List + empty state -->
   <div class="list compact" id="list"></div>
@@ -994,12 +1477,19 @@
 
   <!-- Footer -->
   <div class="footer">
-    <div>1,694 ideas · 14 categories · All data saved automatically</div>
+    <div id="footer-total">Ideas · 14 categories · All data saved automatically</div>
     <div>
       <span class="kbd">/</span> search &nbsp;
       <span class="kbd">R</span> random &nbsp;
       <span class="kbd">I</span> inspire &nbsp;
-      <span class="kbd">Esc</span> close
+      <span class="kbd">F</span> focus &nbsp;
+      <span class="kbd">P</span> print &nbsp;
+      <span class="kbd">?</span> shortcuts
+    </div>
+    <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+      <button class="mbtn" id="export-csv-btn" style="font-size:11px;padding:5px 10px">⬇ Export Starred CSV</button>
+      <button class="mbtn" id="export-week-btn" style="font-size:11px;padding:5px 10px">📅 Copy Week Schedule</button>
+      <button class="mbtn" id="export-canvas-btn" style="font-size:11px;padding:5px 10px">🖼 Content Plan Image</button>
     </div>
   </div>
 
@@ -1043,6 +1533,167 @@
   <!-- Toast -->
   <div class="toast" id="toast"></div>
 
+  <!-- Undo Toast -->
+  <div class="undo-toast" id="undo-toast">
+    <span id="undo-msg">Action undone</span>
+    <button class="undo-btn" id="undo-btn">Undo</button>
+  </div>
+
+  <!-- Pull-to-refresh indicator -->
+  <div class="ptr-indicator" id="ptr-indicator">↓ Release to refresh</div>
+
+  <!-- FAB -->
+  <button class="fab" id="fab-add" title="Add custom idea">+</button>
+
+  <!-- Quick-add bottom sheet -->
+  <div class="sheet-overlay" id="sheet-overlay"></div>
+  <div class="bottom-sheet" id="add-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Add Custom Idea</div>
+    <input class="sheet-input" id="add-title" placeholder="Idea title…" maxlength="200"/>
+    <div class="sheet-row" id="add-cat-chips">
+      <button class="sheet-chip on" data-cat="gaming">🕹 Gaming</button>
+      <button class="sheet-chip" data-cat="gear">🎮 Gear</button>
+      <button class="sheet-chip" data-cat="tutorial">🛠 Tutorial</button>
+      <button class="sheet-chip" data-cat="review">⭐ Review</button>
+      <button class="sheet-chip" data-cat="lifestyle">🎒 Lifestyle</button>
+      <button class="sheet-chip" data-cat="story">📖 Story</button>
+      <button class="sheet-chip" data-cat="comedy">😂 Comedy</button>
+      <button class="sheet-chip" data-cat="trend">🔥 Trend</button>
+    </div>
+    <div class="sheet-actions">
+      <button class="sheet-btn" id="add-cancel">Cancel</button>
+      <button class="sheet-btn prime" id="add-save">Add Idea</button>
+    </div>
+  </div>
+
+  <!-- Priority context menu -->
+  <div class="rating-menu" id="rating-menu">
+    <div class="rating-opt" data-r="hot">🔥 Hot</div>
+    <div class="rating-opt" data-r="solid">👍 Solid</div>
+    <div class="rating-opt" data-r="weak">💤 Weak</div>
+    <div class="rating-opt" data-r="">✕ Clear</div>
+  </div>
+
+  <!-- Status context menu -->
+  <div class="status-menu" id="status-menu">
+    <div class="status-opt" data-s="filming">🎬 Filming</div>
+    <div class="status-opt" data-s="editing">✂️ Editing</div>
+    <div class="status-opt" data-s="posted">✅ Posted</div>
+    <div class="status-opt" data-s="">✕ Clear</div>
+  </div>
+
+  <!-- Keyboard shortcuts modal -->
+  <div class="overlay" id="kbd-overlay">
+    <div class="kbd-modal">
+      <h2>Keyboard Shortcuts</h2>
+      <div class="kbd-section">
+        <div class="kbd-section-title">Navigation</div>
+        <div class="kbd-row"><span>Search</span><div class="kbd-keys"><kbd class="kbd">/</kbd></div></div>
+        <div class="kbd-row"><span>Random pick</span><div class="kbd-keys"><kbd class="kbd">R</kbd></div></div>
+        <div class="kbd-row"><span>Inspire mode</span><div class="kbd-keys"><kbd class="kbd">I</kbd></div></div>
+        <div class="kbd-row"><span>Focus mode</span><div class="kbd-keys"><kbd class="kbd">F</kbd></div></div>
+        <div class="kbd-row"><span>Close / Esc</span><div class="kbd-keys"><kbd class="kbd">Esc</kbd></div></div>
+        <div class="kbd-row"><span>This help</span><div class="kbd-keys"><kbd class="kbd">?</kbd></div></div>
+      </div>
+      <div class="kbd-section">
+        <div class="kbd-section-title">Export</div>
+        <div class="kbd-row"><span>Print view</span><div class="kbd-keys"><kbd class="kbd">P</kbd></div></div>
+        <div class="kbd-row"><span>Copy visible</span><div class="kbd-keys"><kbd class="kbd">C</kbd></div></div>
+      </div>
+      <div class="kbd-section">
+        <div class="kbd-section-title">Inspire mode</div>
+        <div class="kbd-row"><span>Previous</span><div class="kbd-keys"><kbd class="kbd">←</kbd></div></div>
+        <div class="kbd-row"><span>Next</span><div class="kbd-keys"><kbd class="kbd">→</kbd></div></div>
+      </div>
+      <div style="text-align:center;margin-top:16px"><button class="mbtn prime" id="kbd-close">Close</button></div>
+    </div>
+  </div>
+
+  <!-- Charts modal -->
+  <div class="overlay" id="charts-overlay">
+    <div class="charts-modal">
+      <h2>📊 Analytics</h2>
+      <div class="chart-section">
+        <div class="chart-title">Done per week (last 8 weeks)</div>
+        <div class="bar-chart" id="weekly-chart"></div>
+      </div>
+      <div class="chart-section">
+        <div class="chart-title">Category completion</div>
+        <div id="cat-chart"></div>
+      </div>
+      <div class="chart-section">
+        <div class="chart-title">Streak history</div>
+        <div id="streak-chart"></div>
+      </div>
+      <div style="text-align:center;margin-top:8px"><button class="mbtn prime" id="charts-close">Close</button></div>
+    </div>
+  </div>
+
+  <!-- Achievements modal -->
+  <div class="overlay" id="ach-overlay">
+    <div class="achievements-modal">
+      <h2>🏆 Achievements</h2>
+      <div class="badge-grid" id="badge-grid"></div>
+      <div style="text-align:center;margin-top:16px"><button class="mbtn prime" id="ach-close">Close</button></div>
+    </div>
+  </div>
+
+  <!-- Calendar modal -->
+  <div class="overlay" id="cal-overlay">
+    <div class="cal-modal">
+      <div class="cal-header">
+        <button class="cal-nav" id="cal-prev">←</button>
+        <div class="cal-month-title" id="cal-title"></div>
+        <button class="cal-nav" id="cal-next">→</button>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+      <div class="cal-items" id="cal-items"></div>
+      <div style="text-align:center;margin-top:12px"><button class="mbtn prime" id="cal-close">Close</button></div>
+    </div>
+  </div>
+
+  <!-- Saved filters modal -->
+  <div class="overlay" id="sfilter-overlay">
+    <div class="modal" style="max-width:400px;text-align:left">
+      <div class="modal-eyebrow">Saved Filters</div>
+      <div id="sfilter-list" style="margin-bottom:14px"></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input class="sheet-input" id="sfilter-name" placeholder="Filter name…" style="flex:1;margin:0" maxlength="40"/>
+        <button class="mbtn prime" id="sfilter-save">Save current</button>
+      </div>
+      <div style="text-align:center;margin-top:14px"><button class="mbtn" id="sfilter-close">Close</button></div>
+    </div>
+  </div>
+
+  <!-- Focus mode overlay -->
+  <div class="focus-overlay" id="focus-overlay">
+    <button class="focus-close" id="focus-close">✕ Exit Focus</button>
+    <div class="focus-inner">
+      <div class="focus-count" id="focus-count"></div>
+      <div class="focus-title" id="focus-title"></div>
+      <div class="focus-tags" id="focus-tags"></div>
+      <div class="focus-nav-row">
+        <button class="inav-btn" id="focus-prev">←</button>
+        <button class="inav-btn prime" id="focus-next">→</button>
+      </div>
+      <div class="focus-btns">
+        <button class="iact" id="focus-fav">⭐ Star</button>
+        <button class="iact" id="focus-done">✓ Done</button>
+        <button class="iact" id="focus-pin">📌 Pin</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom navigation (mobile) -->
+  <nav class="bottom-nav" id="bottom-nav">
+    <button class="bnav-btn active" id="bnav-home" data-bnav="home"><span>🏠</span><span>Home</span></button>
+    <button class="bnav-btn" id="bnav-star" data-bnav="star"><span>⭐</span><span>Starred</span></button>
+    <button class="bnav-btn" id="bnav-rand" data-bnav="rand"><span>🎲</span><span>Random</span></button>
+    <button class="bnav-btn" id="bnav-charts" data-bnav="charts"><span>📊</span><span>Stats</span></button>
+    <button class="bnav-btn" id="bnav-ach" data-bnav="ach"><span>🏆</span><span>Badges</span></button>
+  </nav>
+
   <!-- DATA BLOCK -->
   <script src="data.js"></script>
 
@@ -1065,12 +1716,25 @@
     };
 
     const KEYS = {
-      favs:   'sv_favs',
-      done:   'sv_done',
-      notes:  'sv_notes',
-      pris:   'sv_pris',
-      scheds: 'sv_scheds',
-      streak: 'sv_streak',
+      favs:     'sv_favs',
+      done:     'sv_done',
+      notes:    'sv_notes',
+      pris:     'sv_pris',
+      scheds:   'sv_scheds',
+      streak:   'sv_streak',
+      custom:   'sv_custom',
+      ratings:  'sv_ratings',
+      statuses: 'sv_statuses',
+      series:   'sv_series',
+      sfilters: 'sv_sfilters',
+      sortpref: 'sv_sortpref',
+      hcats:    'sv_hcats',
+      pinned:   'sv_pinned',
+      achiev:   'sv_achievements',
+      goal:     'sv_goal',
+      light:    'sv_light',
+      recent:   'sv_recent',
+      streakhist:'sv_streakhist',
     };
 
     let favs = new Set();
@@ -1079,12 +1743,26 @@
     let pris = {};
     let scheds = {};
     let streakData = {};
+    let customIdeas = [];
+    let ratings = {};
+    let statuses = {};
+    let seriesLabels = {};
+    let savedFilters = [];
+    let hiddenCats = new Set();
+    let pinned = new Set();
+    let achievements = {};
+    let goalTarget = 3;
+    let recentTouched = [];
+    let streakHistory = [];
 
     let filt = 'all';
     let q = '';
     let showFavsOnly = false;
     let showDoneOnly = false;
     let showPriOnly = false;
+    let hideDone = false;
+    let showUnstarredOnly = false;
+    let dateRangeFilter = '';
     let sortMode = 'num';
     let spotlight = null;
     let viewMode = 'compact';
@@ -1094,6 +1772,13 @@
     let insPool = [];
     let insIdx = 0;
     let priTarget = null;
+    let ratingTarget = null;
+    let statusTarget = null;
+    let focusPool = [];
+    let focusIdx = 0;
+    let undoStack = [];
+    let undoTimer = null;
+    let calViewDate = new Date();
 
     function lsGet(key) {
       try { return localStorage.getItem(key); } catch(e) { return null; }
@@ -1126,6 +1811,8 @@
       card.dataset.title = idea.t.toLowerCase();
       card.innerHTML = `
         <div class="card-edge" style="background:${edgeColor(idea.tags)}"></div>
+        <div class="card-swipe-hint right">⭐</div>
+        <div class="card-swipe-hint left">✓</div>
         <div class="card-inner">
           <div class="card-check">✓</div>
           <div class="cnum">${String(i+1).padStart(4,'0')}</div>
@@ -1136,11 +1823,15 @@
             <div class="ctags">${tagsHtml}</div>
           </div>
           <div class="card-acts">
-            <button class="cact fav-btn"  data-i="${i}" title="Star">★</button>
-            <button class="cact done-btn" data-i="${i}" title="Mark done">✓</button>
-            <button class="cact pri-btn"  data-i="${i}" title="Set priority">◈</button>
-            <button class="cact note-btn" data-i="${i}" title="Add note">✎</button>
-            <button class="cact date-btn" data-i="${i}" title="Schedule">📅</button>
+            <button class="cact fav-btn"    data-i="${i}" title="Star">★</button>
+            <button class="cact done-btn"   data-i="${i}" title="Mark done">✓</button>
+            <button class="cact pri-btn"    data-i="${i}" title="Set priority">◈</button>
+            <button class="cact rating-btn" data-i="${i}" title="Rate">🔥</button>
+            <button class="cact status-btn" data-i="${i}" title="Status">🎬</button>
+            <button class="cact note-btn"   data-i="${i}" title="Add note">✎</button>
+            <button class="cact date-btn"   data-i="${i}" title="Schedule">📅</button>
+            <button class="cact pin-btn"    data-i="${i}" title="Pin to top">📌</button>
+            <button class="cact dup-btn"    data-i="${i}" title="Duplicate">⧉</button>
           </div>
         </div>`;
       list.appendChild(card);
@@ -1201,26 +1892,43 @@
     }
 
     // === ACTIONS ===
+    function touchRecent(i) {
+      recentTouched = [i, ...recentTouched.filter(x => x !== i)].slice(0, 5);
+      renderRecentBar();
+    }
+
     function applyFav(i, state, save=true, flash=true) {
       if (state) favs.add(i); else favs.delete(i);
       _setFavUI(i, state);
+      touchRecent(i);
       if (flash && state) {
         cards[i].classList.remove('flash-fav');
         void cards[i].offsetWidth;
         cards[i].classList.add('flash-fav');
+        pulseBtn(cards[i].querySelector('.fav-btn'));
       }
-      if (save) { saveAll(); updateCounts(); if (showFavsOnly) render(); }
+      if (save) { saveAll(); updateCounts(); if (showFavsOnly || showUnstarredOnly) render(); }
     }
 
     function applyDone(i, state, save=true, flash=true) {
+      const wasSize = done.size;
       if (state) { done.add(i); recordDoneToday(); } else done.delete(i);
       _setDoneUI(i, state);
+      touchRecent(i);
       if (flash && state) {
         cards[i].classList.remove('flash-done');
         void cards[i].offsetWidth;
         cards[i].classList.add('flash-done');
+        pulseBtn(cards[i].querySelector('.done-btn'));
+        checkMilestone(done.size, wasSize);
+        triggerConfetti(done.size);
       }
-      if (save) { saveAll(); updateCounts(); buildDashboard(); if (showDoneOnly) render(); }
+      if (save) {
+        saveAll(); updateCounts(); buildDashboard();
+        if (showDoneOnly || hideDone) render();
+        checkAchievements(true);
+        updateGoalWidget();
+      }
     }
 
     function applyPri(i, level, save=true) {
@@ -1238,64 +1946,115 @@
       if (streakData.lastDate === yesterday) { streakData.count = (streakData.count || 0) + 1; }
       else { streakData.count = 1; }
       streakData.lastDate = today;
+      // track history
+      const existing = streakHistory.find(h => h.date === today);
+      if (!existing) streakHistory.push({ date: today, streak: streakData.count });
+      if (streakHistory.length > 90) streakHistory = streakHistory.slice(-90);
       updateStreak();
     }
 
     function updateStreak() {
       if (!streakData.lastDate) streakData = { count: 0, lastDate: null };
       const badge = document.getElementById('streak-badge');
-      document.getElementById('streak-num').textContent = streakData.count;
-      badge.classList.toggle('hidden', !streakData.count);
+      const flameEl = document.getElementById('streak-flame');
+      const count = streakData.count || 0;
+      document.getElementById('streak-num').textContent = count;
+      badge.classList.toggle('hidden', !count);
+      if (flameEl) {
+        if (count >= 3) {
+          flameEl.className = 'streak-flame';
+          flameEl.textContent = '🔥';
+        } else {
+          flameEl.className = '';
+          flameEl.textContent = '🔥';
+        }
+      }
     }
 
     // === COUNTS ===
     function updateCounts() {
-      const total = window.ALL_IDEAS.length;
+      const total = cards.length;
       document.getElementById('hc-total').textContent  = total.toLocaleString();
       document.getElementById('hc-fav').textContent    = favs.size;
       document.getElementById('hc-done').textContent   = done.size;
       document.getElementById('hc-pri').textContent    = Object.keys(pris).length;
       document.getElementById('hc-sched').textContent  = Object.keys(scheds).length;
-      document.getElementById('vis-n').textContent     = cards.filter(c => !c.classList.contains('hidden')).length;
+      document.getElementById('vis-n').textContent     = cards.filter(c => !c.classList.contains('hidden')).length.toLocaleString();
       const pct = total > 0 ? done.size / total * 100 : 0;
       document.getElementById('prog-fill').style.width = pct + '%';
       document.getElementById('prog-label').textContent = `${done.size.toLocaleString()} / ${total.toLocaleString()} done`;
+      const footerTot = document.getElementById('footer-total');
+      if (footerTot) footerTot.textContent = `${total.toLocaleString()} ideas · 14 categories · All data saved`;
+
+      // Best category
+      let bestCat = '', bestPct = -1;
+      catList.forEach(cat => {
+        const tot = catCounts[cat] || 0;
+        if (!tot) return;
+        const dc = [...done].filter(i => window.ALL_IDEAS[i]?.tags.includes(cat)).length;
+        const p = dc / tot;
+        if (p > bestPct) { bestPct = p; bestCat = cat; }
+      });
+      const bestEl = document.getElementById('hc-best');
+      if (bestEl) bestEl.textContent = bestCat ? TC[bestCat]?.l || bestCat : '—';
     }
 
     // === SORT ===
     function sorted() {
       const a = [...cards];
+      let base;
       if (sortMode === 'az')
-        return a.sort((x,y) => x.dataset.title.localeCompare(y.dataset.title));
-      if (sortMode === 'fav')
-        return a.sort((x,y) => (favs.has(+x.dataset.idx)?0:1) - (favs.has(+y.dataset.idx)?0:1)
+        base = a.sort((x,y) => x.dataset.title.localeCompare(y.dataset.title));
+      else if (sortMode === 'fav')
+        base = a.sort((x,y) => (favs.has(+x.dataset.idx)?0:1) - (favs.has(+y.dataset.idx)?0:1)
                               || (+x.dataset.idx - +y.dataset.idx));
-      if (sortMode === 'undone')
-        return a.sort((x,y) => (done.has(+x.dataset.idx)?1:0) - (done.has(+y.dataset.idx)?1:0)
+      else if (sortMode === 'undone')
+        base = a.sort((x,y) => (done.has(+x.dataset.idx)?1:0) - (done.has(+y.dataset.idx)?1:0)
                               || (+x.dataset.idx - +y.dataset.idx));
-      if (sortMode === 'sched')
-        return a.sort((x,y) => (scheds[+x.dataset.idx]||'9999').localeCompare(scheds[+y.dataset.idx]||'9999')
+      else if (sortMode === 'sched')
+        base = a.sort((x,y) => (scheds[+x.dataset.idx]||'9999').localeCompare(scheds[+y.dataset.idx]||'9999')
                               || (+x.dataset.idx - +y.dataset.idx));
-      if (sortMode === 'pri') {
+      else if (sortMode === 'pri') {
         const order = {high:0, med:1, low:2};
-        return a.sort((x,y) => (order[pris[+x.dataset.idx]]??3) - (order[pris[+y.dataset.idx]]??3)
+        base = a.sort((x,y) => (order[pris[+x.dataset.idx]]??3) - (order[pris[+y.dataset.idx]]??3)
                               || (+x.dataset.idx - +y.dataset.idx));
+      } else if (sortMode === 'pin') {
+        base = a.sort((x,y) => (pinned.has(+x.dataset.idx)?0:1) - (pinned.has(+y.dataset.idx)?0:1)
+                              || (+x.dataset.idx - +y.dataset.idx));
+      } else {
+        base = a.sort((x,y) => +x.dataset.idx - +y.dataset.idx);
       }
-      return a.sort((x,y) => +x.dataset.idx - +y.dataset.idx);
+      // Always put pinned first unless sorting by pin explicitly
+      if (sortMode !== 'pin') {
+        base.sort((x,y) => (pinned.has(+x.dataset.idx)?0:1) - (pinned.has(+y.dataset.idx)?0:1));
+      }
+      return base;
     }
 
     // === RENDER ===
     function render() {
       let vis = 0;
       const s = sorted();
+      const today = new Date().toISOString().slice(0,10);
+      const weekEnd = new Date(Date.now() + 6*86400000).toISOString().slice(0,10);
+      const monthEnd = new Date(new Date().getFullYear(), new Date().getMonth()+1, 0).toISOString().slice(0,10);
+
       s.forEach(card => {
         const i = +card.dataset.idx;
-        const mf    = filt === 'all' || card.dataset.tags.split(' ').includes(filt);
+        const tags = card.dataset.tags.split(' ');
+        const mf    = filt === 'all' || tags.includes(filt);
+        const mcat  = !hiddenCats.size || !tags.some(t => hiddenCats.has(t)) || filt !== 'all';
         const mq    = !q || card.dataset.title.includes(q);
         const mfav  = !showFavsOnly || favs.has(i);
         const mdone = !showDoneOnly || done.has(i);
         const mpri  = !showPriOnly || pris[i];
-        const show  = mf && mq && mfav && mdone && mpri;
+        const mhide = !hideDone || !done.has(i);
+        const munsT = !showUnstarredOnly || !favs.has(i);
+        let mdr = true;
+        if (dateRangeFilter === 'today') mdr = scheds[i] === today;
+        else if (dateRangeFilter === 'week') mdr = scheds[i] && scheds[i] >= today && scheds[i] <= weekEnd;
+        else if (dateRangeFilter === 'month') mdr = scheds[i] && scheds[i] >= today && scheds[i] <= monthEnd;
+        const show  = mf && mcat && mq && mfav && mdone && mpri && mhide && munsT && mdr;
         card.classList.toggle('hidden', !show);
         const nr = list.querySelector(`.note-row[data-for="${i}"]`);
         const dr = list.querySelector(`.date-row[data-dfor="${i}"]`);
@@ -1319,7 +2078,8 @@
         cards.filter(c => !c.classList.contains('hidden')).forEach(c => {
           const tEl = c.querySelector('.ctitle');
           if (!tEl) return;
-          const plain = tEl.textContent;
+          const plain = tEl.dataset.plain || tEl.textContent;
+          tEl.dataset.plain = plain;
           tEl.innerHTML = plain.replace(re, '<mark style="background:rgba(255,255,128,.25);border-radius:2px;color:inherit">$1</mark>');
         });
       } else {
@@ -1327,7 +2087,9 @@
           const tEl = c.querySelector('.ctitle');
           if (!tEl || !tEl.querySelector('mark')) return;
           const i = +c.dataset.idx;
-          tEl.textContent = window.ALL_IDEAS[i].t;
+          const idea = i < window.ALL_IDEAS.length ? window.ALL_IDEAS[i] : customIdeas[i - window.ALL_IDEAS.length];
+          if (idea) tEl.textContent = idea.t;
+          delete tEl.dataset.plain;
           if (pris[i]) _setPriUI(i, pris[i]);
         });
       }
@@ -1359,12 +2121,575 @@
       });
     }
 
+    // === NEW UI APPLIERS ===
+    function _setRatingUI(i, r) {
+      cards[i].querySelectorAll('.crating').forEach(e => e.remove());
+      if (r) {
+        const s = document.createElement('span');
+        s.className = `crating ${r}`;
+        s.dataset.i = i;
+        s.textContent = r === 'hot' ? '🔥 Hot' : r === 'solid' ? '👍 Solid' : '💤 Weak';
+        cards[i].querySelector('.ctitle')?.appendChild(s);
+      }
+    }
+
+    function _setStatusUI(i, st) {
+      cards[i].querySelectorAll('.cstatus').forEach(e => e.remove());
+      if (st) {
+        const s = document.createElement('span');
+        s.className = `cstatus ${st}`;
+        s.dataset.i = i;
+        s.textContent = st === 'filming' ? '🎬 Filming' : st === 'editing' ? '✂️ Editing' : '✅ Posted';
+        cards[i].querySelector('.ctitle')?.appendChild(s);
+      }
+    }
+
+    function _setSeriesUI(i, label) {
+      cards[i].querySelectorAll('.cseries').forEach(e => e.remove());
+      if (label) {
+        const s = document.createElement('span');
+        s.className = 'cseries';
+        s.textContent = `📺 ${label}`;
+        cards[i].querySelector('.ctitle')?.appendChild(s);
+      }
+    }
+
+    function applyRating(i, r) {
+      if (r) ratings[i] = r; else delete ratings[i];
+      _setRatingUI(i, r);
+      saveAll();
+      showToast(r ? `Rated: ${r}` : 'Rating cleared');
+    }
+
+    function applyStatus(i, st) {
+      if (st) statuses[i] = st; else delete statuses[i];
+      _setStatusUI(i, st);
+      saveAll();
+      showToast(st ? `Status: ${st}` : 'Status cleared');
+    }
+
+    function applyPin(i, state) {
+      if (state) pinned.add(i); else pinned.delete(i);
+      cards[i].classList.toggle('pinned', state);
+      cards[i].querySelector('.pin-btn')?.classList.toggle('on', state);
+      saveAll();
+      if (sortMode === 'num') render();
+    }
+
+    function pulseBtn(btn) {
+      if (!btn) return;
+      btn.classList.remove('pulse');
+      void btn.offsetWidth;
+      btn.classList.add('pulse');
+      btn.addEventListener('animationend', () => btn.classList.remove('pulse'), { once: true });
+    }
+
+    // === UNDO ===
+    function pushUndo(msg, undoFn) {
+      undoStack = [{ msg, fn: undoFn }];
+      clearTimeout(undoTimer);
+      const t = document.getElementById('undo-toast');
+      document.getElementById('undo-msg').textContent = msg;
+      t.classList.add('show');
+      undoTimer = setTimeout(() => { t.classList.remove('show'); undoStack = []; }, 5000);
+    }
+
+    document.getElementById('undo-btn').addEventListener('click', () => {
+      if (undoStack.length) { undoStack.pop().fn(); undoStack = []; }
+      document.getElementById('undo-toast').classList.remove('show');
+      clearTimeout(undoTimer);
+    });
+
+    // === CONFETTI ===
+    const CONFETTI_MILESTONES = [10,25,50,100,250,500];
+    function triggerConfetti(count) {
+      if (!CONFETTI_MILESTONES.includes(count)) return;
+      const colors = ['#A0453F','#C8A870','#6A8A58','#E6E1D6','#C8605A'];
+      for (let k = 0; k < 60; k++) {
+        const el = document.createElement('div');
+        el.className = 'confetti-piece';
+        el.style.cssText = `left:${Math.random()*100}vw;top:-20px;background:${colors[k%colors.length]};animation-delay:${Math.random()*.8}s;animation-duration:${1.4+Math.random()*.8}s`;
+        document.body.appendChild(el);
+        el.addEventListener('animationend', () => el.remove());
+      }
+      showToast(`🎉 ${count} ideas done! Milestone reached!`);
+    }
+
+    // === MILESTONE MSG ===
+    const MILESTONES = [{n:10,msg:'🎯 10 done — you\'re on a roll!'},{n:25,msg:'🔥 25 done — keep grinding!'},{n:50,msg:'⚔️ 50 done — halfway hero!'},{n:100,msg:'💥 100 done — content beast!'},{n:250,msg:'🏆 250 done — legendary!'},{n:500,msg:'👑 500 done — KING of content!'}];
+    function checkMilestone(newSize, oldSize) {
+      const hit = MILESTONES.find(m => newSize >= m.n && oldSize < m.n);
+      if (!hit) return;
+      const el = document.getElementById('milestone-msg');
+      if (!el) return;
+      el.textContent = hit.msg;
+      el.style.display = 'block';
+      setTimeout(() => { el.style.display = 'none'; }, 4000);
+    }
+
+    // === ACHIEVEMENTS ===
+    const ACHIEVEMENTS_DEF = [
+      { id:'first', name:'First Star', ico:'⭐', desc:'Star your first idea' },
+      { id:'done5', name:'Getting Started', ico:'✅', desc:'Complete 5 ideas' },
+      { id:'done25', name:'Content Grinder', ico:'📹', desc:'Complete 25 ideas' },
+      { id:'done100', name:'Century', ico:'💯', desc:'Complete 100 ideas' },
+      { id:'streak3', name:'On Fire', ico:'🔥', desc:'3-day done streak' },
+      { id:'streak7', name:'Week Warrior', ico:'⚡', desc:'7-day done streak' },
+      { id:'allcat', name:'Category King', ico:'👑', desc:'Do an idea in every category' },
+      { id:'sched10', name:'Planner', ico:'📅', desc:'Schedule 10 ideas' },
+      { id:'pri10', name:'Prioritiser', ico:'🎯', desc:'Set priority on 10 ideas' },
+      { id:'note10', name:'Scribe', ico:'📝', desc:'Add notes to 10 ideas' },
+      { id:'fav50', name:'Fan Favourite', ico:'💛', desc:'Star 50 ideas' },
+    ];
+
+    function checkAchievements(notify) {
+      const newEarned = [];
+      const catsWithDone = new Set([...done].map(i => window.ALL_IDEAS[i]?.tags[0]).filter(Boolean));
+      const checks = {
+        first: favs.size >= 1,
+        done5: done.size >= 5,
+        done25: done.size >= 25,
+        done100: done.size >= 100,
+        streak3: (streakData.count||0) >= 3,
+        streak7: (streakData.count||0) >= 7,
+        allcat: catList.every(c => catsWithDone.has(c)),
+        sched10: Object.keys(scheds).length >= 10,
+        pri10: Object.keys(pris).length >= 10,
+        note10: Object.keys(notes).length >= 10,
+        fav50: favs.size >= 50,
+      };
+      ACHIEVEMENTS_DEF.forEach(a => {
+        if (!achievements[a.id] && checks[a.id]) {
+          achievements[a.id] = new Date().toISOString().slice(0,10);
+          newEarned.push(a);
+        }
+      });
+      if (newEarned.length) {
+        saveAll();
+        if (notify) newEarned.forEach(a => showToast(`🏆 Achievement: ${a.name}!`));
+      }
+    }
+
+    function renderBadgeGrid() {
+      const g = document.getElementById('badge-grid');
+      if (!g) return;
+      g.innerHTML = '';
+      ACHIEVEMENTS_DEF.forEach(a => {
+        const earned = achievements[a.id];
+        const d = document.createElement('div');
+        d.className = 'badge-item ' + (earned ? 'earned' : 'locked');
+        d.innerHTML = `<div class="badge-ico">${a.ico}</div><div class="badge-name">${a.name}</div><div class="badge-desc">${a.desc}${earned ? '<br><span style="font-size:9px;color:var(--teal)">'+earned+'</span>' : ''}</div>`;
+        g.appendChild(d);
+      });
+    }
+
+    // === IDEA OF THE DAY ===
+    function renderIotd() {
+      const today = new Date().toISOString().slice(0,10);
+      let hash = 0;
+      for (const c of today) hash = (hash * 31 + c.charCodeAt(0)) & 0x7fffffff;
+      const idx = hash % window.ALL_IDEAS.length;
+      const el = document.getElementById('iotd-title');
+      if (el) el.textContent = window.ALL_IDEAS[idx].t;
+      const card = document.getElementById('iotd-card');
+      if (card) card.dataset.idx = idx;
+    }
+
+    // === WEEK STRIP ===
+    function renderWeekStrip() {
+      const container = document.getElementById('week-days');
+      if (!container) return;
+      container.innerHTML = '';
+      const today = new Date();
+      const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      for (let k = 0; k < 7; k++) {
+        const d = new Date(today);
+        d.setDate(today.getDate() + k);
+        const ds = d.toISOString().slice(0,10);
+        const isToday = k === 0;
+        const hasS = Object.values(scheds).includes(ds);
+        const div = document.createElement('div');
+        div.className = 'wday' + (isToday ? ' today' : '') + (hasS ? ' has-sched' : '');
+        div.dataset.date = ds;
+        div.innerHTML = `<div class="wday-name">${days[d.getDay()]}</div><div class="wday-num">${d.getDate()}</div><div class="wday-dot${hasS?'':' hidden'}"></div>`;
+        div.addEventListener('click', () => {
+          dateRangeFilter = 'custom';
+          document.querySelectorAll('.tbtn[data-dr]').forEach(b => b.classList.remove('on'));
+          render();
+          setTimeout(() => {
+            const sched = Object.entries(scheds).filter(([,v]) => v === ds).map(([k]) => +k);
+            if (sched.length) cards[sched[0]]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 80);
+        });
+        container.appendChild(div);
+      }
+    }
+
+    // === TODAY STRIP ===
+    function renderTodayStrip() {
+      const today = new Date().toISOString().slice(0,10);
+      const count = Object.values(scheds).filter(v => v === today).length;
+      const strip = document.getElementById('today-strip');
+      const cnt = document.getElementById('today-strip-count');
+      if (strip) strip.classList.toggle('visible', count > 0);
+      if (cnt) cnt.textContent = count;
+    }
+
+    // === RECENT BAR ===
+    function renderRecentBar() {
+      const bar = document.getElementById('recent-bar');
+      const chips = document.getElementById('recent-chips');
+      if (!bar || !chips) return;
+      bar.classList.toggle('visible', recentTouched.length > 0);
+      chips.innerHTML = '';
+      recentTouched.forEach(i => {
+        const idea = i < window.ALL_IDEAS.length ? window.ALL_IDEAS[i] : customIdeas[i - window.ALL_IDEAS.length];
+        if (!idea) return;
+        const ch = document.createElement('button');
+        ch.className = 'recent-chip';
+        ch.textContent = idea.t.slice(0, 30) + (idea.t.length > 30 ? '…' : '');
+        ch.addEventListener('click', () => {
+          cards[i]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          spotlight = i; render();
+        });
+        chips.appendChild(ch);
+      });
+    }
+
+    // === GOAL WIDGET ===
+    function updateGoalWidget() {
+      const thisWeekStart = new Date();
+      thisWeekStart.setHours(0,0,0,0);
+      thisWeekStart.setDate(thisWeekStart.getDate() - thisWeekStart.getDay());
+      const wsStr = thisWeekStart.toISOString().slice(0,10);
+      let weekDone = 0;
+      if (streakHistory) {
+        const lastWeek = streakHistory.filter(h => h.date >= wsStr);
+        weekDone = lastWeek.length;
+      }
+      const curEl = document.getElementById('goal-cur');
+      const fillEl = document.getElementById('goal-fill');
+      if (curEl) curEl.textContent = weekDone;
+      if (fillEl) fillEl.style.width = Math.min(100, weekDone / goalTarget * 100) + '%';
+    }
+
+    function renderGoalWidget() {
+      const inp = document.getElementById('goal-target');
+      if (inp) inp.value = goalTarget;
+      updateGoalWidget();
+    }
+
+    // === SAVED FILTERS ===
+    function renderSavedFilterChips() {
+      const row = document.getElementById('sfilter-row');
+      if (!row) return;
+      row.style.display = savedFilters.length ? 'flex' : 'none';
+      row.innerHTML = '';
+      savedFilters.forEach((sf, idx) => {
+        const ch = document.createElement('div');
+        ch.className = 'sfilter-chip';
+        ch.innerHTML = `<span>${sf.name}</span><span class="sfilter-del" data-idx="${idx}">✕</span>`;
+        ch.addEventListener('click', e => {
+          if (e.target.dataset.idx !== undefined) {
+            savedFilters.splice(+e.target.dataset.idx, 1);
+            saveAll(); renderSavedFilterChips(); return;
+          }
+          filt = sf.filt; q = sf.q || '';
+          showFavsOnly = sf.favs || false;
+          showDoneOnly = sf.doneOnly || false;
+          showPriOnly = sf.pri || false;
+          hideDone = sf.hideDone || false;
+          document.getElementById('search').value = q;
+          document.querySelectorAll('.chip').forEach(c => c.classList.toggle('on', c.dataset.f === filt));
+          render();
+        });
+        row.appendChild(ch);
+      });
+    }
+
+    // === CHARTS ===
+    function renderCharts() {
+      // Done per week (last 8 weeks)
+      const weekChart = document.getElementById('weekly-chart');
+      if (weekChart) {
+        weekChart.innerHTML = '';
+        const weeks = [];
+        for (let w = 7; w >= 0; w--) {
+          const wStart = new Date();
+          wStart.setHours(0,0,0,0);
+          wStart.setDate(wStart.getDate() - wStart.getDay() - w*7);
+          const wEnd = new Date(wStart); wEnd.setDate(wStart.getDate() + 7);
+          const ws = wStart.toISOString().slice(0,10);
+          const we = wEnd.toISOString().slice(0,10);
+          const count = streakHistory.filter(h => h.date >= ws && h.date < we).length;
+          weeks.push({ label: `W-${w||'now'}`, count });
+        }
+        const max = Math.max(...weeks.map(w => w.count), 1);
+        weeks.forEach(w => {
+          const row = document.createElement('div');
+          row.className = 'bar-row';
+          row.innerHTML = `<div class="bar-label">${w.label}</div><div class="bar-track"><div class="bar-fill" style="width:${w.count/max*100}%"></div></div><div class="bar-val">${w.count}</div>`;
+          weekChart.appendChild(row);
+        });
+      }
+      // Cat completion
+      const catChart = document.getElementById('cat-chart');
+      if (catChart) {
+        catChart.innerHTML = '';
+        const dw = document.createElement('div'); dw.className = 'donut-wrap';
+        catList.forEach(cat => {
+          const tot = catCounts[cat] || 0;
+          const dc = [...done].filter(i => window.ALL_IDEAS[i]?.tags.includes(cat)).length;
+          const pct = tot > 0 ? Math.round(dc / tot * 100) : 0;
+          const d = document.createElement('div'); d.className = 'donut-bar-wrap';
+          d.innerHTML = `<div class="donut-bar-label"><span style="color:${TC[cat]?.color}">${TC[cat]?.l||cat}</span><span>${dc}/${tot}</span></div><div class="bar-track" style="height:6px"><div class="bar-fill" style="width:${pct}%;background:${TC[cat]?.color||'#888'}"></div></div>`;
+          dw.appendChild(d);
+        });
+        catChart.appendChild(dw);
+      }
+      // Streak history
+      const sChart = document.getElementById('streak-chart');
+      if (sChart) {
+        if (streakHistory.length < 2) { sChart.innerHTML = '<div style="font-size:12px;color:var(--txt2)">Complete ideas on multiple days to see streak history.</div>'; }
+        else {
+          const last14 = streakHistory.slice(-14);
+          const max = Math.max(...last14.map(h => h.streak), 1);
+          const bChart = document.createElement('div'); bChart.className = 'bar-chart';
+          last14.forEach(h => {
+            const r = document.createElement('div'); r.className = 'bar-row';
+            r.innerHTML = `<div class="bar-label">${h.date.slice(5)}</div><div class="bar-track"><div class="bar-fill" style="width:${h.streak/max*100}%;background:var(--gold)"></div></div><div class="bar-val">${h.streak}</div>`;
+            bChart.appendChild(r);
+          });
+          sChart.appendChild(bChart);
+        }
+      }
+    }
+
+    // === CALENDAR ===
+    function renderCalendar() {
+      const year = calViewDate.getFullYear();
+      const month = calViewDate.getMonth();
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month+1, 0).getDate();
+      const today = new Date().toISOString().slice(0,10);
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      document.getElementById('cal-title').textContent = `${months[month]} ${year}`;
+      const grid = document.getElementById('cal-grid');
+      grid.innerHTML = '';
+      ['Su','Mo','Tu','We','Th','Fr','Sa'].forEach(d => {
+        const div = document.createElement('div'); div.className = 'cal-dow'; div.textContent = d;
+        grid.appendChild(div);
+      });
+      for (let k = 0; k < firstDay; k++) {
+        const e = document.createElement('div'); e.className = 'cal-day empty'; grid.appendChild(e);
+      }
+      for (let day = 1; day <= daysInMonth; day++) {
+        const ds = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+        const hasItems = Object.values(scheds).includes(ds);
+        const div = document.createElement('div');
+        div.className = 'cal-day' + (ds === today ? ' today' : '') + (hasItems ? ' has-items' : '');
+        div.textContent = day; div.dataset.date = ds;
+        div.addEventListener('click', () => showCalItems(ds));
+        grid.appendChild(div);
+      }
+    }
+
+    function showCalItems(ds) {
+      const items = document.getElementById('cal-items');
+      items.innerHTML = '';
+      const scheduled = Object.entries(scheds).filter(([,v]) => v === ds);
+      if (!scheduled.length) { items.innerHTML = '<div style="font-size:12px;color:var(--txt2);text-align:center;padding:12px">No ideas scheduled for this day.</div>'; return; }
+      scheduled.forEach(([idxStr]) => {
+        const i = +idxStr;
+        const idea = i < window.ALL_IDEAS.length ? window.ALL_IDEAS[i] : customIdeas[i - window.ALL_IDEAS.length];
+        if (!idea) return;
+        const d = document.createElement('div'); d.className = 'cal-item';
+        d.innerHTML = `<div class="cal-item-date">${ds}</div>${idea.t}`;
+        d.addEventListener('click', () => {
+          document.getElementById('cal-overlay').classList.remove('open');
+          cards[i]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          spotlight = i; render();
+        });
+        items.appendChild(d);
+      });
+    }
+
+    // === FOCUS MODE ===
+    function openFocusMode() {
+      focusPool = (filt === 'all' && !q) ? window.ALL_IDEAS.map((_,i) => i) : visIdxs();
+      if (!focusPool.length) return;
+      focusIdx = Math.floor(Math.random() * focusPool.length);
+      document.getElementById('focus-overlay').classList.add('open');
+      renderFocus();
+    }
+
+    function renderFocus() {
+      const idx = focusPool[focusIdx];
+      const idea = idx < window.ALL_IDEAS.length ? window.ALL_IDEAS[idx] : customIdeas[idx - window.ALL_IDEAS.length];
+      if (!idea) return;
+      document.getElementById('focus-count').textContent = `${focusIdx+1} of ${focusPool.length}`;
+      document.getElementById('focus-title').textContent = idea.t;
+      document.getElementById('focus-tags').innerHTML = idea.tags.map(t => {
+        const c = TC[t]||{cls:'tgaming',l:t};
+        return `<span class="tag ${c.cls}">${c.l}</span>`;
+      }).join('');
+      const ff = document.getElementById('focus-fav');
+      const fd = document.getElementById('focus-done');
+      if (ff) { ff.className = 'iact' + (favs.has(idx) ? ' on-fav' : ''); ff.textContent = favs.has(idx) ? '★ Starred' : '⭐ Star'; }
+      if (fd) { fd.className = 'iact' + (done.has(idx) ? ' on-done' : ''); fd.textContent = done.has(idx) ? '✓ Done' : '○ Mark done'; }
+    }
+
+    document.getElementById('focus-close').addEventListener('click', () => document.getElementById('focus-overlay').classList.remove('open'));
+    document.getElementById('focus-prev').addEventListener('click', () => { focusIdx = (focusIdx-1+focusPool.length)%focusPool.length; renderFocus(); });
+    document.getElementById('focus-next').addEventListener('click', () => { focusIdx = (focusIdx+1)%focusPool.length; renderFocus(); });
+    document.getElementById('focus-fav').addEventListener('click', () => { const i=focusPool[focusIdx]; applyFav(i,!favs.has(i)); renderFocus(); showToast(favs.has(i)?'⭐ Starred':'Unstarred'); });
+    document.getElementById('focus-done').addEventListener('click', () => { const i=focusPool[focusIdx]; applyDone(i,!done.has(i)); renderFocus(); showToast(done.has(i)?'✓ Done':'Marked todo'); });
+    document.getElementById('focus-pin').addEventListener('click', () => { const i=focusPool[focusIdx]; applyPin(i,!pinned.has(i)); renderFocus(); showToast(pinned.has(i)?'📌 Pinned':'Unpinned'); });
+
+    // === EXPORT ===
+    function exportStarredCSV() {
+      const rows = [['#','Title','Tags','Note','Date','Priority','Rating','Status']];
+      [...favs].sort((a,b) => a-b).forEach(i => {
+        const idea = i < window.ALL_IDEAS.length ? window.ALL_IDEAS[i] : customIdeas[i - window.ALL_IDEAS.length];
+        if (!idea) return;
+        rows.push([i+1, `"${idea.t.replace(/"/g,'""')}"`, idea.tags.join(';'), notes[i]||'', scheds[i]||'', pris[i]||'', ratings[i]||'', statuses[i]||'']);
+      });
+      const csv = rows.map(r => r.join(',')).join('\n');
+      const a = document.createElement('a');
+      a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+      a.download = 'switchvault-starred.csv';
+      a.click();
+      showToast(`⬇ Exported ${favs.size} starred ideas`);
+    }
+
+    function exportWeekSchedule() {
+      const today = new Date();
+      const lines = ['📅 SwitchVault — Week Schedule', ''];
+      for (let k = 0; k < 7; k++) {
+        const d = new Date(today); d.setDate(today.getDate() + k);
+        const ds = d.toISOString().slice(0,10);
+        const items = Object.entries(scheds).filter(([,v]) => v === ds);
+        const dayName = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()];
+        lines.push(`${dayName} ${ds}:`);
+        if (items.length) {
+          items.forEach(([idxStr]) => {
+            const i = +idxStr;
+            const idea = i < window.ALL_IDEAS.length ? window.ALL_IDEAS[i] : customIdeas[i - window.ALL_IDEAS.length];
+            if (idea) lines.push(`  • ${idea.t}`);
+          });
+        } else { lines.push('  (nothing scheduled)'); }
+        lines.push('');
+      }
+      navigator.clipboard?.writeText(lines.join('\n')).then(() => showToast('📅 Week schedule copied'));
+    }
+
+    function exportContentCanvas() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 800; canvas.height = 600;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#111110'; ctx.fillRect(0,0,800,600);
+      ctx.fillStyle = '#A0453F'; ctx.font = 'bold 32px Arial';
+      ctx.fillText('Content Plan', 40, 60);
+      ctx.fillStyle = '#E6E1D6'; ctx.font = '14px Arial';
+      ctx.fillText(`Generated: ${new Date().toLocaleDateString()}  |  Done: ${done.size}  |  Starred: ${favs.size}`, 40, 90);
+      let y = 130; let col = 0;
+      const vis = cards.filter(c => !c.classList.contains('hidden') && favs.has(+c.dataset.idx)).slice(0, 24);
+      ctx.font = '12px Arial';
+      vis.forEach((c, k) => {
+        const i = +c.dataset.idx;
+        const idea = i < window.ALL_IDEAS.length ? window.ALL_IDEAS[i] : customIdeas[i - window.ALL_IDEAS.length];
+        if (!idea) return;
+        const x = col === 0 ? 40 : 420;
+        ctx.fillStyle = done.has(i) ? '#6A8A58' : '#C8A870';
+        ctx.fillText(`${done.has(i)?'✓':' '} ${idea.t.slice(0,40)}`, x, y);
+        if (col === 1) { y += 20; col = 0; } else col = 1;
+      });
+      const a = document.createElement('a'); a.href = canvas.toDataURL(); a.download = 'content-plan.png'; a.click();
+      showToast('🖼 Content plan downloaded');
+    }
+
+    // === SWIPE ON CARDS ===
+    (function setupSwipe() {
+      let swipeStart = null, swipeCard = null;
+      list.addEventListener('touchstart', e => {
+        const card = e.target.closest('.card');
+        if (!card || selectMode) return;
+        swipeCard = card; swipeStart = e.touches[0].clientX;
+      }, { passive: true });
+      list.addEventListener('touchmove', e => {
+        if (!swipeCard || !swipeStart) return;
+        const dx = e.touches[0].clientX - swipeStart;
+        if (Math.abs(dx) > 20) {
+          swipeCard.style.transform = `translateX(${dx * 0.3}px)`;
+          swipeCard.querySelector('.card-swipe-hint.right').style.opacity = dx > 30 ? Math.min(1,(dx-30)/40) : 0;
+          swipeCard.querySelector('.card-swipe-hint.left').style.opacity = dx < -30 ? Math.min(1,(-dx-30)/40) : 0;
+        }
+      }, { passive: true });
+      list.addEventListener('touchend', e => {
+        if (!swipeCard || swipeStart === null) return;
+        const dx = e.changedTouches[0].clientX - swipeStart;
+        swipeCard.style.transform = '';
+        swipeCard.querySelectorAll('.card-swipe-hint').forEach(h => h.style.opacity = 0);
+        const i = +swipeCard.dataset.idx;
+        if (dx > 80) { applyFav(i, !favs.has(i)); showToast(favs.has(i) ? '⭐ Starred' : 'Unstarred'); }
+        else if (dx < -80) { applyDone(i, !done.has(i)); showToast(done.has(i) ? '✓ Done' : 'Marked todo'); }
+        swipeCard = null; swipeStart = null;
+      });
+    })();
+
+    // === LONG PRESS to open note ===
+    (function setupLongPress() {
+      let lpTimer = null, lpCard = null;
+      list.addEventListener('touchstart', e => {
+        const card = e.target.closest('.card');
+        if (!card) return;
+        lpCard = card;
+        lpTimer = setTimeout(() => {
+          const i = +lpCard.dataset.idx;
+          const row = list.querySelector(`.note-row[data-for="${i}"]`);
+          if (row) { row.classList.add('visible'); row.querySelector('.note-input').focus(); }
+          lpCard = null;
+        }, 600);
+      }, { passive: true });
+      list.addEventListener('touchend', () => { clearTimeout(lpTimer); lpCard = null; }, { passive: true });
+      list.addEventListener('touchmove', () => { clearTimeout(lpTimer); lpCard = null; }, { passive: true });
+    })();
+
+    // === PULL TO REFRESH ===
+    (function setupPTR() {
+      let ptrStart = 0, ptrActive = false;
+      document.addEventListener('touchstart', e => {
+        if (window.scrollY === 0) ptrStart = e.touches[0].clientY;
+      }, { passive: true });
+      document.addEventListener('touchmove', e => {
+        if (ptrStart && window.scrollY === 0) {
+          const dy = e.touches[0].clientY - ptrStart;
+          if (dy > 60 && !ptrActive) {
+            ptrActive = true;
+            document.getElementById('ptr-indicator').classList.add('visible');
+          }
+        }
+      }, { passive: true });
+      document.addEventListener('touchend', () => {
+        if (ptrActive) {
+          document.getElementById('ptr-indicator').classList.remove('visible');
+          ptrActive = false; ptrStart = 0;
+          renderWeekStrip(); renderTodayStrip(); updateCounts();
+          showToast('↺ Refreshed');
+        } else { ptrStart = 0; }
+      }, { passive: true });
+    })();
+
     // === APPLY STORED STATE ===
     function applyStoredState() {
       cards.forEach((c, i) => {
         if (favs.has(i))  _setFavUI(i, true);
         if (done.has(i))  _setDoneUI(i, true);
         if (pris[i])      _setPriUI(i, pris[i]);
+        if (ratings[i])   _setRatingUI(i, ratings[i]);
+        if (statuses[i])  _setStatusUI(i, statuses[i]);
+        if (seriesLabels[i]) _setSeriesUI(i, seriesLabels[i]);
+        if (pinned.has(i))  c.classList.add('pinned'), c.querySelector('.pin-btn')?.classList.add('on');
         if (notes[i]) {
           const nd = c.querySelector('.cnote');
           if (nd) { nd.textContent = notes[i]; nd.classList.add('visible'); }
@@ -1374,53 +2699,78 @@
         }
         if (scheds[i]) _setSchedUI(i, scheds[i]);
       });
+      // apply hidden cats to chips
+      hiddenCats.forEach(cat => document.querySelector(`.chip[data-f="${cat}"]`)?.classList.add('cat-hidden'));
     }
 
     // === SAVE / LOAD ===
     function saveAll() {
-      lsSet(KEYS.favs,   JSON.stringify([...favs]));
-      lsSet(KEYS.done,   JSON.stringify([...done]));
-      lsSet(KEYS.notes,  JSON.stringify(notes));
-      lsSet(KEYS.pris,   JSON.stringify(pris));
-      lsSet(KEYS.scheds, JSON.stringify(scheds));
-      lsSet(KEYS.streak, JSON.stringify(streakData));
-      if (window.storage) {
-        Promise.allSettled([
-          window.storage.set(KEYS.favs,   JSON.stringify([...favs])),
-          window.storage.set(KEYS.done,   JSON.stringify([...done])),
-          window.storage.set(KEYS.notes,  JSON.stringify(notes)),
-          window.storage.set(KEYS.pris,   JSON.stringify(pris)),
-          window.storage.set(KEYS.scheds, JSON.stringify(scheds)),
-          window.storage.set(KEYS.streak, JSON.stringify(streakData)),
-        ]).catch(() => {});
-      }
+      lsSet(KEYS.favs,      JSON.stringify([...favs]));
+      lsSet(KEYS.done,      JSON.stringify([...done]));
+      lsSet(KEYS.notes,     JSON.stringify(notes));
+      lsSet(KEYS.pris,      JSON.stringify(pris));
+      lsSet(KEYS.scheds,    JSON.stringify(scheds));
+      lsSet(KEYS.streak,    JSON.stringify(streakData));
+      lsSet(KEYS.custom,    JSON.stringify(customIdeas));
+      lsSet(KEYS.ratings,   JSON.stringify(ratings));
+      lsSet(KEYS.statuses,  JSON.stringify(statuses));
+      lsSet(KEYS.series,    JSON.stringify(seriesLabels));
+      lsSet(KEYS.sfilters,  JSON.stringify(savedFilters));
+      lsSet(KEYS.sortpref,  sortMode);
+      lsSet(KEYS.hcats,     JSON.stringify([...hiddenCats]));
+      lsSet(KEYS.pinned,    JSON.stringify([...pinned]));
+      lsSet(KEYS.achiev,    JSON.stringify(achievements));
+      lsSet(KEYS.goal,      String(goalTarget));
+      lsSet(KEYS.recent,    JSON.stringify(recentTouched));
+      lsSet(KEYS.streakhist,JSON.stringify(streakHistory));
     }
 
-    async function loadAll() {
-      try { const v = lsGet(KEYS.favs);   if(v) favs       = new Set(JSON.parse(v)); } catch(e) {}
-      try { const v = lsGet(KEYS.done);   if(v) done       = new Set(JSON.parse(v)); } catch(e) {}
-      try { const v = lsGet(KEYS.notes);  if(v) notes      = JSON.parse(v); } catch(e) {}
-      try { const v = lsGet(KEYS.pris);   if(v) pris       = JSON.parse(v); } catch(e) {}
-      try { const v = lsGet(KEYS.scheds); if(v) scheds     = JSON.parse(v); } catch(e) {}
-      try { const v = lsGet(KEYS.streak); if(v) streakData = JSON.parse(v); } catch(e) {}
+    async function loadAll() { // returns Promise
+      try { const v = lsGet(KEYS.favs);      if(v) favs          = new Set(JSON.parse(v)); } catch(e) {}
+      try { const v = lsGet(KEYS.done);      if(v) done          = new Set(JSON.parse(v)); } catch(e) {}
+      try { const v = lsGet(KEYS.notes);     if(v) notes         = JSON.parse(v); } catch(e) {}
+      try { const v = lsGet(KEYS.pris);      if(v) pris          = JSON.parse(v); } catch(e) {}
+      try { const v = lsGet(KEYS.scheds);    if(v) scheds        = JSON.parse(v); } catch(e) {}
+      try { const v = lsGet(KEYS.streak);    if(v) streakData    = JSON.parse(v); } catch(e) {}
+      try { const v = lsGet(KEYS.custom);    if(v) customIdeas   = JSON.parse(v); } catch(e) {}
+      try { const v = lsGet(KEYS.ratings);   if(v) ratings       = JSON.parse(v); } catch(e) {}
+      try { const v = lsGet(KEYS.statuses);  if(v) statuses      = JSON.parse(v); } catch(e) {}
+      try { const v = lsGet(KEYS.series);    if(v) seriesLabels  = JSON.parse(v); } catch(e) {}
+      try { const v = lsGet(KEYS.sfilters);  if(v) savedFilters  = JSON.parse(v); } catch(e) {}
+      try { const v = lsGet(KEYS.sortpref);  if(v) sortMode      = v; } catch(e) {}
+      try { const v = lsGet(KEYS.hcats);     if(v) hiddenCats    = new Set(JSON.parse(v)); } catch(e) {}
+      try { const v = lsGet(KEYS.pinned);    if(v) pinned        = new Set(JSON.parse(v)); } catch(e) {}
+      try { const v = lsGet(KEYS.achiev);    if(v) achievements  = JSON.parse(v); } catch(e) {}
+      try { const v = lsGet(KEYS.goal);      if(v) goalTarget    = parseInt(v)||3; } catch(e) {}
+      try { const v = lsGet(KEYS.recent);    if(v) recentTouched = JSON.parse(v); } catch(e) {}
+      try { const v = lsGet(KEYS.streakhist);if(v) streakHistory = JSON.parse(v); } catch(e) {}
 
-      if (window.storage) {
-        try {
-          const keys = [KEYS.favs, KEYS.done, KEYS.notes, KEYS.pris, KEYS.scheds, KEYS.streak];
-          const results = await Promise.allSettled(keys.map(k => window.storage.get(k)));
-          try { const r=results[0]; if(r.value?.value) favs       = new Set(JSON.parse(r.value.value)); } catch(e) {}
-          try { const r=results[1]; if(r.value?.value) done       = new Set(JSON.parse(r.value.value)); } catch(e) {}
-          try { const r=results[2]; if(r.value?.value) notes      = JSON.parse(r.value.value); } catch(e) {}
-          try { const r=results[3]; if(r.value?.value) pris       = JSON.parse(r.value.value); } catch(e) {}
-          try { const r=results[4]; if(r.value?.value) scheds     = JSON.parse(r.value.value); } catch(e) {}
-          try { const r=results[5]; if(r.value?.value) streakData = JSON.parse(r.value.value); } catch(e) {}
-        } catch(e) {}
+      const lightOn = lsGet(KEYS.light) === '1';
+      document.documentElement.classList.toggle('light', lightOn);
+      document.getElementById('theme-toggle').textContent = lightOn ? '☀' : '🌙';
+
+      const savedSort = lsGet(KEYS.sortpref);
+      if (savedSort) {
+        sortMode = savedSort;
+        document.querySelectorAll('.sbtn[data-s]').forEach(b => b.classList.toggle('on', b.dataset.s === sortMode));
       }
+
+      // Rebuild custom idea cards
+      customIdeas.forEach((_, idx) => {
+        if (!cards[window.ALL_IDEAS.length + idx]) addCustomCard(idx);
+      });
 
       applyStoredState();
       updateCounts();
       updateStreak();
       buildDashboard();
+      renderWeekStrip();
+      renderTodayStrip();
+      renderRecentBar();
+      renderGoalWidget();
+      renderIotd();
+      renderSavedFilterChips();
+      checkAchievements(false);
       render();
     }
 
@@ -1436,11 +2786,35 @@
         }
       }
 
+      // Ripple on card click
+      const cardEl = e.target.closest('.card');
+      if (cardEl && !e.target.closest('.cact') && !e.target.closest('.card-check')) {
+        const r = document.createElement('span');
+        r.className = 'ripple';
+        const rect = cardEl.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height) * 2;
+        r.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px`;
+        cardEl.appendChild(r);
+        r.addEventListener('animationend', () => r.remove());
+      }
+
       const fb = e.target.closest('.fav-btn');
-      if (fb) { const i=+fb.dataset.i; applyFav(i, !favs.has(i)); showToast(favs.has(i) ? '⭐ Starred' : 'Unstarred'); return; }
+      if (fb) {
+        const i=+fb.dataset.i; const was=favs.has(i);
+        applyFav(i, !was);
+        showToast(favs.has(i) ? '⭐ Starred' : 'Unstarred');
+        pushUndo(favs.has(i) ? 'Starred idea' : 'Unstarred idea', () => { applyFav(i, was); });
+        return;
+      }
 
       const db = e.target.closest('.done-btn');
-      if (db) { const i=+db.dataset.i; applyDone(i, !done.has(i)); showToast(done.has(i) ? '✓ Done' : 'Marked todo'); return; }
+      if (db) {
+        const i=+db.dataset.i; const was=done.has(i);
+        applyDone(i, !was);
+        showToast(done.has(i) ? '✓ Done' : 'Marked todo');
+        pushUndo(done.has(i) ? 'Marked done' : 'Unmarked done', () => { applyDone(i, was); });
+        return;
+      }
 
       const pb = e.target.closest('.pri-btn');
       if (pb) { openPriMenu(pb, +pb.dataset.i); return; }
@@ -1467,6 +2841,39 @@
         row.classList.remove('visible');
         saveAll(); showToast(val ? '📝 Note saved' : 'Note cleared'); return;
       }
+
+      const rb = e.target.closest('.rating-btn');
+      if (rb) { ratingTarget = +rb.dataset.i; openCtxMenu('rating-menu', rb); return; }
+
+      const stb = e.target.closest('.status-btn');
+      if (stb) { statusTarget = +stb.dataset.i; openCtxMenu('status-menu', stb); return; }
+
+      const pinb = e.target.closest('.pin-btn');
+      if (pinb) {
+        const i = +pinb.dataset.i;
+        applyPin(i, !pinned.has(i));
+        showToast(pinned.has(i) ? '📌 Pinned' : 'Unpinned'); return;
+      }
+
+      const dupb = e.target.closest('.dup-btn');
+      if (dupb) {
+        const i = +dupb.dataset.i;
+        const src = i < window.ALL_IDEAS.length ? window.ALL_IDEAS[i] : customIdeas[i - window.ALL_IDEAS.length];
+        if (src) {
+          customIdeas.push({ t: src.t + ' (copy)', tags: [...src.tags] });
+          saveAll();
+          addCustomCard(customIdeas.length - 1);
+          showToast('⧉ Duplicate added');
+          renderRecentBar();
+        }
+        return;
+      }
+
+      // Rating/status label click on card
+      const ratingEl = e.target.closest('.crating');
+      if (ratingEl && ratingEl.dataset.i !== undefined) { ratingTarget = +ratingEl.dataset.i; openCtxMenu('rating-menu', ratingEl); return; }
+      const statusEl = e.target.closest('.cstatus');
+      if (statusEl && statusEl.dataset.i !== undefined) { statusTarget = +statusEl.dataset.i; openCtxMenu('status-menu', statusEl); return; }
 
       const datebtn = e.target.closest('.date-btn');
       if (datebtn) {
@@ -1529,7 +2936,9 @@
     document.querySelectorAll('.sbtn[data-s]').forEach(b => {
       b.addEventListener('click', function() {
         document.querySelectorAll('.sbtn[data-s]').forEach(x => x.classList.remove('on'));
-        this.classList.add('on'); sortMode = this.dataset.s; render();
+        this.classList.add('on'); sortMode = this.dataset.s;
+        lsSet(KEYS.sortpref, sortMode);
+        render();
       });
     });
 
@@ -1566,6 +2975,313 @@
       t.textContent = msg; t.classList.add('show');
       clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 1800);
     }
+
+    // === NEW TOOLBAR BUTTONS ===
+    document.getElementById('btn-hide-done').addEventListener('click', function() {
+      hideDone = !hideDone; this.classList.toggle('on', hideDone); render();
+    });
+    document.getElementById('btn-unstarred').addEventListener('click', function() {
+      showUnstarredOnly = !showUnstarredOnly; this.classList.toggle('on', showUnstarredOnly); render();
+    });
+
+    ['today','week','month'].forEach(range => {
+      document.getElementById(`btn-date-${range}`)?.addEventListener('click', function() {
+        if (dateRangeFilter === range) { dateRangeFilter = ''; this.classList.remove('on'); }
+        else {
+          dateRangeFilter = range;
+          ['today','week','month'].forEach(r => document.getElementById(`btn-date-${r}`)?.classList.remove('on'));
+          this.classList.add('on');
+        }
+        render();
+      });
+    });
+
+    document.getElementById('btn-week-strip')?.addEventListener('click', function() {
+      const ws = document.getElementById('week-strip');
+      ws.classList.toggle('visible'); this.classList.toggle('on', ws.classList.contains('visible'));
+      if (ws.classList.contains('visible')) renderWeekStrip();
+    });
+
+    document.getElementById('btn-focus')?.addEventListener('click', openFocusMode);
+
+    document.getElementById('btn-charts')?.addEventListener('click', () => {
+      renderCharts();
+      document.getElementById('charts-overlay').classList.add('open');
+    });
+    document.getElementById('charts-close')?.addEventListener('click', () => document.getElementById('charts-overlay').classList.remove('open'));
+
+    document.getElementById('btn-cal')?.addEventListener('click', () => {
+      calViewDate = new Date();
+      renderCalendar();
+      document.getElementById('cal-overlay').classList.add('open');
+    });
+    document.getElementById('cal-close')?.addEventListener('click', () => document.getElementById('cal-overlay').classList.remove('open'));
+    document.getElementById('cal-prev')?.addEventListener('click', () => { calViewDate.setMonth(calViewDate.getMonth()-1); renderCalendar(); });
+    document.getElementById('cal-next')?.addEventListener('click', () => { calViewDate.setMonth(calViewDate.getMonth()+1); renderCalendar(); });
+
+    document.getElementById('btn-ach')?.addEventListener('click', () => {
+      renderBadgeGrid();
+      document.getElementById('ach-overlay').classList.add('open');
+    });
+    document.getElementById('ach-close')?.addEventListener('click', () => document.getElementById('ach-overlay').classList.remove('open'));
+
+    document.getElementById('btn-sfilters')?.addEventListener('click', () => {
+      renderSavedFilterList();
+      document.getElementById('sfilter-overlay').classList.add('open');
+    });
+    document.getElementById('sfilter-close')?.addEventListener('click', () => document.getElementById('sfilter-overlay').classList.remove('open'));
+    document.getElementById('sfilter-save')?.addEventListener('click', () => {
+      const name = document.getElementById('sfilter-name').value.trim();
+      if (!name) return;
+      savedFilters.push({ name, filt, q, favs: showFavsOnly, doneOnly: showDoneOnly, pri: showPriOnly, hideDone });
+      saveAll(); renderSavedFilterChips(); renderSavedFilterList();
+      document.getElementById('sfilter-name').value = '';
+      showToast('🔖 Filter saved');
+    });
+
+    function renderSavedFilterList() {
+      const container = document.getElementById('sfilter-list');
+      if (!container) return;
+      container.innerHTML = '';
+      if (!savedFilters.length) { container.innerHTML = '<div style="font-size:12px;color:var(--txt2);padding:8px 0">No saved filters yet.</div>'; return; }
+      savedFilters.forEach((sf, idx) => {
+        const d = document.createElement('div');
+        d.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--b1);font-size:13px;color:var(--txt)';
+        d.innerHTML = `<span>${sf.name}</span><button style="background:none;border:none;color:var(--txt2);cursor:pointer;font-size:11px" data-idx="${idx}">✕ Remove</button>`;
+        d.querySelector('button').addEventListener('click', () => {
+          savedFilters.splice(idx, 1); saveAll(); renderSavedFilterChips(); renderSavedFilterList();
+        });
+        container.appendChild(d);
+      });
+    }
+
+    document.getElementById('kbd-close')?.addEventListener('click', () => document.getElementById('kbd-overlay').classList.remove('open'));
+    [document.getElementById('kbd-overlay'), document.getElementById('charts-overlay'), document.getElementById('ach-overlay'), document.getElementById('cal-overlay'), document.getElementById('sfilter-overlay')].forEach(ov => {
+      ov?.addEventListener('click', e => { if (e.target === ov) ov.classList.remove('open'); });
+    });
+
+    // === FAB / ADD SHEET ===
+    document.getElementById('fab-add').addEventListener('click', () => {
+      document.getElementById('add-sheet').classList.add('open');
+      document.getElementById('sheet-overlay').classList.add('open');
+      document.getElementById('add-title').focus();
+    });
+    document.getElementById('sheet-overlay').addEventListener('click', closeAddSheet);
+    document.getElementById('add-cancel').addEventListener('click', closeAddSheet);
+    document.getElementById('add-cat-chips').addEventListener('click', e => {
+      const ch = e.target.closest('.sheet-chip'); if (!ch) return;
+      document.querySelectorAll('#add-cat-chips .sheet-chip').forEach(c => c.classList.remove('on'));
+      ch.classList.add('on');
+    });
+    document.getElementById('add-save').addEventListener('click', () => {
+      const title = document.getElementById('add-title').value.trim();
+      if (!title) return;
+      const cat = document.querySelector('#add-cat-chips .sheet-chip.on')?.dataset.cat || 'gaming';
+      customIdeas.push({ t: title, tags: [cat] });
+      saveAll();
+      addCustomCard(customIdeas.length - 1);
+      closeAddSheet();
+      showToast('✅ Custom idea added');
+    });
+    document.getElementById('add-title').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('add-save').click();
+    });
+    function closeAddSheet() {
+      document.getElementById('add-sheet').classList.remove('open');
+      document.getElementById('sheet-overlay').classList.remove('open');
+      document.getElementById('add-title').value = '';
+    }
+
+    function addCustomCard(customIdx) {
+      const globalIdx = window.ALL_IDEAS.length + customIdx;
+      const idea = customIdeas[customIdx];
+      const tagsHtml = idea.tags.map(t => {
+        const c = TC[t] || { cls: 'tgaming', l: t };
+        return `<span class="tag ${c.cls}">${c.l}</span>`;
+      }).join('');
+      const card = document.createElement('div');
+      card.className = 'card stagger-anim';
+      card.dataset.idx   = globalIdx;
+      card.dataset.tags  = idea.tags.join(' ');
+      card.dataset.title = idea.t.toLowerCase();
+      card.innerHTML = `
+        <div class="card-edge" style="background:${TC[idea.tags[0]]?.color||'#A0453F'}"></div>
+        <div class="card-swipe-hint right">⭐</div><div class="card-swipe-hint left">✓</div>
+        <div class="card-inner">
+          <div class="card-check">✓</div>
+          <div class="cnum">${String(globalIdx+1).padStart(4,'0')}</div>
+          <div class="cbody">
+            <div class="ctitle">${idea.t} <span style="font-size:9px;color:var(--acc);background:rgba(160,69,63,.1);padding:1px 5px;border-radius:3px;font-weight:700">CUSTOM</span></div>
+            <div class="cdate"></div><div class="cnote"></div>
+            <div class="ctags">${tagsHtml}</div>
+          </div>
+          <div class="card-acts">
+            <button class="cact fav-btn"    data-i="${globalIdx}" title="Star">★</button>
+            <button class="cact done-btn"   data-i="${globalIdx}" title="Mark done">✓</button>
+            <button class="cact pri-btn"    data-i="${globalIdx}" title="Set priority">◈</button>
+            <button class="cact rating-btn" data-i="${globalIdx}" title="Rate">🔥</button>
+            <button class="cact status-btn" data-i="${globalIdx}" title="Status">🎬</button>
+            <button class="cact note-btn"   data-i="${globalIdx}" title="Add note">✎</button>
+            <button class="cact date-btn"   data-i="${globalIdx}" title="Schedule">📅</button>
+            <button class="cact pin-btn"    data-i="${globalIdx}" title="Pin to top">📌</button>
+            <button class="cact dup-btn"    data-i="${globalIdx}" title="Duplicate">⧉</button>
+          </div>
+        </div>`;
+      list.appendChild(card);
+      cards.push(card);
+      cards[globalIdx] = card;
+
+      const nr = document.createElement('div');
+      nr.className = 'note-row'; nr.dataset.for = globalIdx;
+      nr.innerHTML = `<textarea class="note-input" placeholder="Add a note…"></textarea><button class="note-save" data-i="${globalIdx}">Save</button>`;
+      list.appendChild(nr);
+
+      const dr = document.createElement('div');
+      dr.className = 'date-row'; dr.dataset.dfor = globalIdx;
+      dr.innerHTML = `<input type="date" class="date-input" data-i="${globalIdx}"><button class="date-save" data-i="${globalIdx}">Set date</button><button class="date-clear" data-i="${globalIdx}">Clear</button>`;
+      list.appendChild(dr);
+      setTimeout(() => card.classList.remove('stagger-anim'), 400);
+      updateCounts();
+    }
+
+    // === CONTEXT MENU HELPER ===
+    function openCtxMenu(menuId, btn) {
+      document.querySelectorAll('.rating-menu,.status-menu').forEach(m => m.classList.remove('open'));
+      const m = document.getElementById(menuId);
+      const r = btn.getBoundingClientRect();
+      m.style.top  = (r.bottom + 4) + 'px';
+      m.style.right = (window.innerWidth - r.right) + 'px';
+      m.style.left = 'auto';
+      m.classList.add('open');
+    }
+
+    document.getElementById('rating-menu').addEventListener('click', e => {
+      const opt = e.target.closest('.rating-opt'); if (!opt) return;
+      if (ratingTarget !== null) applyRating(ratingTarget, opt.dataset.r);
+      document.getElementById('rating-menu').classList.remove('open');
+    });
+    document.getElementById('status-menu').addEventListener('click', e => {
+      const opt = e.target.closest('.status-opt'); if (!opt) return;
+      if (statusTarget !== null) applyStatus(statusTarget, opt.dataset.s);
+      document.getElementById('status-menu').classList.remove('open');
+    });
+    document.addEventListener('click', e => {
+      if (!document.getElementById('rating-menu').contains(e.target) && !e.target.closest('.rating-btn') && !e.target.closest('.crating'))
+        document.getElementById('rating-menu').classList.remove('open');
+      if (!document.getElementById('status-menu').contains(e.target) && !e.target.closest('.status-btn') && !e.target.closest('.cstatus'))
+        document.getElementById('status-menu').classList.remove('open');
+    });
+
+    // === THEME TOGGLE ===
+    document.getElementById('theme-toggle').addEventListener('click', function() {
+      const on = document.documentElement.classList.toggle('light');
+      this.textContent = on ? '☀' : '🌙';
+      lsSet(KEYS.light, on ? '1' : '0');
+    });
+
+    // === EXPORT BUTTONS ===
+    document.getElementById('export-csv-btn')?.addEventListener('click', exportStarredCSV);
+    document.getElementById('export-week-btn')?.addEventListener('click', exportWeekSchedule);
+    document.getElementById('export-canvas-btn')?.addEventListener('click', exportContentCanvas);
+
+    // === SELECT: SCHEDULE + CSV ===
+    document.getElementById('sel-sched')?.addEventListener('click', () => {
+      const row = document.getElementById('bulk-sched-row');
+      row.style.display = row.style.display === 'flex' ? 'none' : 'flex';
+    });
+    document.getElementById('bulk-date-apply')?.addEventListener('click', () => {
+      const val = document.getElementById('bulk-date').value;
+      if (!val) return;
+      selected.forEach(i => { scheds[i] = val; _setSchedUI(i, val); });
+      saveAll(); updateCounts(); renderWeekStrip(); renderTodayStrip();
+      showToast(`📅 Scheduled ${selected.size} ideas`);
+      document.getElementById('bulk-sched-row').style.display = 'none';
+      exitSelectMode();
+    });
+    document.getElementById('bulk-date-cancel')?.addEventListener('click', () => {
+      document.getElementById('bulk-sched-row').style.display = 'none';
+    });
+    document.getElementById('sel-export-csv')?.addEventListener('click', () => {
+      const rows = [['#','Title','Tags','Note','Date','Priority']];
+      [...selected].sort((a,b) => a-b).forEach(i => {
+        const idea = i < window.ALL_IDEAS.length ? window.ALL_IDEAS[i] : customIdeas[i - window.ALL_IDEAS.length];
+        if (!idea) return;
+        rows.push([i+1, `"${idea.t.replace(/"/g,'""')}"`, idea.tags.join(';'), notes[i]||'', scheds[i]||'', pris[i]||'']);
+      });
+      const csv = rows.map(r => r.join(',')).join('\n');
+      const a = document.createElement('a');
+      a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+      a.download = 'switchvault-selected.csv';
+      a.click();
+      showToast(`⬇ Exported ${selected.size} ideas`);
+      exitSelectMode();
+    });
+
+    // === BOTTOM NAV ===
+    document.getElementById('bnav-home')?.addEventListener('click', () => {
+      filt = 'all'; showFavsOnly = false; showDoneOnly = false; q = '';
+      document.getElementById('search').value = '';
+      document.querySelectorAll('.chip').forEach(c => c.classList.toggle('on', c.dataset.f === 'all'));
+      document.querySelectorAll('.bnav-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('bnav-home').classList.add('active');
+      render();
+    });
+    document.getElementById('bnav-star')?.addEventListener('click', () => {
+      showFavsOnly = !showFavsOnly;
+      document.querySelectorAll('.bnav-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('bnav-star').classList.toggle('active', showFavsOnly);
+      document.getElementById('btn-fav').classList.toggle('on', showFavsOnly);
+      render();
+    });
+    document.getElementById('bnav-rand')?.addEventListener('click', pickRand);
+    document.getElementById('bnav-charts')?.addEventListener('click', () => { renderCharts(); document.getElementById('charts-overlay').classList.add('open'); });
+    document.getElementById('bnav-ach')?.addEventListener('click', () => { renderBadgeGrid(); document.getElementById('ach-overlay').classList.add('open'); });
+
+    // === IOTD click ===
+    document.getElementById('iotd-card')?.addEventListener('click', () => {
+      const idx = +document.getElementById('iotd-card').dataset.idx;
+      cards[idx]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      spotlight = idx; render();
+    });
+
+    // === GOAL TARGET ===
+    document.getElementById('goal-target')?.addEventListener('change', function() {
+      goalTarget = parseInt(this.value) || 3;
+      saveAll(); updateGoalWidget();
+    });
+
+    // === CHIPS right-click to hide/show ===
+    document.getElementById('chips').addEventListener('contextmenu', e => {
+      const ch = e.target.closest('.chip[data-f]');
+      if (!ch || ch.dataset.f === 'all') return;
+      e.preventDefault();
+      const cat = ch.dataset.f;
+      if (hiddenCats.has(cat)) { hiddenCats.delete(cat); ch.classList.remove('cat-hidden'); }
+      else { hiddenCats.add(cat); ch.classList.add('cat-hidden'); }
+      saveAll(); render();
+    });
+
+    // === CHIP DRAG to reorder ===
+    (function setupChipDrag() {
+      let dragSrc = null;
+      const chipsEl = document.getElementById('chips');
+      chipsEl.querySelectorAll('.chip').forEach(ch => {
+        ch.setAttribute('draggable', 'true');
+        ch.addEventListener('dragstart', function(e) { dragSrc = this; e.dataTransfer.effectAllowed = 'move'; });
+        ch.addEventListener('dragover', function(e) { e.preventDefault(); this.classList.add('drag-over'); });
+        ch.addEventListener('dragleave', function() { this.classList.remove('drag-over'); });
+        ch.addEventListener('drop', function(e) {
+          e.preventDefault(); this.classList.remove('drag-over');
+          if (dragSrc !== this) {
+            const all = [...chipsEl.querySelectorAll('.chip')];
+            const si = all.indexOf(dragSrc), ti = all.indexOf(this);
+            if (si < ti) this.after(dragSrc); else this.before(dragSrc);
+          }
+          dragSrc = null;
+        });
+        ch.addEventListener('dragend', function() { this.classList.remove('drag-over'); dragSrc = null; });
+      });
+    })();
 
     // === PRIORITY MENU ===
     const priMenu = document.getElementById('pri-menu');
@@ -1740,23 +3456,72 @@
     // === KEYBOARD SHORTCUTS ===
     document.addEventListener('keydown', e => {
       if (e.target.matches('input,textarea,select')) return;
+      const focusOpen = document.getElementById('focus-overlay').classList.contains('open');
       if (e.key === '/' || e.key === 's') { e.preventDefault(); searchEl.focus(); }
+      else if (e.key === '?') { document.getElementById('kbd-overlay').classList.toggle('open'); }
       else if (e.key.toLowerCase() === 'r') { pickRand(); }
       else if (e.key.toLowerCase() === 'i') {
         insOverlay.classList.contains('open') ? insOverlay.classList.remove('open') : openInspire();
+      }
+      else if (e.key.toLowerCase() === 'f') {
+        focusOpen ? document.getElementById('focus-overlay').classList.remove('open') : openFocusMode();
+      }
+      else if (e.key.toLowerCase() === 'p') { window.print(); }
+      else if (e.key.toLowerCase() === 'c' && !e.ctrlKey && !e.metaKey) {
+        const vis = cards.filter(c => !c.classList.contains('hidden'));
+        const text = vis.map((c,n) => `${n+1}. ${window.ALL_IDEAS[+c.dataset.idx]?.t || ''}`).join('\n');
+        navigator.clipboard?.writeText(text).then(() => showToast(`📋 Copied ${vis.length} ideas`));
       }
       else if (e.key === 'Escape') {
         overlay.classList.remove('open');
         insOverlay.classList.remove('open');
         priMenu.classList.remove('open');
+        document.getElementById('focus-overlay').classList.remove('open');
+        document.getElementById('kbd-overlay').classList.remove('open');
+        document.getElementById('charts-overlay').classList.remove('open');
+        document.getElementById('ach-overlay').classList.remove('open');
+        document.getElementById('cal-overlay').classList.remove('open');
+        document.getElementById('sfilter-overlay').classList.remove('open');
         if (selectMode) exitSelectMode();
       }
-      else if (e.key === 'ArrowRight' && insOverlay.classList.contains('open')) { insIdx = (insIdx+1) % insPool.length; renderInspire(); }
-      else if (e.key === 'ArrowLeft'  && insOverlay.classList.contains('open')) { insIdx = (insIdx-1+insPool.length) % insPool.length; renderInspire(); }
+      else if (e.key === 'ArrowRight') {
+        if (insOverlay.classList.contains('open')) { insIdx = (insIdx+1) % insPool.length; renderInspire(); }
+        else if (focusOpen) { focusIdx = (focusIdx+1) % focusPool.length; renderFocus(); }
+      }
+      else if (e.key === 'ArrowLeft') {
+        if (insOverlay.classList.contains('open')) { insIdx = (insIdx-1+insPool.length) % insPool.length; renderInspire(); }
+        else if (focusOpen) { focusIdx = (focusIdx-1+focusPool.length) % focusPool.length; renderFocus(); }
+      }
     });
 
+    // === STAGGER ANIMATION ON LOAD ===
+    function staggerCards() {
+      const visible = cards.filter(c => !c.classList.contains('hidden')).slice(0, 40);
+      visible.forEach((c, k) => {
+        c.style.animationDelay = (k * 18) + 'ms';
+        c.classList.add('stagger-anim');
+        c.addEventListener('animationend', () => {
+          c.classList.remove('stagger-anim');
+          c.style.animationDelay = '';
+        }, { once: true });
+      });
+    }
+
     // === INIT ===
-    loadAll();
+    // Show skeleton first
+    (function showSkeleton() {
+      for (let k = 0; k < 8; k++) {
+        const s = document.createElement('div');
+        s.className = 'skeleton-card';
+        s.id = `skel-${k}`;
+        list.appendChild(s);
+      }
+    })();
+
+    loadAll().then(() => {
+      document.querySelectorAll('.skeleton-card').forEach(s => s.remove());
+      staggerCards();
+    });
   </script>
 </body>
 </html>

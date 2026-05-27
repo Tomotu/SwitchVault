@@ -3277,6 +3277,16 @@
         return;
       }
 
+      const rejb = e.target.closest('.rej-btn');
+      if (rejb) {
+        const i = +rejb.dataset.i;
+        const wasRej = rejected.has(i);
+        if (!wasRej) { rejected.add(i); favs.delete(i); _setFavUI(i, false); }
+        else rejected.delete(i);
+        _setRejUI(i, !wasRej);
+        saveAll(); updateCounts(); render(); return;
+      }
+
       const db = e.target.closest('.done-btn');
       if (db) {
         const i=+db.dataset.i; const was=done.has(i);
@@ -3507,6 +3517,9 @@
     });
     document.getElementById('btn-unstarred').addEventListener('click', function() {
       showUnstarredOnly = !showUnstarredOnly; this.classList.toggle('on', showUnstarredOnly); render();
+    });
+    document.getElementById('btn-show-rej')?.addEventListener('click', function() {
+      showRejected = !showRejected; this.classList.toggle('on-teal', showRejected); render();
     });
 
     ['today','week','month'].forEach(range => {
@@ -3787,16 +3800,60 @@
       document.getElementById('bnav-home').classList.add('active');
       render();
     });
+    // Open approved overlay from bottom nav
     document.getElementById('bnav-star')?.addEventListener('click', () => {
-      showFavsOnly = !showFavsOnly;
+      renderApprovedPage();
+      document.getElementById('approved-overlay').classList.add('open');
       document.querySelectorAll('.bnav-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById('bnav-star').classList.toggle('active', showFavsOnly);
-      document.getElementById('btn-fav').classList.toggle('on', showFavsOnly);
-      render();
+      document.getElementById('bnav-star').classList.add('active');
     });
     document.getElementById('bnav-rand')?.addEventListener('click', pickRand);
     document.getElementById('bnav-charts')?.addEventListener('click', () => { renderCharts(); document.getElementById('charts-overlay').classList.add('open'); });
     document.getElementById('bnav-ach')?.addEventListener('click', () => { renderBadgeGrid(); document.getElementById('ach-overlay').classList.add('open'); });
+
+    // === APPROVED OVERLAY ===
+    // Close button
+    document.getElementById('approved-close')?.addEventListener('click', () => {
+      document.getElementById('approved-overlay').classList.remove('open');
+      document.querySelectorAll('.bnav-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('bnav-home').classList.add('active');
+    });
+
+    // Click backdrop to close
+    document.getElementById('approved-overlay')?.addEventListener('click', e => {
+      if (e.target === document.getElementById('approved-overlay')) {
+        document.getElementById('approved-overlay').classList.remove('open');
+        document.querySelectorAll('.bnav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('bnav-home').classList.add('active');
+      }
+    });
+
+    // Delegation for approved page actions
+    document.getElementById('approved-body')?.addEventListener('click', e => {
+      const prodBtn = e.target.closest('[data-appr-prod]');
+      if (prodBtn) {
+        const i = +prodBtn.dataset.apprProd;
+        producing.add(i); saveAll(); renderApprovedPage();
+        _setProdUI(i, true); showToast('🎬 Selected for production'); return;
+      }
+      const unprodBtn = e.target.closest('[data-appr-unprod]');
+      if (unprodBtn) {
+        const i = +unprodBtn.dataset.apprUnprod;
+        producing.delete(i); saveAll(); renderApprovedPage();
+        _setProdUI(i, false); return;
+      }
+      const doneBtn = e.target.closest('[data-appr-done]');
+      if (doneBtn) {
+        const i = +doneBtn.dataset.apprDone;
+        producing.delete(i); applyDone(i, true); saveAll(); updateCounts(); renderApprovedPage();
+        showToast('🎉 Video done!'); return;
+      }
+      const unapprBtn = e.target.closest('[data-appr-unappr]');
+      if (unapprBtn) {
+        const i = +unapprBtn.dataset.apprUnappr;
+        favs.delete(i); _setFavUI(i, false); saveAll(); updateCounts(); renderApprovedPage(); return;
+      }
+    });
 
     // === IOTD click ===
     document.getElementById('iotd-card')?.addEventListener('click', () => {
@@ -4045,6 +4102,7 @@
         document.getElementById('sfilter-overlay').classList.remove('open');
         document.getElementById('coll-overlay').classList.remove('open');
         document.getElementById('hash-overlay').classList.remove('open');
+        document.getElementById('approved-overlay').classList.remove('open');
         if (selectMode) exitSelectMode();
       }
       else if (e.key === 'ArrowRight') {

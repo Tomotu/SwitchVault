@@ -537,6 +537,20 @@
     .list.compact .ctags { display: none; }
     .list.compact .cdate { font-size: 10px; }
     .list.compact .cnote { font-size: 10px; }
+    /* In compact mode show only star + done; everything else on full mode */
+    .list.compact .pri-btn,
+    .list.compact .rating-btn,
+    .list.compact .status-btn,
+    .list.compact .note-btn,
+    .list.compact .date-btn,
+    .list.compact .pin-btn,
+    .list.compact .dup-btn { display: none; }
+
+    /* Filter row (collapsible) */
+    .filter-row {
+      display: flex; gap: 6px; flex-wrap: wrap;
+      padding: 6px 0; margin-bottom: 6px;
+    }
     .cdate { font-size: 11px; color: var(--blue); margin-top: 2px; display: none; }
     .cdate.visible { display: block; }
     .cdate.overdue { color: #D87878; }
@@ -1082,15 +1096,17 @@
 
     /* === UNDO TOAST === */
     .undo-toast {
-      position: fixed; bottom: 80px; left: 50%;
-      transform: translateX(-50%) translateY(60px);
+      position: fixed; bottom: 76px; left: 50%;
+      transform: translateX(-50%) translateY(4px);
       z-index: 600; background: var(--s2); border: 1px solid var(--b2);
       border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,.5);
       padding: 10px 16px; display: flex; align-items: center; gap: 12px;
-      font-size: 13px; color: var(--txt); transition: transform .22s cubic-bezier(.34,1.56,.64,1);
+      font-size: 13px; color: var(--txt);
+      transition: opacity .2s, transform .2s;
       white-space: nowrap;
+      opacity: 0; pointer-events: none;
     }
-    .undo-toast.show { transform: translateX(-50%) translateY(0); }
+    .undo-toast.show { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
     .undo-btn {
       background: var(--acc); border: none; border-radius: 6px;
       color: #fff; cursor: pointer; font-size: 12px; font-weight: 600;
@@ -1366,55 +1382,60 @@
         <button class="sbox-clear" id="search-clear">✕</button>
       </div>
       <div class="tbtn-group">
-        <button class="tbtn tbtn-def" id="btn-fav" title="Show starred only">⭐</button>
-        <button class="tbtn tbtn-def" id="btn-done" title="Show done only">✓</button>
-        <button class="tbtn tbtn-def" id="btn-pri" title="Show priority only">🔴</button>
-        <button class="tbtn tbtn-def" id="btn-hide-done" title="Hide done">🚫</button>
-        <button class="tbtn tbtn-def" id="btn-unstarred" title="Unstarred only">☆</button>
-      </div>
-      <div class="tbtn-group">
-        <button class="tbtn tbtn-def" id="btn-date-today" title="Film today">📆</button>
-        <button class="tbtn tbtn-def" id="btn-date-week" title="This week">7d</button>
-        <button class="tbtn tbtn-def" id="btn-date-month" title="This month">Mo</button>
+        <button class="tbtn tbtn-def" id="btn-fav" title="Starred only">★</button>
+        <button class="tbtn tbtn-def" id="btn-done" title="Done only">✓</button>
+        <button class="tbtn tbtn-def" id="btn-pri" title="Priority only">◈</button>
       </div>
       <button class="tbtn tbtn-acc" id="btn-rand" title="Random pick (R)">🎲</button>
-      <button class="tbtn tbtn-def" id="btn-inspire" title="Inspire mode (I)">✦</button>
-      <button class="tbtn tbtn-def" id="btn-copy" title="Copy visible ideas">📋</button>
+      <button class="tbtn tbtn-def" id="btn-filter-row" title="More filters">⊞</button>
+    </div>
+    <!-- Collapsible filter row -->
+    <div class="filter-row" id="filter-row" style="display:none">
+      <div class="tbtn-group">
+        <button class="tbtn tbtn-def" id="btn-hide-done" title="Hide done" style="font-size:12px">Hide Done</button>
+        <button class="tbtn tbtn-def" id="btn-unstarred" title="Unstarred only" style="font-size:12px">Unstarred</button>
+      </div>
+      <div class="tbtn-group">
+        <button class="tbtn tbtn-def" id="btn-date-today" title="Scheduled today" style="font-size:12px">Today</button>
+        <button class="tbtn tbtn-def" id="btn-date-week" title="This week" style="font-size:12px">Week</button>
+        <button class="tbtn tbtn-def" id="btn-date-month" title="This month" style="font-size:12px">Month</button>
+      </div>
+      <button class="tbtn tbtn-def" id="btn-inspire" title="Inspire mode (I)" style="font-size:12px">✦ Inspire</button>
+      <button class="tbtn tbtn-def" id="btn-copy" title="Copy visible" style="font-size:12px">📋 Copy</button>
     </div>
     <div class="chips-outer">
       <div class="chips" id="chips">
         <button class="chip on" data-f="all">All</button>
-        <button class="chip" data-f="gaming">🕹 Gaming</button>
-        <button class="chip" data-f="gear">🎮 Gear</button>
-        <button class="chip" data-f="series">📺 Series</button>
-        <button class="chip" data-f="education">📚 Education</button>
-        <button class="chip" data-f="story">📖 Story</button>
-        <button class="chip" data-f="lifestyle">🎒 Lifestyle</button>
-        <button class="chip" data-f="review">⭐ Review</button>
-        <button class="chip" data-f="tutorial">🛠 Tutorial</button>
-        <button class="chip" data-f="comedy">😂 Comedy</button>
-        <button class="chip" data-f="challenge">💥 Challenge</button>
-        <button class="chip" data-f="collab">🤝 Collab</button>
-        <button class="chip" data-f="reaction">😲 Reaction</button>
-        <button class="chip" data-f="trend">🔥 Trend</button>
+        <button class="chip" data-f="gaming">Gaming</button>
+        <button class="chip" data-f="gear">Gear</button>
+        <button class="chip" data-f="series">Series</button>
+        <button class="chip" data-f="education">Education</button>
+        <button class="chip" data-f="story">Story</button>
+        <button class="chip" data-f="lifestyle">Lifestyle</button>
+        <button class="chip" data-f="review">Review</button>
+        <button class="chip" data-f="tutorial">Tutorial</button>
+        <button class="chip" data-f="comedy">Comedy</button>
+        <button class="chip" data-f="challenge">Challenge</button>
+        <button class="chip" data-f="collab">Collab</button>
+        <button class="chip" data-f="reaction">Reaction</button>
+        <button class="chip" data-f="trend">Trend</button>
       </div>
     </div>
   </div>
 
   <!-- Status bar -->
   <div class="statusbar">
-    <div>Showing <span class="vis-num" id="vis-n">—</span></div>
+    <div style="flex-shrink:0">Showing <span class="vis-num" id="vis-n">—</span></div>
     <div class="right-ctrls">
-      <button class="dash-toggle" id="dash-toggle">📊 Stats</button>
-      <button class="dash-toggle" id="btn-charts">📈 Charts</button>
-      <button class="dash-toggle" id="btn-cal">📅 Cal</button>
-      <button class="dash-toggle" id="btn-ach">🏆</button>
-      <button class="dash-toggle" id="btn-sfilters">🔖</button>
-      <button class="sbtn" id="btn-week-strip">7d</button>
-      <button class="sbtn" id="btn-focus">⊞ Focus</button>
-      <button class="sbtn" id="btn-select-mode">☐ Select</button>
+      <button class="dash-toggle" id="dash-toggle">Stats</button>
+      <button class="dash-toggle" id="btn-charts">Charts</button>
+      <button class="dash-toggle" id="btn-cal">Cal</button>
+      <button class="dash-toggle" id="btn-ach">Badges</button>
+      <button class="dash-toggle" id="btn-sfilters">Filters</button>
+      <button class="sbtn" id="btn-week-strip">7d Strip</button>
+      <button class="sbtn" id="btn-select-mode">Select</button>
       <div class="ctrl-group">
-        <button class="sbtn" data-v="normal" id="vn">Normal</button>
+        <button class="sbtn" data-v="normal" id="vn">Full</button>
         <button class="sbtn on" data-v="compact" id="vc">Compact</button>
       </div>
       <div class="ctrl-group">
@@ -1422,9 +1443,8 @@
         <button class="sbtn" data-s="az">A–Z</button>
         <button class="sbtn" data-s="fav">★</button>
         <button class="sbtn" data-s="undone">Todo</button>
-        <button class="sbtn" data-s="sched">📅</button>
-        <button class="sbtn" data-s="pri">🔴</button>
-        <button class="sbtn" data-s="pin">📌</button>
+        <button class="sbtn" data-s="sched">Date</button>
+        <button class="sbtn" data-s="pri">Priority</button>
       </div>
     </div>
   </div>
@@ -2975,6 +2995,14 @@
       t.textContent = msg; t.classList.add('show');
       clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 1800);
     }
+
+    // === FILTER ROW TOGGLE ===
+    document.getElementById('btn-filter-row')?.addEventListener('click', function() {
+      const row = document.getElementById('filter-row');
+      const open = row.style.display === 'flex';
+      row.style.display = open ? 'none' : 'flex';
+      this.classList.toggle('on', !open);
+    });
 
     // === NEW TOOLBAR BUTTONS ===
     document.getElementById('btn-hide-done').addEventListener('click', function() {

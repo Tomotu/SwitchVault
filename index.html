@@ -931,25 +931,31 @@
     @media (max-width: 640px) {
       /* Compact hero on mobile */
       .hero { padding: 16px 16px 14px; }
-      .hero-tag { font-size: 10px; padding: 3px 10px; margin-bottom: 10px; }
-      .hero h1 { font-size: 38px; margin-bottom: 2px; }
-      .hero-desc { font-size: 12px; margin: 8px auto 12px; }
-      .hstats { gap: 6px; margin-bottom: 12px; }
-      .hst { min-width: 44px; padding: 7px 8px; }
-      .hst-n { font-size: 20px; }
-      .hst-l { font-size: 9px; }
-      .best-cat, .days-since { display: none; }
-      .streak-badge { font-size: 11px; padding: 3px 10px; margin-bottom: 10px; }
+      .hero-tag { font-size: 10px; padding: 3px 10px; margin-bottom: 8px; }
+      .hero h1 { font-size: 36px; margin-bottom: 2px; }
+      .hero-desc { font-size: 12px; margin: 6px auto 10px; }
+      .hstats { gap: 5px; margin-bottom: 10px; }
+      /* Limit to 4 stats on mobile so they fit in one row */
+      .hst { min-width: 0; flex: 1; padding: 7px 6px; }
+      .hst-n { font-size: 18px; }
+      .hst-l { font-size: 8px; }
+      /* Hide less critical stats on mobile to avoid overflow */
+      .best-cat, .days-since, #hc-pri, #hc-sched { display: none; }
+      .hst:has(#hc-pri), .hst:has(#hc-sched) { display: none; }
+      .streak-badge { font-size: 11px; padding: 3px 10px; margin-bottom: 8px; }
       .prog-wrap { margin-bottom: 0; }
       /* Hide Idea of the Day and goal widget on mobile — they take too much vertical space */
       .iotd-card, .goal-widget { display: none; }
+
+      /* Hide the fixed top-right buttons on mobile (accessible via bottom nav) */
+      #sync-indicator, #sync-settings-btn, #theme-toggle { display: none !important; }
 
       /* Toolbar: single tight row */
       .toolbar { padding: 8px 12px; }
       .row1 { margin-bottom: 8px; gap: 6px; }
       .row1 .tbtn-group { display: none; }
       .app-logo { display: none; }
-      #btn-rand { padding: 7px 9px; font-size: 14px; min-width: 34px; }
+      #btn-rand { padding: 7px 9px; font-size: 14px; min-width: 36px; }
       #btn-filter-row { font-size: 11px; padding: 7px 9px; }
       #search { font-size: 13px; padding: 7px 28px 7px 32px; }
 
@@ -962,9 +968,9 @@
       .right-ctrls { display: none; }
       .mobile-ctrls { display: flex; }
 
-      /* Cards */
-      .card-acts { gap: 1px; }
-      .cact { padding: 3px 4px; font-size: 12px; }
+      /* Cards — slightly larger touch targets on action buttons */
+      .card-acts { gap: 2px; }
+      .cact { padding: 5px 5px; font-size: 13px; min-width: 34px; min-height: 34px; }
     }
 
     /* === LIGHT MODE === */
@@ -2001,7 +2007,7 @@
     <button class="bnav-btn active" id="bnav-home" data-bnav="home"><span>💡</span><span>Ideas</span></button>
     <a class="bnav-btn" id="bnav-pipe" href="pipeline.html"><span>🎬</span><span>Pipeline</span></a>
     <button class="bnav-btn" id="bnav-rand" data-bnav="rand"><span>🎲</span><span>Random</span></button>
-    <button class="bnav-btn" id="bnav-charts" data-bnav="charts"><span>📊</span><span>Stats</span></button>
+    <a class="bnav-btn" id="bnav-charts" href="stats.html"><span>📊</span><span>Stats</span></a>
     <button class="bnav-btn" id="bnav-sync" data-bnav="sync"><span id="bnav-sync-ico">☁</span><span>Sync</span></button>
   </nav>
 

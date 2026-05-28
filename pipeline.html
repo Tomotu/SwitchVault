@@ -236,12 +236,39 @@
     }
     html.light body::before { opacity: .02; }
 
+    /* Progress bar */
+    .pipe-progress {
+      background: var(--s1); border-bottom: 1px solid var(--b0);
+      padding: 8px clamp(12px,3vw,24px);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .pipe-prog-track {
+      flex: 1; height: 6px; background: var(--b1); border-radius: 3px; overflow: hidden;
+    }
+    .pipe-prog-fill {
+      height: 100%; border-radius: 3px;
+      background: linear-gradient(90deg, var(--teal), var(--blue));
+      transition: width .4s ease;
+    }
+    .pipe-prog-label { font-size: 11px; color: var(--txt2); white-space: nowrap; }
+    .pipe-prog-label b { color: var(--txt); }
+
     /* ── MOBILE ── */
     @media (max-width: 640px) {
       .pipe-toolbar-top { padding: 10px 12px 6px; }
-      .pipe-heading { font-size: 18px; }
+      /* Stack title row vertically on mobile: logo + heading on one line, pills below */
+      .pipe-title-row { flex-wrap: wrap; gap: 6px; }
+      .pipe-heading { font-size: 17px; flex: 1; }
+      .app-logo { display: none; }
+      .pipe-stage-pills { width: 100%; display: flex; gap: 5px; }
+      .pipe-pill { font-size: 9px; padding: 3px 7px; }
       .pipe-body { padding: 12px 12px 24px; }
       .sbox input { font-size: 13px; padding: 7px 28px 7px 32px; }
+      /* Larger touch targets on action buttons */
+      .pipe-btn { padding: 9px 14px; font-size: 12px; min-height: 38px; }
+      /* Cards: slightly more compact */
+      .pipe-card-main { padding: 12px 14px; }
+      .pipe-card-title { font-size: 13px; }
     }
 
     /* Desktop — wider content area */
@@ -298,6 +325,14 @@
     </div>
   </div>
 
+  <!-- Progress bar -->
+  <div class="pipe-progress" id="pipe-progress" style="display:none">
+    <div class="pipe-prog-track">
+      <div class="pipe-prog-fill" id="pipe-prog-fill" style="width:0%"></div>
+    </div>
+    <div class="pipe-prog-label"><b id="pipe-prog-done">0</b> of <b id="pipe-prog-total">0</b> done</div>
+  </div>
+
   <!-- Pipeline content -->
   <div id="pipe-body" class="pipe-body"></div>
 
@@ -308,9 +343,9 @@
   <nav class="bottom-nav">
     <a class="bnav-btn" href="index.html"><span>💡</span><span>Ideas</span></a>
     <a class="bnav-btn active" href="pipeline.html"><span>🎬</span><span>Pipeline</span></a>
-    <a class="bnav-btn" href="index.html"><span>🎲</span><span>Random</span></a>
-    <a class="bnav-btn" href="index.html"><span>📊</span><span>Stats</span></a>
-    <a class="bnav-btn" href="index.html"><span>☁</span><span>Sync</span></a>
+    <a class="bnav-btn" href="index.html#rand"><span>🎲</span><span>Random</span></a>
+    <a class="bnav-btn" href="stats.html"><span>📊</span><span>Stats</span></a>
+    <a class="bnav-btn" href="index.html#sync"><span>☁</span><span>Sync</span></a>
   </nav>
 
   <script src="data.js"></script>

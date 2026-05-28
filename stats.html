@@ -215,6 +215,34 @@
       --txt:#2A2520; --txt2:#706860; --mut:#A09080; --mut2:#D4CEC4; --hi:#3A3028;
     }
     html.light body::before { opacity: .02; }
+
+    /* ── THEME TOGGLE ── */
+    .stats-theme-toggle {
+      background: none; border: 1px solid var(--b2); border-radius: 6px;
+      color: var(--txt2); cursor: pointer; font-size: 14px; padding: 4px 8px;
+      transition: all .15s; flex-shrink: 0;
+    }
+    .stats-theme-toggle:hover { background: var(--s3); color: var(--txt); }
+
+    /* ── CARD HOVER ── */
+    .hstat { transition: background .15s, border-color .15s, transform .12s; }
+    .hstat:hover { transform: translateY(-1px); }
+
+    /* ── FADE IN ── */
+    @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+    body > *:not(.bottom-nav) { animation: fadeIn .25s ease both; }
+    .hero-stats { animation-delay: .05s; }
+    .overall-progress { animation-delay: .08s; }
+    .streak-banner { animation-delay: .1s; }
+    .section { animation-delay: .12s; }
+
+    /* ── TOP CATEGORIES ── */
+    .top-cats-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .top-cat-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      border-radius: 20px; padding: 5px 12px;
+      font-size: 12px; font-weight: 600; border: 1px solid;
+    }
   </style>
 </head>
 <body>
@@ -233,6 +261,7 @@
       </svg>
     </div>
     <h2 class="stats-heading">Analytics</h2>
+    <button class="stats-theme-toggle" id="stats-theme-toggle" title="Toggle light/dark">🌙</button>
   </div>
 
   <!-- Hero stat cards -->
@@ -243,11 +272,11 @@
     </div>
     <div class="hstat">
       <div class="hstat-n green" id="hs-done">0</div>
-      <div class="hstat-l">Done</div>
+      <div class="hstat-l">Filmed</div>
     </div>
     <div class="hstat">
-      <div class="hstat-n gold" id="hs-fav">0</div>
-      <div class="hstat-l">Approved</div>
+      <div class="hstat-n gold" id="hs-prod">0</div>
+      <div class="hstat-l">Filming</div>
     </div>
     <div class="hstat">
       <div class="hstat-n red" id="hs-pri">0</div>
@@ -351,6 +380,7 @@
       favs:'sv_favs', done:'sv_done', notes:'sv_notes', pris:'sv_pris',
       scheds:'sv_scheds', streak:'sv_streak', custom:'sv_custom',
       streakhist:'sv_streakhist', achiev:'sv_achievements', light:'sv_light',
+      producing:'sv_producing', rejected:'sv_rejected',
     };
 
     const TC = {

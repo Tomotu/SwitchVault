@@ -261,6 +261,27 @@
     .pipe-prog-label { font-size: 11px; color: var(--txt2); white-space: nowrap; }
     .pipe-prog-label b { color: var(--txt); }
 
+    /* ── THEME TOGGLE ── */
+    .pipe-theme-toggle {
+      background: none; border: 1px solid var(--b2); border-radius: 6px;
+      color: var(--txt2); cursor: pointer; font-size: 14px; padding: 4px 8px;
+      transition: all .15s; margin-left: auto; flex-shrink: 0;
+    }
+    .pipe-theme-toggle:hover { background: var(--s3); color: var(--txt); }
+
+    /* ── SWIPE HINT ── */
+    .pipe-hint { font-size: 10px; color: var(--mut); padding: 0 0 4px; text-align: center; }
+
+    /* ── CARD HOVER ── */
+    .pipe-card {
+      transition: background .15s, border-color .15s, transform .12s;
+    }
+    .pipe-card:hover { transform: translateY(-1px); }
+
+    /* ── FADE IN ── */
+    @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+    body > *:not(.bottom-nav) { animation: fadeIn .25s ease both; }
+
     /* ── MOBILE ── */
     @media (max-width: 640px) {
       .pipe-toolbar-top { padding: 10px 12px 6px; }
@@ -308,7 +329,9 @@
           <span class="pipe-pill prod"><b id="cnt-prod">0</b> Filming</span>
           <span class="pipe-pill pdone"><b id="cnt-done">0</b> Done</span>
         </div>
+        <button class="pipe-theme-toggle" id="pipe-theme-toggle" title="Toggle light/dark">🌙</button>
       </div>
+      <div class="pipe-hint">Tap cards to manage • Search to filter</div>
       <div class="sbox">
         <span class="sbox-ico">⌕</span>
         <input id="pipe-search" type="text" placeholder="Search your pipeline…" autocomplete="off" spellcheck="false"/>
@@ -453,10 +476,12 @@
       }).join('');
       const noteHtml  = notes[i]     ? `<div class="pipe-card-note">${notes[i]}</div>` : '';
       const durHtml   = durations[i] ? `<span class="pipe-dur-badge ${durations[i]}">${DUR_LABELS[durations[i]]||durations[i]}</span>` : '';
-      const schedHtml = scheds[i]    ? `<span class="pipe-sched-badge">📅 ${scheds[i]}</span>` : '';
+      const schedFormatted = scheds[i] ? (() => { try { return new Date(scheds[i]).toLocaleDateString('en-US',{month:'short',day:'numeric'}); } catch(e) { return scheds[i]; } })() : '';
+      const schedHtml = scheds[i]    ? `<span class="pipe-sched-badge">Sched: ${schedFormatted}</span>` : '';
       const metaHtml  = (durHtml||schedHtml) ? `<div class="pipe-card-meta">${durHtml}${schedHtml}</div>` : '';
       const priLabel  = pris[i] === 'h' ? '🔴' : pris[i] === 'm' ? '🟡' : '';
-      const titleHtml = `${priLabel ? `<span style="margin-right:5px">${priLabel}</span>` : ''}${idea.t}`;
+      const priStar   = pris[i] ? ' <span style="font-size:11px" title="Priority">⭐</span>' : '';
+      const titleHtml = `${priLabel ? `<span style="margin-right:5px">${priLabel}</span>` : ''}${idea.t}${priStar}`;
 
       let actions = '';
       if (stage === 'ready') {
@@ -610,6 +635,18 @@
       document.querySelectorAll('[data-pc]').forEach(b => b.classList.toggle('on', b.dataset.pc === pipeCat));
       render();
     });
+
+    // ── Theme toggle ──
+    (function() {
+      const btn = document.getElementById('pipe-theme-toggle');
+      const lightOn = lsGet(KEYS.light) === '1';
+      btn.textContent = lightOn ? '☀' : '🌙';
+      btn.addEventListener('click', function() {
+        const on = document.documentElement.classList.toggle('light');
+        this.textContent = on ? '☀' : '🌙';
+        lsSet(KEYS.light, on ? '1' : '0');
+      });
+    })();
 
     // ── Boot ──
     loadState();

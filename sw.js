@@ -1,4 +1,4 @@
-const CACHE = 'contentvault-v1';
+const CACHE = 'contentvault-v2';
 const ASSETS = [
   '/SwitchVault/',
   '/SwitchVault/index.html',
@@ -20,15 +20,16 @@ self.addEventListener('activate', e => {
   );
 });
 
+// Network-first: always fetch fresh, fall back to cache when offline
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   e.respondWith(
-    caches.match(e.request).then(cached => {
-      const network = fetch(e.request).then(res => {
-        if (res.ok) caches.open(CACHE).then(c => c.put(e.request, res.clone()));
-        return res;
-      });
-      return cached || network;
-    })
+    fetch(e.request).then(res => {
+      if (res.ok) {
+        const clone = res.clone();
+        caches.open(CACHE).then(c => c.put(e.request, clone));
+      }
+      return res;
+    }).catch(() => caches.match(e.request))
   );
 });

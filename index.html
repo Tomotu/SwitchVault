@@ -1936,6 +1936,7 @@
     <button class="bnav-btn" id="bnav-rand" data-bnav="rand"><span>🎲</span><span>Random</span></button>
     <button class="bnav-btn" id="bnav-charts" data-bnav="charts"><span>📊</span><span>Stats</span></button>
     <button class="bnav-btn" id="bnav-ach" data-bnav="ach"><span>🏆</span><span>Badges</span></button>
+    <button class="bnav-btn" id="bnav-sync" data-bnav="sync"><span id="bnav-sync-ico">☁</span><span>Sync</span></button>
   </nav>
 
   <!-- Approved Ideas Overlay -->
@@ -3856,6 +3857,15 @@
     document.getElementById('bnav-rand')?.addEventListener('click', pickRand);
     document.getElementById('bnav-charts')?.addEventListener('click', () => { renderCharts(); document.getElementById('charts-overlay').classList.add('open'); });
     document.getElementById('bnav-ach')?.addEventListener('click', () => { renderBadgeGrid(); document.getElementById('ach-overlay').classList.add('open'); });
+    document.getElementById('bnav-sync')?.addEventListener('click', () => {
+      const creds = getSyncCredentials();
+      document.getElementById('sync-url-input').value = creds.url;
+      document.getElementById('sync-key-input').value = creds.key;
+      document.getElementById('sync-phrase-input').value = creds.phrase;
+      document.getElementById('sync-disconnect-btn').style.display = syncConfigured ? '' : 'none';
+      document.getElementById('sync-status-msg').textContent = syncConfigured ? '✓ Connected' : '';
+      document.getElementById('sync-overlay').classList.add('open');
+    });
 
     // === APPROVED OVERLAY ===
     // Close button
@@ -4197,12 +4207,18 @@
     function updateSyncIndicator(status) {
       // status: 'off' | 'syncing' | 'ok' | 'error'
       const btn = document.getElementById('sync-indicator');
-      if (!btn) return;
-      btn.style.display = syncConfigured ? '' : 'none';
       const icons = { off: '☁', syncing: '↻', ok: '✓', error: '✕' };
       const colors = { off: 'var(--txt2)', syncing: 'var(--gold)', ok: 'var(--teal)', error: 'var(--acc)' };
-      btn.textContent = icons[status] || '☁';
-      btn.style.color = colors[status] || 'var(--txt2)';
+      if (btn) {
+        btn.style.display = syncConfigured ? '' : 'none';
+        btn.textContent = icons[status] || '☁';
+        btn.style.color = colors[status] || 'var(--txt2)';
+      }
+      const navIco = document.getElementById('bnav-sync-ico');
+      if (navIco) {
+        navIco.textContent = icons[status] || '☁';
+        navIco.style.color = syncConfigured ? (colors[status] || 'var(--txt2)') : '';
+      }
     }
 
     function getAllDataForSync() {

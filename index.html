@@ -4,14 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ContentVault — Nintendo Switch TikTok</title>
-  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="preload" href="data.js" as="script">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='32' fill='%23111110'/%3E%3Crect x='10' y='46' width='42' height='100' rx='21' fill='%23A0453F'/%3E%3Ccircle cx='31' cy='68' r='10' fill='rgba(0,0,0,.3)'/%3E%3Crect x='50' y='20' width='92' height='152' rx='10' fill='%23282523'/%3E%3Crect x='60' y='32' width='72' height='128' rx='6' fill='%23141412'/%3E%3Cpolygon points='80,84 112,96 80,108' fill='%236A8A58' opacity='.9'/%3E%3Crect x='140' y='46' width='42' height='100' rx='21' fill='%236A8A58'/%3E%3Ccircle cx='161' cy='124' r='10' fill='rgba(0,0,0,.3)'/%3E%3C/svg%3E">
   <meta name="theme-color" content="#111110">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="ContentVault">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <!-- Supabase loaded on-demand when sync panel is opened -->
   <style>
     :root {
       --bg:    #111110;
@@ -205,10 +208,10 @@
       border-radius: 3px;
       background: linear-gradient(90deg, var(--teal), var(--blue), var(--gold));
       background-size: 200% 100%;
-      animation: shimmer 3s linear infinite;
       transition: width .5s cubic-bezier(.4,0,.2,1);
     }
     @keyframes shimmer { 0% { background-position: 200% 0 } 100% { background-position: -200% 0 } }
+    .prog-fill.shimmering { animation: shimmer 3s linear infinite; }
 
     /* === DASHBOARD === */
     .dashboard {
@@ -1188,24 +1191,99 @@
     .cal-item:hover { background: var(--s3); }
     .cal-item-date { font-size: 10px; color: var(--txt2); margin-bottom: 3px; }
 
-    /* === APPROVED PAGE === */
-    .approved-body { padding: 16px clamp(12px,3vw,24px); overflow-y: auto; max-height: calc(90vh - 60px); }
-    .appr-section { margin-bottom: 24px; }
-    .appr-section-hdr { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--txt2); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--b1); display: flex; align-items: center; gap: 8px; }
-    .appr-section-hdr span { background: var(--b1); border-radius: 10px; padding: 1px 7px; font-size: 10px; }
-    .appr-card { background: var(--s2); border: 1px solid var(--b1); border-radius: var(--r); padding: 12px 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; transition: background .12s; }
-    .appr-card:hover { background: var(--s3); }
-    .appr-card-edge { width: 3px; height: 36px; border-radius: 2px; flex-shrink: 0; }
-    .appr-card-body { flex: 1; min-width: 0; }
-    .appr-card-title { font-size: 13px; font-weight: 500; color: var(--txt); margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .appr-card-tags { font-size: 11px; color: var(--txt2); }
-    .appr-card-actions { display: flex; gap: 6px; flex-shrink: 0; }
-    .appr-btn { background: var(--s1); border: 1px solid var(--b2); border-radius: 6px; color: var(--txt2); cursor: pointer; font-size: 11px; padding: 5px 10px; white-space: nowrap; transition: all .15s; font-weight: 500; }
-    .appr-btn:hover { background: var(--s3); color: var(--txt); }
-    .appr-btn.green { background: rgba(106,138,88,.12); border-color: rgba(106,138,88,.3); color: var(--teal); }
-    .appr-btn.green:hover { background: rgba(106,138,88,.2); }
-    .appr-btn.red { background: rgba(160,69,63,.1); border-color: rgba(160,69,63,.3); color: var(--acc); }
-    .appr-empty { text-align: center; color: var(--txt2); font-size: 13px; padding: 40px 16px; }
+    /* === PIPELINE PAGE === */
+    #pg-pipeline { min-height: 100vh; background: var(--bg); }
+    .pipe-toolbar {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--s1); border-bottom: 1px solid var(--b1);
+    }
+    .pipe-toolbar-top {
+      padding: 12px clamp(12px,3vw,24px) 8px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .pipe-title-row { display: flex; align-items: center; gap: 10px; }
+    .pipe-heading {
+      font-family: 'Anton', sans-serif; font-size: 22px; font-weight: 400;
+      color: var(--txt); letter-spacing: .02em; flex: 1;
+    }
+    .pipe-stage-pills { display: flex; gap: 5px; flex-wrap: wrap; }
+    .pipe-pill {
+      font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+      border-radius: 20px; padding: 3px 9px; border: 1px solid; white-space: nowrap;
+    }
+    .pipe-pill.ready  { color: var(--gold); background: rgba(200,168,112,.08); border-color: rgba(200,168,112,.25); }
+    .pipe-pill.prod   { color: var(--teal); background: rgba(106,138,88,.08);  border-color: rgba(106,138,88,.25); }
+    .pipe-pill.pdone  { color: var(--txt2); background: rgba(96,88,80,.1);      border-color: rgba(96,88,80,.25); }
+    .pipe-sbox { width: 100%; }
+    .pipe-cats-row {
+      padding: 6px clamp(12px,3vw,24px) 10px; display: flex; gap: 6px;
+      overflow-x: auto; scrollbar-width: none;
+    }
+    .pipe-cats-row::-webkit-scrollbar { display: none; }
+    .pipe-body {
+      padding: 16px clamp(12px,3vw,24px) 80px;
+      max-width: 720px;
+    }
+    .pipe-stage { margin-bottom: 32px; }
+    .pipe-stage-hdr {
+      font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+      margin-bottom: 12px; padding: 0 0 8px; border-bottom: 2px solid;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .pipe-stage-hdr.ready { color: var(--gold); border-color: rgba(200,168,112,.3); }
+    .pipe-stage-hdr.prod  { color: var(--teal); border-color: rgba(106,138,88,.3); }
+    .pipe-stage-hdr.pdone { color: var(--txt2); border-color: rgba(96,88,80,.2); }
+    .pipe-stage-count {
+      background: var(--b1); border-radius: 10px; padding: 1px 7px;
+      font-size: 10px; color: var(--txt2); font-weight: 700;
+    }
+    .pipe-card {
+      background: var(--s2); border: 1px solid var(--b1); border-radius: 10px;
+      margin-bottom: 10px; display: flex; overflow: hidden; transition: background .12s;
+    }
+    .pipe-card:hover { background: var(--s3); }
+    .pipe-card-edge { width: 4px; flex-shrink: 0; }
+    .pipe-card-main { flex: 1; padding: 14px 16px; min-width: 0; }
+    .pipe-card-title {
+      font-size: 14px; font-weight: 600; color: var(--txt);
+      margin-bottom: 7px; line-height: 1.35;
+    }
+    .pipe-card-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 9px; }
+    .pipe-card-note {
+      font-size: 11px; color: var(--txt2); margin-bottom: 9px; font-style: italic;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .pipe-card-meta { display: flex; gap: 6px; align-items: center; margin-bottom: 9px; flex-wrap: wrap; }
+    .pipe-dur-badge {
+      font-size: 9px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+      border-radius: 4px; padding: 2px 6px; border: 1px solid;
+    }
+    .pipe-dur-badge.quick  { color: var(--teal); background: rgba(106,138,88,.1); border-color: rgba(106,138,88,.25); }
+    .pipe-dur-badge.medium { color: var(--gold); background: rgba(200,168,112,.1); border-color: rgba(200,168,112,.25); }
+    .pipe-dur-badge.full   { color: var(--acc);  background: rgba(160,69,63,.08); border-color: rgba(160,69,63,.2); }
+    .pipe-card-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+    .pipe-btn {
+      background: var(--s1); border: 1px solid var(--b2); border-radius: 6px;
+      color: var(--txt2); cursor: pointer; font-size: 11px; font-weight: 600;
+      padding: 6px 13px; white-space: nowrap; transition: all .15s; letter-spacing: .02em;
+    }
+    .pipe-btn:hover { background: var(--s3); color: var(--txt); }
+    .pipe-btn.primary { background: rgba(106,138,88,.12); border-color: rgba(106,138,88,.3); color: var(--teal); }
+    .pipe-btn.primary:hover { background: rgba(106,138,88,.22); }
+    .pipe-btn.danger  { background: rgba(160,69,63,.08); border-color: rgba(160,69,63,.25); color: var(--acc); }
+    .pipe-btn.danger:hover { background: rgba(160,69,63,.15); }
+    .pipe-card.is-pdone { opacity: .55; }
+    .pipe-card.is-pdone .pipe-card-title { text-decoration: line-through; color: var(--txt2); }
+    .pipe-empty {
+      text-align: center; color: var(--txt2); font-size: 13px; padding: 64px 24px; line-height: 1.9;
+    }
+    .pipe-empty-ico { font-size: 36px; margin-bottom: 16px; }
+    .pipe-empty-title { font-size: 16px; font-weight: 600; color: var(--txt); margin-bottom: 8px; }
+    .pipe-sched-badge {
+      font-size: 9px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+      color: var(--txt2); background: var(--s1); border: 1px solid var(--b2);
+      border-radius: 4px; padding: 2px 6px;
+    }
     .prod-badge { display: inline-block; font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--teal); background: rgba(106,138,88,.12); border: 1px solid rgba(106,138,88,.25); border-radius: 4px; padding: 1px 5px; margin-left: 6px; vertical-align: middle; }
     .overlay-hdr { display: flex; align-items: center; justify-content: space-between; padding: 16px clamp(12px,3vw,24px) 0; }
     .overlay-title { font-family: 'Anton',sans-serif; font-size: 20px; font-weight: 400; color: var(--txt); }
@@ -1480,14 +1558,17 @@
   <button id="sync-settings-btn" title="Cloud sync settings" style="position:fixed;top:12px;right:52px;z-index:200;background:var(--s2);border:1px solid var(--b2);border-radius:8px;color:var(--txt2);cursor:pointer;font-size:13px;padding:5px 8px;transition:all .15s;">⚙</button>
   <button id="theme-toggle" title="Toggle light/dark" style="position:fixed;top:12px;right:12px;z-index:200;background:var(--s2);border:1px solid var(--b2);border-radius:8px;color:var(--txt2);cursor:pointer;font-size:15px;padding:5px 9px;transition:all .15s;">🌙</button>
 
+  <!-- IDEAS PAGE -->
+  <div id="pg-ideas">
+
   <!-- Hero -->
   <div class="hero">
     <div class="hero-tag">🎮 Nintendo Switch · TikTok Creator</div>
     <h1><span>Content</span>Vault</h1>
-    <p class="hero-desc">Your Nintendo Switch TikTok content command centre. Star, schedule, prioritise, and track every idea.</p>
+    <p class="hero-desc">Browse and approve ideas here. Move approved ideas through your production pipeline on the <strong style="color:var(--teal)">Pipeline</strong> page.</p>
     <div class="hstats">
       <div class="hst"><div class="hst-n" id="hc-total">—</div><div class="hst-l">Ideas</div></div>
-      <div class="hst"><div class="hst-n" id="hc-fav">0</div><div class="hst-l">Starred</div></div>
+      <div class="hst"><div class="hst-n" id="hc-fav">0</div><div class="hst-l">Approved</div></div>
       <div class="hst"><div class="hst-n" id="hc-done">0</div><div class="hst-l">Done</div></div>
       <div class="hst"><div class="hst-n" id="hc-pri">0</div><div class="hst-l">Priority</div></div>
       <div class="hst"><div class="hst-n" id="hc-sched">0</div><div class="hst-l">Scheduled</div></div>
@@ -1544,7 +1625,7 @@
         </div>
       </div>
       <div class="tbtn-group">
-        <button class="tbtn tbtn-def" id="btn-fav" title="Starred only" style="font-size:12px">Starred</button>
+        <button class="tbtn tbtn-def" id="btn-fav" title="Approved only" style="font-size:12px">Approved</button>
         <button class="tbtn tbtn-def" id="btn-done" title="Done only" style="font-size:12px">Done</button>
         <button class="tbtn tbtn-def" id="btn-pri" title="Priority only" style="font-size:12px">Priority</button>
       </div>
@@ -1590,6 +1671,7 @@
   <div class="statusbar">
     <div style="flex-shrink:0">Showing <span class="vis-num" id="vis-n">—</span></div>
     <div class="right-ctrls">
+      <button class="dash-toggle" id="btn-pipeline" style="color:var(--teal)">🎬 Pipeline</button>
       <button class="dash-toggle" id="dash-toggle">Stats</button>
       <button class="dash-toggle" id="btn-charts">Charts</button>
       <button class="dash-toggle" id="btn-cal">Cal</button>
@@ -1678,6 +1760,57 @@
       <button class="mbtn" id="export-canvas-btn" style="font-size:11px;padding:5px 10px">🖼 Content Plan Image</button>
     </div>
   </div>
+
+  </div><!-- end #pg-ideas -->
+
+  <!-- PIPELINE PAGE -->
+  <div id="pg-pipeline" style="display:none">
+    <div class="pipe-toolbar" id="pipe-toolbar">
+      <div class="pipe-toolbar-top">
+        <div class="pipe-title-row">
+          <div class="app-logo" title="Pipeline">
+            <svg viewBox="0 0 40 26" width="30" height="19" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="0" y="3" width="11" height="20" rx="5.5" fill="#A0453F"/>
+              <circle cx="5.5" cy="9" r="2" fill="rgba(0,0,0,.3)"/>
+              <rect x="10" y="0" width="20" height="26" rx="2" fill="#282523"/>
+              <rect x="12" y="3" width="16" height="20" rx="1.5" fill="#141412"/>
+              <polygon points="17.5,10.5 23.5,13 17.5,15.5" fill="#6A8A58" opacity=".9"/>
+              <rect x="29" y="3" width="11" height="20" rx="5.5" fill="#6A8A58"/>
+              <circle cx="34.5" cy="17" r="2" fill="rgba(0,0,0,.3)"/>
+            </svg>
+          </div>
+          <h2 class="pipe-heading">Pipeline</h2>
+          <div class="pipe-stage-pills">
+            <span class="pipe-pill ready"><b id="pipe-cnt-ready">0</b> Ready</span>
+            <span class="pipe-pill prod"><b id="pipe-cnt-prod">0</b> Filming</span>
+            <span class="pipe-pill pdone"><b id="pipe-cnt-done">0</b> Done</span>
+          </div>
+        </div>
+        <div class="sbox pipe-sbox">
+          <span class="sbox-ico">⌕</span>
+          <input id="pipe-search" type="text" placeholder="Search pipeline…" autocomplete="off" spellcheck="false"/>
+          <button class="sbox-clear" id="pipe-search-clear" style="display:none">✕</button>
+        </div>
+      </div>
+      <div class="pipe-cats-row" id="pipe-cats">
+        <button class="chip on" data-pc="all">All</button>
+        <button class="chip" data-pc="gaming">Gaming</button>
+        <button class="chip" data-pc="gear">Gear</button>
+        <button class="chip" data-pc="tutorial">Tutorial</button>
+        <button class="chip" data-pc="review">Review</button>
+        <button class="chip" data-pc="lifestyle">Lifestyle</button>
+        <button class="chip" data-pc="story">Story</button>
+        <button class="chip" data-pc="comedy">Comedy</button>
+        <button class="chip" data-pc="education">Education</button>
+        <button class="chip" data-pc="series">Series</button>
+        <button class="chip" data-pc="challenge">Challenge</button>
+        <button class="chip" data-pc="reaction">Reaction</button>
+        <button class="chip" data-pc="trend">Trend</button>
+        <button class="chip" data-pc="collab">Collab</button>
+      </div>
+    </div>
+    <div id="pipe-body" class="pipe-body"></div>
+  </div><!-- end #pg-pipeline -->
 
   <!-- Random modal -->
   <div class="overlay" id="overlay">
@@ -1931,23 +2064,20 @@
 
   <!-- Bottom navigation (mobile) -->
   <nav class="bottom-nav" id="bottom-nav">
-    <button class="bnav-btn active" id="bnav-home" data-bnav="home"><span>🏠</span><span>Home</span></button>
-    <button class="bnav-btn" id="bnav-star" data-bnav="star"><span>✓</span><span>Approved</span></button>
+    <button class="bnav-btn active" id="bnav-home" data-bnav="home"><span>💡</span><span>Ideas</span></button>
+    <button class="bnav-btn" id="bnav-pipe" data-bnav="pipe">
+      <svg viewBox="0 0 18 18" width="18" height="18" fill="none" style="display:block">
+        <rect x="1" y="4" width="6" height="10" rx="1.5" fill="currentColor" opacity=".5"/>
+        <rect x="8.5" y="1" width="6" height="16" rx="1.5" fill="currentColor" opacity=".8"/>
+        <rect x="16" y="6" width="1.5" height="6" rx=".75" fill="currentColor"/>
+      </svg>
+      <span>Pipeline</span>
+    </button>
     <button class="bnav-btn" id="bnav-rand" data-bnav="rand"><span>🎲</span><span>Random</span></button>
     <button class="bnav-btn" id="bnav-charts" data-bnav="charts"><span>📊</span><span>Stats</span></button>
-    <button class="bnav-btn" id="bnav-ach" data-bnav="ach"><span>🏆</span><span>Badges</span></button>
+    <button class="bnav-btn" id="bnav-sync" data-bnav="sync"><span id="bnav-sync-ico">☁</span><span>Sync</span></button>
   </nav>
 
-  <!-- Approved Ideas Overlay -->
-  <div class="overlay" id="approved-overlay">
-    <div class="overlay-inner">
-      <div class="overlay-hdr">
-        <span class="overlay-title">Approved Ideas</span>
-        <button class="overlay-close" id="approved-close">✕</button>
-      </div>
-      <div id="approved-body" class="approved-body"></div>
-    </div>
-  </div>
 
   <!-- DATA BLOCK -->
   <script src="data.js"></script>
@@ -2020,6 +2150,10 @@
     let durTarget = null;
     let activeCollection = '';
 
+    let currentPage = 'ideas';
+    let pipeQ = '';
+    let pipeCat = 'all';
+
     let filt = 'all';
     let q = '';
     let showFavsOnly = false;
@@ -2061,6 +2195,7 @@
 
     // === DOM BUILD LOOP ===
     const list = document.getElementById('list');
+    const _initFrag = document.createDocumentFragment();
     const cards = [];
 
     function edgeColor(tags) { return TC[tags[0]]?.color || '#444'; }
@@ -2106,33 +2241,34 @@
             <button class="cact dup-btn"    data-i="${i}" title="Duplicate">⧉</button>
           </div>
         </div>`;
-      list.appendChild(card);
+      _initFrag.appendChild(card);
       cards.push(card);
 
       const nr = document.createElement('div');
       nr.className = 'note-row';
       nr.dataset.for = i;
       nr.innerHTML = `<textarea class="note-input" placeholder="Add a note for this idea…"></textarea><button class="note-save" data-i="${i}">Save</button>`;
-      list.appendChild(nr);
+      _initFrag.appendChild(nr);
 
       const hr = document.createElement('div');
       hr.className = 'hook-row';
       hr.dataset.hfor = i;
       hr.innerHTML = `<div class="hook-label">🎣 Hook — first 3 seconds</div><textarea class="hook-input" placeholder="e.g. "You've been playing Switch wrong your whole life…""></textarea><button class="hook-save" data-i="${i}">Save</button>`;
-      list.appendChild(hr);
+      _initFrag.appendChild(hr);
 
       const tr = document.createElement('div');
       tr.className = 'thumb-row';
       tr.dataset.tfor = i;
       tr.innerHTML = `<div class="hook-label">🖼 Thumbnail concept</div><input class="thumb-input" type="text" placeholder="e.g. Shocked face, controller closeup, text: INSANE…" maxlength="200"><button class="thumb-save" data-i="${i}">Save</button><button class="thumb-clear" data-i="${i}">Clear</button>`;
-      list.appendChild(tr);
+      _initFrag.appendChild(tr);
 
       const dr = document.createElement('div');
       dr.className = 'date-row';
       dr.dataset.dfor = i;
       dr.innerHTML = `<input type="date" class="date-input" data-i="${i}"><button class="date-save" data-i="${i}">Set date</button><button class="date-clear" data-i="${i}">Clear</button>`;
-      list.appendChild(dr);
+      _initFrag.appendChild(dr);
     });
+    list.appendChild(_initFrag);
 
 
     // === UI APPLIERS ===
@@ -2280,17 +2416,16 @@
     // === COUNTS ===
     function updateCounts() {
       const total = cards.length;
-      document.getElementById('hc-total').textContent  = total.toLocaleString();
-      document.getElementById('hc-fav').textContent    = favs.size;
-      document.getElementById('hc-done').textContent   = done.size;
-      document.getElementById('hc-pri').textContent    = Object.keys(pris).length;
-      document.getElementById('hc-sched').textContent  = Object.keys(scheds).length;
-      document.getElementById('vis-n').textContent     = cards.filter(c => !c.classList.contains('hidden')).length.toLocaleString();
+      EL.hcTotal.textContent  = total.toLocaleString();
+      EL.hcFav.textContent    = favs.size;
+      EL.hcDone.textContent   = done.size;
+      EL.hcPri.textContent    = Object.keys(pris).length;
+      EL.hcSched.textContent  = Object.keys(scheds).length;
       const pct = total > 0 ? done.size / total * 100 : 0;
-      document.getElementById('prog-fill').style.width = pct + '%';
-      document.getElementById('prog-label').textContent = `${done.size.toLocaleString()} / ${total.toLocaleString()} done`;
-      const footerTot = document.getElementById('footer-total');
-      if (footerTot) footerTot.textContent = `${total.toLocaleString()} ideas · 14 categories · All data saved`;
+      EL.progFill.style.width = pct + '%';
+      EL.progFill.classList.toggle('shimmering', done.size > 0);
+      EL.progLabel.textContent = `${done.size.toLocaleString()} / ${total.toLocaleString()} done`;
+      if (EL.footerTot) EL.footerTot.textContent = `${total.toLocaleString()} ideas · 14 categories · All data saved`;
 
       // Best category
       let bestCat = '', bestPct = -1;
@@ -2301,20 +2436,15 @@
         const p = dc / tot;
         if (p > bestPct) { bestPct = p; bestCat = cat; }
       });
-      const bestEl = document.getElementById('hc-best');
-      if (bestEl) bestEl.textContent = bestCat ? TC[bestCat]?.l || bestCat : '—';
+      if (EL.hcBest) EL.hcBest.textContent = bestCat ? TC[bestCat]?.l || bestCat : '—';
 
       // Days since last post
-      const daysEl = document.getElementById('hc-days');
-      if (daysEl) {
+      if (EL.hcDays) {
         const daysSince = streakData.lastDate
           ? Math.floor((Date.now() - new Date(streakData.lastDate + 'T00:00:00')) / 86400000)
           : null;
-        daysEl.textContent = daysSince !== null ? daysSince : '—';
-        const hstDays = daysEl.closest('.hst');
-        if (hstDays) {
-          daysEl.className = 'hst-n' + (daysSince === null ? '' : daysSince <= 1 ? ' recent' : daysSince >= 7 ? ' stale' : '');
-        }
+        EL.hcDays.textContent = daysSince !== null ? daysSince : '—';
+        EL.hcDays.className = 'hst-n' + (daysSince === null ? '' : daysSince <= 1 ? ' recent' : daysSince >= 7 ? ' stale' : '');
       }
     }
 
@@ -2391,8 +2521,8 @@
           if (dr) list.appendChild(dr);
         }
       });
-      document.getElementById('vis-n').textContent = vis.toLocaleString();
-      document.getElementById('empty').classList.toggle('show', vis === 0);
+      EL.visN.textContent = vis.toLocaleString();
+      EL.empty.classList.toggle('show', vis === 0);
       updateCollectionIndicator();
 
       cards.forEach(c => c.classList.remove('spotlight'));
@@ -2646,42 +2776,109 @@
     }
 
     // === APPROVED PAGE ===
-    function renderApprovedPage() {
-      const body = document.getElementById('approved-body');
+    // === PIPELINE PAGE ===
+
+    function _pipeMatches(i, idea) {
+      if (pipeCat !== 'all' && !idea.tags.includes(pipeCat)) return false;
+      if (pipeQ) {
+        const sq = pipeQ.toLowerCase();
+        if (!idea.t.toLowerCase().includes(sq)) return false;
+      }
+      return true;
+    }
+
+    function _pipeCard(i, stage) {
+      const idea = getIdea(i); if (!idea) return '';
+      const edgeColor = stage === 'ready' ? 'var(--gold)' : stage === 'prod' ? 'var(--teal)' : 'var(--mut)';
+      const tagsHtml = idea.tags.map(t => {
+        const c = TC[t] || { cls: 'tgaming', l: t };
+        return `<span class="tag ${c.cls}">${c.l}</span>`;
+      }).join('');
+      const noteHtml = notes[i] ? `<div class="pipe-card-note">${notes[i]}</div>` : '';
+      const durHtml = durations[i] ? `<span class="pipe-dur-badge ${durations[i]}">${DUR_LABELS[durations[i]] || durations[i]}</span>` : '';
+      const schedHtml = scheds[i] ? `<span class="pipe-sched-badge">📅 ${scheds[i]}</span>` : '';
+      const metaHtml = (durHtml || schedHtml) ? `<div class="pipe-card-meta">${durHtml}${schedHtml}</div>` : '';
+      let actionsHtml = '';
+      if (stage === 'ready') {
+        actionsHtml = `<button class="pipe-btn primary" data-pipe-prod="${i}">▶ Start Filming</button><button class="pipe-btn danger" data-pipe-unappr="${i}">Remove</button>`;
+      } else if (stage === 'prod') {
+        actionsHtml = `<button class="pipe-btn primary" data-pipe-done="${i}">✓ Mark Done</button><button class="pipe-btn" data-pipe-unprod="${i}">← Back to Ready</button>`;
+      } else {
+        actionsHtml = `<button class="pipe-btn" data-pipe-undone="${i}">↩ Undo Done</button>`;
+      }
+      const doneClass = stage === 'done' ? ' is-pdone' : '';
+      return `<div class="pipe-card${doneClass}"><div class="pipe-card-edge" style="background:${edgeColor}"></div><div class="pipe-card-main"><div class="pipe-card-title">${idea.t}</div><div class="pipe-card-tags">${tagsHtml}</div>${noteHtml}${metaHtml}<div class="pipe-card-actions">${actionsHtml}</div></div></div>`;
+    }
+
+    function renderPipeline() {
+      const body = document.getElementById('pipe-body');
       if (!body) return;
-      const bank = [...favs].filter(i => !producing.has(i) && !done.has(i));
-      const inProd = [...producing].filter(i => !done.has(i));
-      const completed = [...favs].filter(i => done.has(i));
-      let html = '';
-      if (!favs.size) {
-        body.innerHTML = '<div class="appr-empty">No approved ideas yet.<br>Star ideas on the main page to approve them.</div>';
+
+      const allApproved = [...favs];
+      const bankAll  = allApproved.filter(i => !producing.has(i) && !done.has(i));
+      const prodAll  = [...producing].filter(i => !done.has(i));
+      const doneAll  = allApproved.filter(i => done.has(i));
+
+      // update pill counts (unfiltered)
+      const cntReady = document.getElementById('pipe-cnt-ready');
+      const cntProd  = document.getElementById('pipe-cnt-prod');
+      const cntDone  = document.getElementById('pipe-cnt-done');
+      if (cntReady) cntReady.textContent = bankAll.length;
+      if (cntProd)  cntProd.textContent  = prodAll.length;
+      if (cntDone)  cntDone.textContent  = doneAll.length;
+
+      if (!allApproved.length) {
+        body.innerHTML = `<div class="pipe-empty"><div class="pipe-empty-ico">💡</div><div class="pipe-empty-title">No ideas approved yet</div>Go to the <strong>Ideas</strong> page and tap the ★ on ideas you want to make into videos.</div>`;
         return;
       }
+
+      const bank  = bankAll.filter(i => { const idea = getIdea(i); return idea && _pipeMatches(i, idea); });
+      const inProd = prodAll.filter(i => { const idea = getIdea(i); return idea && _pipeMatches(i, idea); });
+      const completed = doneAll.filter(i => { const idea = getIdea(i); return idea && _pipeMatches(i, idea); });
+
+      let html = '';
+
       if (bank.length) {
-        html += `<div class="appr-section"><div class="appr-section-hdr" style="color:var(--gold)">Ready to Film <span>${bank.length}</span></div>`;
-        bank.forEach(i => {
-          const idea = getIdea(i); if (!idea) return;
-          html += `<div class="appr-card"><div class="appr-card-edge" style="background:var(--gold)"></div><div class="appr-card-body"><div class="appr-card-title">${idea.t}</div><div class="appr-card-tags">${idea.tags.map(t => '#'+t).join(' ')}</div></div><div class="appr-card-actions"><button class="appr-btn green" data-appr-prod="${i}">Select →</button><button class="appr-btn" data-appr-unappr="${i}">✕</button></div></div>`;
-        });
+        html += `<div class="pipe-stage"><div class="pipe-stage-hdr ready">Ready to Film <span class="pipe-stage-count">${bank.length}</span></div>`;
+        bank.forEach(i => { html += _pipeCard(i, 'ready'); });
         html += '</div>';
       }
+
       if (inProd.length) {
-        html += `<div class="appr-section"><div class="appr-section-hdr" style="color:var(--teal)">In Production <span>${inProd.length}</span></div>`;
-        inProd.forEach(i => {
-          const idea = getIdea(i); if (!idea) return;
-          html += `<div class="appr-card"><div class="appr-card-edge" style="background:var(--teal)"></div><div class="appr-card-body"><div class="appr-card-title">${idea.t}</div><div class="appr-card-tags">${idea.tags.map(t => '#'+t).join(' ')}</div></div><div class="appr-card-actions"><button class="appr-btn green" data-appr-done="${i}">✓ Done</button><button class="appr-btn" data-appr-unprod="${i}">← Back</button></div></div>`;
-        });
+        html += `<div class="pipe-stage"><div class="pipe-stage-hdr prod">In Production <span class="pipe-stage-count">${inProd.length}</span></div>`;
+        inProd.forEach(i => { html += _pipeCard(i, 'prod'); });
         html += '</div>';
       }
+
       if (completed.length) {
-        html += `<div class="appr-section"><div class="appr-section-hdr">Done <span>${completed.length}</span></div>`;
-        completed.forEach(i => {
-          const idea = getIdea(i); if (!idea) return;
-          html += `<div class="appr-card" style="opacity:.6"><div class="appr-card-edge" style="background:var(--mut)"></div><div class="appr-card-body"><div class="appr-card-title" style="text-decoration:line-through">${idea.t}</div></div></div>`;
-        });
+        html += `<div class="pipe-stage"><div class="pipe-stage-hdr pdone">Done <span class="pipe-stage-count">${completed.length}</span></div>`;
+        completed.forEach(i => { html += _pipeCard(i, 'done'); });
         html += '</div>';
       }
+
+      if (!bank.length && !inProd.length && !completed.length) {
+        html = `<div class="pipe-empty"><div class="pipe-empty-ico">🔍</div><div class="pipe-empty-title">No matches</div>Try a different search or category filter.</div>`;
+      }
+
       body.innerHTML = html;
+    }
+
+    // Keep old name as alias so any stray calls don't crash
+    function renderApprovedPage() { renderPipeline(); }
+
+    // === PAGE SWITCHING ===
+    function goPage(name) {
+      currentPage = name;
+      const pgIdeas = document.getElementById('pg-ideas');
+      const pgPipe  = document.getElementById('pg-pipeline');
+      if (pgIdeas) pgIdeas.style.display = name === 'ideas' ? '' : 'none';
+      if (pgPipe)  pgPipe.style.display  = name === 'pipeline' ? '' : 'none';
+      const fab = document.getElementById('fab-add');
+      if (fab) fab.style.display = name === 'ideas' ? '' : 'none';
+      document.querySelectorAll('.bnav-btn').forEach(b => b.classList.remove('active'));
+      const activeBtn = name === 'ideas' ? 'bnav-home' : name === 'pipeline' ? 'bnav-pipe' : null;
+      if (activeBtn) document.getElementById(activeBtn)?.classList.add('active');
+      if (name === 'pipeline') renderPipeline();
     }
 
     // === GOAL WIDGET ===
@@ -3195,7 +3392,7 @@
     }
 
     // === SAVE / LOAD ===
-    function saveAll() {
+    function _doSave() {
       lsSet(KEYS.favs,      JSON.stringify([...favs]));
       lsSet(KEYS.done,      JSON.stringify([...done]));
       lsSet(KEYS.notes,     JSON.stringify(notes));
@@ -3220,6 +3417,13 @@
       lsSet(KEYS.producing, JSON.stringify([...producing]));
       pushSync();
     }
+    let _saveTimer;
+    function saveAll() {
+      clearTimeout(_saveTimer);
+      _saveTimer = setTimeout(_doSave, 300);
+    }
+    // Flush immediately if page is closed mid-debounce
+    window.addEventListener('pagehide', () => { clearTimeout(_saveTimer); _doSave(); });
 
     async function loadAll() { // returns Promise
       try { const v = lsGet(KEYS.favs);      if(v) favs          = new Set(JSON.parse(v)); } catch(e) {}
@@ -3839,65 +4043,76 @@
 
     // === BOTTOM NAV ===
     document.getElementById('bnav-home')?.addEventListener('click', () => {
+      goPage('ideas');
       filt = 'all'; showFavsOnly = false; showDoneOnly = false; q = '';
       document.getElementById('search').value = '';
       document.querySelectorAll('.chip').forEach(c => c.classList.toggle('on', c.dataset.f === 'all'));
-      document.querySelectorAll('.bnav-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById('bnav-home').classList.add('active');
       render();
     });
-    // Open approved overlay from bottom nav
-    document.getElementById('bnav-star')?.addEventListener('click', () => {
-      renderApprovedPage();
-      document.getElementById('approved-overlay').classList.add('open');
-      document.querySelectorAll('.bnav-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById('bnav-star').classList.add('active');
-    });
+    document.getElementById('bnav-pipe')?.addEventListener('click', () => goPage('pipeline'));
     document.getElementById('bnav-rand')?.addEventListener('click', pickRand);
     document.getElementById('bnav-charts')?.addEventListener('click', () => { renderCharts(); document.getElementById('charts-overlay').classList.add('open'); });
-    document.getElementById('bnav-ach')?.addEventListener('click', () => { renderBadgeGrid(); document.getElementById('ach-overlay').classList.add('open'); });
-
-    // === APPROVED OVERLAY ===
-    // Close button
-    document.getElementById('approved-close')?.addEventListener('click', () => {
-      document.getElementById('approved-overlay').classList.remove('open');
-      document.querySelectorAll('.bnav-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById('bnav-home').classList.add('active');
+    document.getElementById('bnav-sync')?.addEventListener('click', () => {
+      const creds = getSyncCredentials();
+      document.getElementById('sync-url-input').value = creds.url;
+      document.getElementById('sync-key-input').value = creds.key;
+      document.getElementById('sync-phrase-input').value = creds.phrase;
+      document.getElementById('sync-disconnect-btn').style.display = syncConfigured ? '' : 'none';
+      document.getElementById('sync-status-msg').textContent = syncConfigured ? '✓ Connected' : '';
+      document.getElementById('sync-overlay').classList.add('open');
     });
 
-    // Click backdrop to close
-    document.getElementById('approved-overlay')?.addEventListener('click', e => {
-      if (e.target === document.getElementById('approved-overlay')) {
-        document.getElementById('approved-overlay').classList.remove('open');
-        document.querySelectorAll('.bnav-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById('bnav-home').classList.add('active');
-      }
+    // Desktop pipeline button
+    document.getElementById('btn-pipeline')?.addEventListener('click', () => goPage('pipeline'));
+
+    // === PIPELINE PAGE EVENTS ===
+    document.getElementById('pipe-search')?.addEventListener('input', e => {
+      pipeQ = e.target.value.trim().toLowerCase();
+      document.getElementById('pipe-search-clear').style.display = pipeQ ? '' : 'none';
+      renderPipeline();
+    });
+    document.getElementById('pipe-search-clear')?.addEventListener('click', () => {
+      pipeQ = ''; document.getElementById('pipe-search').value = '';
+      document.getElementById('pipe-search-clear').style.display = 'none';
+      renderPipeline();
+    });
+    document.getElementById('pipe-cats')?.addEventListener('click', e => {
+      const btn = e.target.closest('[data-pc]');
+      if (!btn) return;
+      pipeCat = btn.dataset.pc;
+      document.querySelectorAll('#pipe-cats [data-pc]').forEach(b => b.classList.toggle('on', b.dataset.pc === pipeCat));
+      renderPipeline();
     });
 
-    // Delegation for approved page actions
-    document.getElementById('approved-body')?.addEventListener('click', e => {
-      const prodBtn = e.target.closest('[data-appr-prod]');
+    // Delegation for pipeline actions
+    document.getElementById('pipe-body')?.addEventListener('click', e => {
+      const prodBtn = e.target.closest('[data-pipe-prod]');
       if (prodBtn) {
-        const i = +prodBtn.dataset.apprProd;
-        producing.add(i); saveAll(); renderApprovedPage();
-        _setProdUI(i, true); showToast('🎬 Selected for production'); return;
+        const i = +prodBtn.dataset.pipeProd;
+        producing.add(i); saveAll(); _setProdUI(i, true); renderPipeline();
+        showToast('🎬 Filming started'); return;
       }
-      const unprodBtn = e.target.closest('[data-appr-unprod]');
+      const unprodBtn = e.target.closest('[data-pipe-unprod]');
       if (unprodBtn) {
-        const i = +unprodBtn.dataset.apprUnprod;
-        producing.delete(i); saveAll(); renderApprovedPage();
-        _setProdUI(i, false); return;
+        const i = +unprodBtn.dataset.pipeUnprod;
+        producing.delete(i); saveAll(); _setProdUI(i, false); renderPipeline(); return;
       }
-      const doneBtn = e.target.closest('[data-appr-done]');
+      const doneBtn = e.target.closest('[data-pipe-done]');
       if (doneBtn) {
-        const i = +doneBtn.dataset.apprDone;
-        producing.delete(i); applyDone(i, true); saveAll(); updateCounts(); renderApprovedPage();
+        const i = +doneBtn.dataset.pipeDone;
+        producing.delete(i); applyDone(i, true); saveAll(); updateCounts(); renderPipeline();
         showToast('🎉 Video done!'); return;
       }
-      const unapprBtn = e.target.closest('[data-appr-unappr]');
+      const undoneBtn = e.target.closest('[data-pipe-undone]');
+      if (undoneBtn) {
+        const i = +undoneBtn.dataset.pipeUndone;
+        applyDone(i, false); saveAll(); updateCounts(); renderPipeline(); return;
+      }
+      const unapprBtn = e.target.closest('[data-pipe-unappr]');
       if (unapprBtn) {
-        const i = +unapprBtn.dataset.apprUnappr;
-        favs.delete(i); _setFavUI(i, false); saveAll(); updateCounts(); renderApprovedPage(); return;
+        const i = +unapprBtn.dataset.pipeUnappr;
+        favs.delete(i); producing.delete(i); _setFavUI(i, false);
+        saveAll(); updateCounts(); renderPipeline(); return;
       }
     });
 
@@ -4148,7 +4363,7 @@
         document.getElementById('sfilter-overlay').classList.remove('open');
         document.getElementById('coll-overlay').classList.remove('open');
         document.getElementById('hash-overlay').classList.remove('open');
-        document.getElementById('approved-overlay').classList.remove('open');
+        if (currentPage === 'pipeline') goPage('ideas');
         if (selectMode) exitSelectMode();
       }
       else if (e.key === 'ArrowRight') {
@@ -4197,12 +4412,18 @@
     function updateSyncIndicator(status) {
       // status: 'off' | 'syncing' | 'ok' | 'error'
       const btn = document.getElementById('sync-indicator');
-      if (!btn) return;
-      btn.style.display = syncConfigured ? '' : 'none';
       const icons = { off: '☁', syncing: '↻', ok: '✓', error: '✕' };
       const colors = { off: 'var(--txt2)', syncing: 'var(--gold)', ok: 'var(--teal)', error: 'var(--acc)' };
-      btn.textContent = icons[status] || '☁';
-      btn.style.color = colors[status] || 'var(--txt2)';
+      if (btn) {
+        btn.style.display = syncConfigured ? '' : 'none';
+        btn.textContent = icons[status] || '☁';
+        btn.style.color = colors[status] || 'var(--txt2)';
+      }
+      const navIco = document.getElementById('bnav-sync-ico');
+      if (navIco) {
+        navIco.textContent = icons[status] || '☁';
+        navIco.style.color = syncConfigured ? (colors[status] || 'var(--txt2)') : '';
+      }
     }
 
     function getAllDataForSync() {
@@ -4297,11 +4518,22 @@
         .subscribe();
     }
 
-    function initSync() {
+    function loadSupabaseScript() {
+      return new Promise((resolve, reject) => {
+        if (window.supabase) { resolve(); return; }
+        const s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js';
+        s.onload = resolve; s.onerror = reject;
+        document.head.appendChild(s);
+      });
+    }
+
+    async function initSync() {
       const creds = getSyncCredentials();
       if (!creds.url || !creds.key || !creds.phrase) { syncConfigured = false; updateSyncIndicator('off'); return; }
       syncPhrase = creds.phrase;
       try {
+        await loadSupabaseScript();
         sbClient = window.supabase.createClient(creds.url, creds.key);
         syncConfigured = true;
         updateSyncIndicator('ok');
@@ -4335,7 +4567,7 @@
       if (!url || !key || !phrase) { msg.textContent = 'All fields required'; msg.style.color = 'var(--acc)'; return; }
       msg.textContent = 'Connecting…'; msg.style.color = 'var(--txt2)';
       lsSet('sv_sb_url', url); lsSet('sv_sb_key', key); lsSet('sv_sb_phrase', phrase);
-      initSync();
+      await initSync();
       if (!syncConfigured) { msg.textContent = 'Failed to connect — check URL and key'; msg.style.color = 'var(--acc)'; return; }
       // Push local data up, then pull to merge
       await pushSync(0);
@@ -4365,6 +4597,22 @@
         list.appendChild(s);
       }
     })();
+
+    // Cached DOM refs — avoid repeated getElementById on every state update
+    const EL = {
+      hcTotal:   document.getElementById('hc-total'),
+      hcFav:     document.getElementById('hc-fav'),
+      hcDone:    document.getElementById('hc-done'),
+      hcPri:     document.getElementById('hc-pri'),
+      hcSched:   document.getElementById('hc-sched'),
+      hcBest:    document.getElementById('hc-best'),
+      hcDays:    document.getElementById('hc-days'),
+      visN:      document.getElementById('vis-n'),
+      progFill:  document.getElementById('prog-fill'),
+      progLabel: document.getElementById('prog-label'),
+      footerTot: document.getElementById('footer-total'),
+      empty:     document.getElementById('empty'),
+    };
 
     loadAll().then(() => {
       document.querySelectorAll('.skeleton-card').forEach(s => s.remove());

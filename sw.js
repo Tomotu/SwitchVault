@@ -1,4 +1,4 @@
-const CACHE = 'contentvault-v1';
+const CACHE = 'contentvault-v3';
 const ASSETS = [
   '/SwitchVault/',
   '/SwitchVault/index.html',
@@ -20,15 +20,18 @@ self.addEventListener('activate', e => {
   );
 });
 
+// Stale-while-revalidate: serve cache instantly, refresh in background
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   e.respondWith(
-    caches.match(e.request).then(cached => {
-      const network = fetch(e.request).then(res => {
-        if (res.ok) caches.open(CACHE).then(c => c.put(e.request, res.clone()));
-        return res;
-      });
-      return cached || network;
-    })
+    caches.open(CACHE).then(cache =>
+      cache.match(e.request).then(cached => {
+        const networkFetch = fetch(e.request).then(res => {
+          if (res.ok) cache.put(e.request, res.clone());
+          return res;
+        }).catch(() => null);
+        return cached || networkFetch;
+      })
+    )
   );
 });

@@ -11,6 +11,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="ContentVault">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <style>
     :root {
       --bg:    #111110;
@@ -1475,6 +1476,8 @@
   </div>
 
   <!-- Light mode toggle -->
+  <button id="sync-indicator" title="Sync status" style="position:fixed;top:12px;right:94px;z-index:200;background:var(--s2);border:1px solid var(--b2);border-radius:8px;color:var(--txt2);cursor:pointer;font-size:13px;padding:5px 8px;transition:all .15s;display:none;">☁</button>
+  <button id="sync-settings-btn" title="Cloud sync settings" style="position:fixed;top:12px;right:52px;z-index:200;background:var(--s2);border:1px solid var(--b2);border-radius:8px;color:var(--txt2);cursor:pointer;font-size:13px;padding:5px 8px;transition:all .15s;">⚙</button>
   <button id="theme-toggle" title="Toggle light/dark" style="position:fixed;top:12px;right:12px;z-index:200;background:var(--s2);border:1px solid var(--b2);border-radius:8px;color:var(--txt2);cursor:pointer;font-size:15px;padding:5px 9px;transition:all .15s;">🌙</button>
 
   <!-- Hero -->
@@ -1880,6 +1883,48 @@
         <button class="iact" id="focus-fav">⭐ Star</button>
         <button class="iact" id="focus-done">✓ Done</button>
         <button class="iact" id="focus-pin">📌 Pin</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sync Settings Overlay -->
+  <div class="overlay" id="sync-overlay">
+    <div class="overlay-inner" style="max-width:480px">
+      <div class="overlay-hdr">
+        <span class="overlay-title">Cloud Sync Setup</span>
+        <button class="overlay-close" id="sync-close">✕</button>
+      </div>
+      <div style="padding:20px clamp(12px,3vw,24px);overflow-y:auto;max-height:calc(90vh - 60px)">
+        <p style="font-size:13px;color:var(--txt2);margin-bottom:20px;line-height:1.6">Sync your ideas across devices using your own free <strong style="color:var(--txt)">Supabase</strong> project. Data is stored privately under your passphrase.</p>
+
+        <div style="background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:14px 16px;margin-bottom:20px;font-size:12px;color:var(--txt2);line-height:1.8">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--txt2);margin-bottom:8px">Setup steps</div>
+          <div>1. Go to <strong style="color:var(--txt)">supabase.com</strong> → create a free account + new project</div>
+          <div>2. In <strong style="color:var(--txt)">SQL Editor</strong>, run:<br><code style="background:var(--b1);border-radius:4px;padding:4px 8px;display:inline-block;margin-top:4px;font-size:11px;color:var(--teal)">create table sv_data (sync_key text primary key, data jsonb not null default '{}'::jsonb, updated_at timestamptz not null default now());</code></div>
+          <div>3. Go to <strong style="color:var(--txt)">Project Settings → API</strong> → copy Project URL + anon key</div>
+          <div>4. Paste below and choose a passphrase → Connect</div>
+          <div>5. Repeat steps 4 on your other device (same passphrase)</div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <label style="font-size:12px;color:var(--txt2)">
+            Supabase Project URL
+            <input id="sync-url-input" type="url" placeholder="https://xxxxxxxxxxxx.supabase.co" style="display:block;width:100%;margin-top:4px;background:var(--s1);border:1px solid var(--b2);border-radius:var(--r);color:var(--txt);font-size:13px;padding:9px 12px;box-sizing:border-box;outline:none;font-family:inherit">
+          </label>
+          <label style="font-size:12px;color:var(--txt2)">
+            Anon / Public Key
+            <input id="sync-key-input" type="password" placeholder="eyJh…" style="display:block;width:100%;margin-top:4px;background:var(--s1);border:1px solid var(--b2);border-radius:var(--r);color:var(--txt);font-size:13px;padding:9px 12px;box-sizing:border-box;outline:none;font-family:inherit">
+          </label>
+          <label style="font-size:12px;color:var(--txt2)">
+            Sync Passphrase <span style="color:var(--mut)">(same on all your devices)</span>
+            <input id="sync-phrase-input" type="password" placeholder="choose any passphrase…" style="display:block;width:100%;margin-top:4px;background:var(--s1);border:1px solid var(--b2);border-radius:var(--r);color:var(--txt);font-size:13px;padding:9px 12px;box-sizing:border-box;outline:none;font-family:inherit">
+          </label>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <button id="sync-connect-btn" style="background:var(--teal);border:none;border-radius:var(--r);color:#fff;font-size:13px;font-weight:600;padding:10px 20px;cursor:pointer;transition:opacity .15s">Connect &amp; Sync</button>
+            <button id="sync-disconnect-btn" style="background:var(--s1);border:1px solid var(--b2);border-radius:var(--r);color:var(--txt2);font-size:13px;padding:10px 16px;cursor:pointer;transition:all .15s;display:none">Disconnect</button>
+            <span id="sync-status-msg" style="font-size:12px;color:var(--txt2)"></span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -3173,6 +3218,7 @@
       lsSet(KEYS.srchist,   JSON.stringify(searchHistory));
       lsSet(KEYS.rejected,  JSON.stringify([...rejected]));
       lsSet(KEYS.producing, JSON.stringify([...producing]));
+      pushSync();
     }
 
     async function loadAll() { // returns Promise
@@ -4133,6 +4179,182 @@
       });
     }
 
+    // === CLOUD SYNC ===
+    let sbClient = null;
+    let syncPhrase = null;
+    let syncConfigured = false;
+    let syncPushTimer = null;
+    let realtimeChannel = null;
+
+    function getSyncCredentials() {
+      return {
+        url: lsGet('sv_sb_url') || '',
+        key: lsGet('sv_sb_key') || '',
+        phrase: lsGet('sv_sb_phrase') || ''
+      };
+    }
+
+    function updateSyncIndicator(status) {
+      // status: 'off' | 'syncing' | 'ok' | 'error'
+      const btn = document.getElementById('sync-indicator');
+      if (!btn) return;
+      btn.style.display = syncConfigured ? '' : 'none';
+      const icons = { off: '☁', syncing: '↻', ok: '✓', error: '✕' };
+      const colors = { off: 'var(--txt2)', syncing: 'var(--gold)', ok: 'var(--teal)', error: 'var(--acc)' };
+      btn.textContent = icons[status] || '☁';
+      btn.style.color = colors[status] || 'var(--txt2)';
+    }
+
+    function getAllDataForSync() {
+      return {
+        favs: [...favs], done: [...done], notes, pris, scheds,
+        streak: streakData, custom: customIdeas, sfilters: savedFilters,
+        sortpref: sortMode, hcats: [...hiddenCats], pinned: [...pinned],
+        achiev: achievements, goal: goalTarget, recent: recentTouched,
+        streakhist: streakHistory, hooks, durations, thumbs,
+        colls: collections, srchist: searchHistory,
+        rejected: [...(typeof rejected !== 'undefined' ? rejected : [])],
+        producing: [...(typeof producing !== 'undefined' ? producing : [])],
+      };
+    }
+
+    function applyCloudData(obj) {
+      if (!obj) return;
+      try {
+        // Merge Sets (union — never lose data from either device)
+        if (obj.favs)     favs     = new Set([...favs, ...obj.favs]);
+        if (obj.done)     done     = new Set([...done, ...obj.done]);
+        if (obj.pinned)   pinned   = new Set([...pinned, ...obj.pinned]);
+        if (typeof rejected !== 'undefined' && obj.rejected)  rejected  = new Set([...rejected,  ...obj.rejected]);
+        if (typeof producing !== 'undefined' && obj.producing) producing = new Set([...producing, ...obj.producing]);
+        if (obj.hcats)    hiddenCats = new Set([...hiddenCats, ...obj.hcats]);
+        // Merge objects (cloud wins per-key — latest device to write wins per idea)
+        if (obj.notes)    notes    = Object.assign({}, notes, obj.notes);
+        if (obj.pris)     pris     = Object.assign({}, pris, obj.pris);
+        if (obj.scheds)   scheds   = Object.assign({}, scheds, obj.scheds);
+        if (obj.hooks)    hooks    = Object.assign({}, hooks, obj.hooks);
+        if (obj.durations) durations = Object.assign({}, durations, obj.durations);
+        if (obj.thumbs)   thumbs   = Object.assign({}, thumbs, obj.thumbs);
+        if (obj.colls)    collections = Object.assign({}, collections, obj.colls);
+        // Merge custom ideas (union by title)
+        if (obj.custom && Array.isArray(obj.custom)) {
+          const existing = new Set(customIdeas.map(i => i.t));
+          obj.custom.forEach(idea => { if (!existing.has(idea.t)) customIdeas.push(idea); });
+        }
+        // Scalars: cloud wins
+        if (obj.sortpref) sortMode = obj.sortpref;
+        if (obj.goal)     goalTarget = parseInt(obj.goal) || 3;
+        if (obj.srchist)  searchHistory = obj.srchist;
+        if (obj.achiev)   achievements = obj.achiev;
+        if (obj.streak)   streakData = obj.streak;
+        if (obj.streakhist) streakHistory = obj.streakhist;
+        if (obj.recent)   recentTouched = obj.recent;
+        if (obj.sfilters) savedFilters = obj.sfilters;
+      } catch(e) {}
+    }
+
+    async function pushSync(debounceMs) {
+      if (!syncConfigured || !sbClient) return;
+      clearTimeout(syncPushTimer);
+      syncPushTimer = setTimeout(async () => {
+        updateSyncIndicator('syncing');
+        try {
+          const { error } = await sbClient.from('sv_data').upsert({
+            sync_key: syncPhrase,
+            data: getAllDataForSync(),
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'sync_key' });
+          updateSyncIndicator(error ? 'error' : 'ok');
+        } catch(e) { updateSyncIndicator('error'); }
+      }, debounceMs || 1500);
+    }
+
+    async function pullSync(silent) {
+      if (!syncConfigured || !sbClient) return;
+      if (!silent) updateSyncIndicator('syncing');
+      try {
+        const { data, error } = await sbClient.from('sv_data')
+          .select('data').eq('sync_key', syncPhrase).maybeSingle();
+        if (!error && data?.data) {
+          applyCloudData(data.data);
+          applyStoredState();
+          updateCounts();
+          buildDashboard();
+          render();
+          saveAll();
+        }
+        updateSyncIndicator(error ? 'error' : 'ok');
+      } catch(e) { updateSyncIndicator('error'); }
+    }
+
+    function subscribeRealtime() {
+      if (realtimeChannel) { sbClient.removeChannel(realtimeChannel); realtimeChannel = null; }
+      realtimeChannel = sbClient.channel('sv_realtime')
+        .on('postgres_changes', {
+          event: 'UPDATE', schema: 'public', table: 'sv_data',
+          filter: `sync_key=eq.${syncPhrase}`
+        }, () => { pullSync(true); })
+        .subscribe();
+    }
+
+    function initSync() {
+      const creds = getSyncCredentials();
+      if (!creds.url || !creds.key || !creds.phrase) { syncConfigured = false; updateSyncIndicator('off'); return; }
+      syncPhrase = creds.phrase;
+      try {
+        sbClient = window.supabase.createClient(creds.url, creds.key);
+        syncConfigured = true;
+        updateSyncIndicator('ok');
+        subscribeRealtime();
+      } catch(e) { syncConfigured = false; updateSyncIndicator('error'); }
+    }
+
+    // Pull on window focus (cross-device sync catch-up)
+    window.addEventListener('focus', () => { if (syncConfigured) pullSync(true); });
+
+    // === SYNC SETTINGS UI ===
+    document.getElementById('sync-settings-btn')?.addEventListener('click', () => {
+      const creds = getSyncCredentials();
+      document.getElementById('sync-url-input').value = creds.url;
+      document.getElementById('sync-key-input').value = creds.key;
+      document.getElementById('sync-phrase-input').value = creds.phrase;
+      document.getElementById('sync-disconnect-btn').style.display = syncConfigured ? '' : 'none';
+      document.getElementById('sync-status-msg').textContent = syncConfigured ? '✓ Connected' : '';
+      document.getElementById('sync-overlay').classList.add('open');
+    });
+    document.getElementById('sync-close')?.addEventListener('click', () => document.getElementById('sync-overlay').classList.remove('open'));
+    document.getElementById('sync-overlay')?.addEventListener('click', e => {
+      if (e.target === document.getElementById('sync-overlay')) document.getElementById('sync-overlay').classList.remove('open');
+    });
+
+    document.getElementById('sync-connect-btn')?.addEventListener('click', async () => {
+      const url = document.getElementById('sync-url-input').value.trim();
+      const key = document.getElementById('sync-key-input').value.trim();
+      const phrase = document.getElementById('sync-phrase-input').value.trim();
+      const msg = document.getElementById('sync-status-msg');
+      if (!url || !key || !phrase) { msg.textContent = 'All fields required'; msg.style.color = 'var(--acc)'; return; }
+      msg.textContent = 'Connecting…'; msg.style.color = 'var(--txt2)';
+      lsSet('sv_sb_url', url); lsSet('sv_sb_key', key); lsSet('sv_sb_phrase', phrase);
+      initSync();
+      if (!syncConfigured) { msg.textContent = 'Failed to connect — check URL and key'; msg.style.color = 'var(--acc)'; return; }
+      // Push local data up, then pull to merge
+      await pushSync(0);
+      await pullSync();
+      msg.textContent = '✓ Connected and synced!'; msg.style.color = 'var(--teal)';
+      document.getElementById('sync-disconnect-btn').style.display = '';
+      document.getElementById('sync-indicator').style.display = '';
+    });
+
+    document.getElementById('sync-disconnect-btn')?.addEventListener('click', () => {
+      lsSet('sv_sb_url', ''); lsSet('sv_sb_key', ''); lsSet('sv_sb_phrase', '');
+      sbClient = null; syncConfigured = false; syncPhrase = null;
+      if (realtimeChannel) { try { sbClient?.removeChannel(realtimeChannel); } catch(e) {} realtimeChannel = null; }
+      updateSyncIndicator('off');
+      document.getElementById('sync-disconnect-btn').style.display = 'none';
+      document.getElementById('sync-status-msg').textContent = 'Disconnected';
+      document.getElementById('sync-status-msg').style.color = 'var(--txt2)';
+    });
+
     // === INIT ===
     // Show skeleton first
     (function showSkeleton() {
@@ -4147,6 +4369,7 @@
     loadAll().then(() => {
       document.querySelectorAll('.skeleton-card').forEach(s => s.remove());
       staggerCards();
+      initSync();
     });
   </script>
 </body>

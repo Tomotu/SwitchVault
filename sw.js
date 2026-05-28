@@ -20,16 +20,18 @@ self.addEventListener('activate', e => {
   );
 });
 
-// Network-first: always fetch fresh, fall back to cache when offline
+// Stale-while-revalidate: serve cache instantly, refresh in background
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   e.respondWith(
-    fetch(e.request).then(res => {
-      if (res.ok) {
-        const clone = res.clone();
-        caches.open(CACHE).then(c => c.put(e.request, clone));
-      }
-      return res;
-    }).catch(() => caches.match(e.request))
+    caches.open(CACHE).then(cache =>
+      cache.match(e.request).then(cached => {
+        const networkFetch = fetch(e.request).then(res => {
+          if (res.ok) cache.put(e.request, res.clone());
+          return res;
+        }).catch(() => null);
+        return cached || networkFetch;
+      })
+    )
   );
 });

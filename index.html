@@ -4,14 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ContentVault — Nintendo Switch TikTok</title>
-  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='32' fill='%23111110'/%3E%3Crect x='10' y='46' width='42' height='100' rx='21' fill='%23A0453F'/%3E%3Ccircle cx='31' cy='68' r='10' fill='rgba(0,0,0,.3)'/%3E%3Crect x='50' y='20' width='92' height='152' rx='10' fill='%23282523'/%3E%3Crect x='60' y='32' width='72' height='128' rx='6' fill='%23141412'/%3E%3Cpolygon points='80,84 112,96 80,108' fill='%236A8A58' opacity='.9'/%3E%3Crect x='140' y='46' width='42' height='100' rx='21' fill='%236A8A58'/%3E%3Ccircle cx='161' cy='124' r='10' fill='rgba(0,0,0,.3)'/%3E%3C/svg%3E">
   <meta name="theme-color" content="#111110">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="ContentVault">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <!-- Supabase loaded on-demand when sync panel is opened -->
   <style>
     :root {
       --bg:    #111110;
@@ -2281,17 +2283,15 @@
     // === COUNTS ===
     function updateCounts() {
       const total = cards.length;
-      document.getElementById('hc-total').textContent  = total.toLocaleString();
-      document.getElementById('hc-fav').textContent    = favs.size;
-      document.getElementById('hc-done').textContent   = done.size;
-      document.getElementById('hc-pri').textContent    = Object.keys(pris).length;
-      document.getElementById('hc-sched').textContent  = Object.keys(scheds).length;
-      document.getElementById('vis-n').textContent     = cards.filter(c => !c.classList.contains('hidden')).length.toLocaleString();
+      EL.hcTotal.textContent  = total.toLocaleString();
+      EL.hcFav.textContent    = favs.size;
+      EL.hcDone.textContent   = done.size;
+      EL.hcPri.textContent    = Object.keys(pris).length;
+      EL.hcSched.textContent  = Object.keys(scheds).length;
       const pct = total > 0 ? done.size / total * 100 : 0;
-      document.getElementById('prog-fill').style.width = pct + '%';
-      document.getElementById('prog-label').textContent = `${done.size.toLocaleString()} / ${total.toLocaleString()} done`;
-      const footerTot = document.getElementById('footer-total');
-      if (footerTot) footerTot.textContent = `${total.toLocaleString()} ideas · 14 categories · All data saved`;
+      EL.progFill.style.width = pct + '%';
+      EL.progLabel.textContent = `${done.size.toLocaleString()} / ${total.toLocaleString()} done`;
+      if (EL.footerTot) EL.footerTot.textContent = `${total.toLocaleString()} ideas · 14 categories · All data saved`;
 
       // Best category
       let bestCat = '', bestPct = -1;
@@ -2302,20 +2302,15 @@
         const p = dc / tot;
         if (p > bestPct) { bestPct = p; bestCat = cat; }
       });
-      const bestEl = document.getElementById('hc-best');
-      if (bestEl) bestEl.textContent = bestCat ? TC[bestCat]?.l || bestCat : '—';
+      if (EL.hcBest) EL.hcBest.textContent = bestCat ? TC[bestCat]?.l || bestCat : '—';
 
       // Days since last post
-      const daysEl = document.getElementById('hc-days');
-      if (daysEl) {
+      if (EL.hcDays) {
         const daysSince = streakData.lastDate
           ? Math.floor((Date.now() - new Date(streakData.lastDate + 'T00:00:00')) / 86400000)
           : null;
-        daysEl.textContent = daysSince !== null ? daysSince : '—';
-        const hstDays = daysEl.closest('.hst');
-        if (hstDays) {
-          daysEl.className = 'hst-n' + (daysSince === null ? '' : daysSince <= 1 ? ' recent' : daysSince >= 7 ? ' stale' : '');
-        }
+        EL.hcDays.textContent = daysSince !== null ? daysSince : '—';
+        EL.hcDays.className = 'hst-n' + (daysSince === null ? '' : daysSince <= 1 ? ' recent' : daysSince >= 7 ? ' stale' : '');
       }
     }
 
@@ -2392,8 +2387,8 @@
           if (dr) list.appendChild(dr);
         }
       });
-      document.getElementById('vis-n').textContent = vis.toLocaleString();
-      document.getElementById('empty').classList.toggle('show', vis === 0);
+      EL.visN.textContent = vis.toLocaleString();
+      EL.empty.classList.toggle('show', vis === 0);
       updateCollectionIndicator();
 
       cards.forEach(c => c.classList.remove('spotlight'));
@@ -4313,11 +4308,22 @@
         .subscribe();
     }
 
-    function initSync() {
+    function loadSupabaseScript() {
+      return new Promise((resolve, reject) => {
+        if (window.supabase) { resolve(); return; }
+        const s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js';
+        s.onload = resolve; s.onerror = reject;
+        document.head.appendChild(s);
+      });
+    }
+
+    async function initSync() {
       const creds = getSyncCredentials();
       if (!creds.url || !creds.key || !creds.phrase) { syncConfigured = false; updateSyncIndicator('off'); return; }
       syncPhrase = creds.phrase;
       try {
+        await loadSupabaseScript();
         sbClient = window.supabase.createClient(creds.url, creds.key);
         syncConfigured = true;
         updateSyncIndicator('ok');
@@ -4351,7 +4357,7 @@
       if (!url || !key || !phrase) { msg.textContent = 'All fields required'; msg.style.color = 'var(--acc)'; return; }
       msg.textContent = 'Connecting…'; msg.style.color = 'var(--txt2)';
       lsSet('sv_sb_url', url); lsSet('sv_sb_key', key); lsSet('sv_sb_phrase', phrase);
-      initSync();
+      await initSync();
       if (!syncConfigured) { msg.textContent = 'Failed to connect — check URL and key'; msg.style.color = 'var(--acc)'; return; }
       // Push local data up, then pull to merge
       await pushSync(0);
@@ -4381,6 +4387,22 @@
         list.appendChild(s);
       }
     })();
+
+    // Cached DOM refs — avoid repeated getElementById on every state update
+    const EL = {
+      hcTotal:   document.getElementById('hc-total'),
+      hcFav:     document.getElementById('hc-fav'),
+      hcDone:    document.getElementById('hc-done'),
+      hcPri:     document.getElementById('hc-pri'),
+      hcSched:   document.getElementById('hc-sched'),
+      hcBest:    document.getElementById('hc-best'),
+      hcDays:    document.getElementById('hc-days'),
+      visN:      document.getElementById('vis-n'),
+      progFill:  document.getElementById('prog-fill'),
+      progLabel: document.getElementById('prog-label'),
+      footerTot: document.getElementById('footer-total'),
+      empty:     document.getElementById('empty'),
+    };
 
     loadAll().then(() => {
       document.querySelectorAll('.skeleton-card').forEach(s => s.remove());

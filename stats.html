@@ -310,6 +310,12 @@
     <div class="week-chart" id="week-chart"></div>
   </div>
 
+  <!-- Top Categories insight -->
+  <div class="section" id="top-cats-section">
+    <div class="section-title">Top Categories</div>
+    <div class="top-cats-row" id="top-cats-row"></div>
+  </div>
+
   <!-- Category breakdown -->
   <div class="section">
     <div class="section-title">Category completion</div>
@@ -380,7 +386,7 @@
       favs:'sv_favs', done:'sv_done', notes:'sv_notes', pris:'sv_pris',
       scheds:'sv_scheds', streak:'sv_streak', custom:'sv_custom',
       streakhist:'sv_streakhist', achiev:'sv_achievements', light:'sv_light',
-      producing:'sv_producing', rejected:'sv_rejected',
+      producing:'sv_producing', rejected:'sv_rejected', durations:'sv_durations',
     };
 
     const TC = {
@@ -417,14 +423,16 @@
     function lsGet(k) { try { return localStorage.getItem(k); } catch(e) { return null; } }
 
     // ── Load state ──
-    let favs = new Set(), done = new Set(), pris = {}, scheds = {}, notes = {};
+    let favs = new Set(), done = new Set(), producing = new Set(), pris = {}, scheds = {}, notes = {}, durations = {};
     let streakData = {}, streakHistory = [], achievements = {}, customIdeas = [];
 
     try { const v=lsGet(KEYS.favs);       if(v) favs         = new Set(JSON.parse(v)); } catch(e){}
     try { const v=lsGet(KEYS.done);       if(v) done         = new Set(JSON.parse(v)); } catch(e){}
+    try { const v=lsGet(KEYS.producing);  if(v) producing    = new Set(JSON.parse(v)); } catch(e){}
     try { const v=lsGet(KEYS.pris);       if(v) pris         = JSON.parse(v); } catch(e){}
     try { const v=lsGet(KEYS.scheds);     if(v) scheds       = JSON.parse(v); } catch(e){}
     try { const v=lsGet(KEYS.notes);      if(v) notes        = JSON.parse(v); } catch(e){}
+    try { const v=lsGet(KEYS.durations);  if(v) durations    = JSON.parse(v); } catch(e){}
     try { const v=lsGet(KEYS.streak);     if(v) streakData   = JSON.parse(v); } catch(e){}
     try { const v=lsGet(KEYS.streakhist); if(v) streakHistory= JSON.parse(v); } catch(e){}
     try { const v=lsGet(KEYS.achiev);     if(v) achievements = JSON.parse(v); } catch(e){}
@@ -432,6 +440,18 @@
 
     const lightOn = lsGet(KEYS.light) === '1';
     document.documentElement.classList.toggle('light', lightOn);
+
+    // ── Theme toggle ──
+    (function() {
+      const btn = document.getElementById('stats-theme-toggle');
+      if (!btn) return;
+      btn.textContent = lightOn ? '☀' : '🌙';
+      btn.addEventListener('click', function() {
+        const on = document.documentElement.classList.toggle('light');
+        this.textContent = on ? '☀' : '🌙';
+        try { localStorage.setItem(KEYS.light, on ? '1' : '0'); } catch(e) {}
+      });
+    })();
 
     const totalIdeas = window.ALL_IDEAS.length + customIdeas.length;
 
@@ -448,7 +468,7 @@
     const pct = totalIdeas > 0 ? Math.round(done.size / totalIdeas * 100) : 0;
     document.getElementById('hs-total').textContent = totalIdeas;
     document.getElementById('hs-done').textContent  = done.size;
-    document.getElementById('hs-fav').textContent   = favs.size;
+    document.getElementById('hs-prod').textContent  = producing.size;
     document.getElementById('hs-pri').textContent   = Object.keys(pris).length;
     document.getElementById('prog-pct').textContent = pct + '%';
     const pf = document.getElementById('prog-fill');
@@ -519,6 +539,32 @@
           <div class="cat-count">${dc}/${tot}</div>
           <div class="cat-pct">${pct}%</div>`;
         container.appendChild(row);
+      });
+    }
+
+    // ── Top Categories ──
+    function renderTopCategories() {
+      const container = document.getElementById('top-cats-row');
+      if (!container) return;
+      container.innerHTML = '';
+      const catCounts = {};
+      catList.forEach(c => catCounts[c] = 0);
+      [...done].forEach(i => {
+        const idea = window.ALL_IDEAS[i] || customIdeas[i - window.ALL_IDEAS.length];
+        if (idea) idea.tags.forEach(t => { if (catCounts[t] !== undefined) catCounts[t]++; });
+      });
+      const sorted = catList.map(c => ({ c, n: catCounts[c] })).filter(x => x.n > 0).sort((a,b) => b.n - a.n).slice(0,3);
+      if (!sorted.length) {
+        container.innerHTML = '<span style="font-size:12px;color:var(--txt2)">No completed videos yet — start filming!</span>';
+        return;
+      }
+      sorted.forEach(({ c, n }) => {
+        const color = TC[c]?.color || '#888';
+        const badge = document.createElement('span');
+        badge.className = 'top-cat-badge';
+        badge.style.cssText = `color:${color};background:${color}18;border-color:${color}40`;
+        badge.textContent = `${TC[c]?.l || c} · ${n}`;
+        container.appendChild(badge);
       });
     }
 
@@ -626,18 +672,34 @@
 
     // ── Quick actions ──
     document.getElementById('qa-export').addEventListener('click', () => {
-      const rows = [['#','Title','Tags','Note','Date','Priority','Done']];
-      [...favs].sort((a,b)=>a-b).forEach(i => {
-        const idea = window.ALL_IDEAS[i] || customIdeas[i - window.ALL_IDEAS.length];
+      // Build full idea list for export
+      const allIdeas = [...window.ALL_IDEAS, ...customIdeas];
+      const rows = [['Title','Category','Status','Duration','Schedule','Note']];
+      allIdeas.forEach((idea, i) => {
         if (!idea) return;
-        rows.push([i+1, `"${idea.t.replace(/"/g,'""')}"`, idea.tags.join(';'), notes[i]||'', scheds[i]||'', pris[i]||'', done.has(i)?'yes':'no']);
+        // Status logic
+        let status = 'New';
+        if (done.has(i))      status = 'Done';
+        else if (producing.has(i)) status = 'Filming';
+        else if (favs.has(i)) status = 'Approved';
+        else { try { const rej = JSON.parse(localStorage.getItem('sv_rejected')||'[]'); if (rej.includes(i)) status = 'Rejected'; } catch(e){} }
+        const dur = durations[i] || '';
+        const durLabel = dur === 'quick' ? 'Quick' : dur === 'medium' ? 'Medium' : dur === 'full' ? 'Full day' : '';
+        rows.push([
+          `"${idea.t.replace(/"/g,'""')}"`,
+          idea.tags[0] || '',
+          status,
+          durLabel,
+          scheds[i] || '',
+          `"${(notes[i]||'').replace(/"/g,'""').replace(/\n/g,' ')}"`
+        ]);
       });
       const csv = rows.map(r=>r.join(',')).join('\n');
       const a = document.createElement('a');
       a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
-      a.download = 'switchvault-starred.csv';
+      a.download = 'switchvault-export.csv';
       a.click();
-      showToast('Exported ' + favs.size + ' starred ideas');
+      showToast('Exported ' + allIdeas.length + ' ideas');
     });
 
     document.getElementById('qa-copy-week').addEventListener('click', () => {
@@ -663,6 +725,7 @@
 
     // ── Init ──
     renderWeekChart();
+    renderTopCategories();
     renderCatGrid();
     renderStreakCal();
     renderBadges();

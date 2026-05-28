@@ -1509,6 +1509,17 @@
     .hst.days-since .hst-n { color: var(--txt2); }
     .hst.days-since .hst-n.recent { color: var(--teal); }
     .hst.days-since .hst-n.stale  { color: #E06060; }
+
+    /* === VERY SMALL SCREEN COMPACT HERO STATS === */
+    @media (max-width:379px) {
+      .hstats { gap:5px; }
+      .hst { padding:8px 8px; min-width:48px; }
+      .hst-n { font-size:18px; }
+    }
+
+    /* === FADE IN ANIMATION === */
+    @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+    body > *:not(.bottom-nav) { animation: fadeIn .25s ease both; }
   </style>
 </head>
 <body>
@@ -4419,6 +4430,17 @@
       document.querySelectorAll('.skeleton-card').forEach(s => s.remove());
       staggerCards();
       initSync();
+      // Handle #sync deep-link from other pages
+      if (location.hash === '#sync') {
+        history.replaceState(null, '', location.pathname);
+        const creds = getSyncCredentials();
+        document.getElementById('sync-url-input').value = creds.url;
+        document.getElementById('sync-key-input').value = creds.key;
+        document.getElementById('sync-phrase-input').value = creds.phrase;
+        document.getElementById('sync-disconnect-btn').style.display = syncConfigured ? '' : 'none';
+        document.getElementById('sync-status-msg').textContent = syncConfigured ? '✓ Connected' : '';
+        document.getElementById('sync-overlay').classList.add('open');
+      }
     });
   </script>
 </body>

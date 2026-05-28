@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="preload" href="data.js" as="script">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='32' fill='%23111110'/%3E%3Crect x='10' y='46' width='42' height='100' rx='21' fill='%23A0453F'/%3E%3Ccircle cx='31' cy='68' r='10' fill='rgba(0,0,0,.3)'/%3E%3Crect x='50' y='20' width='92' height='152' rx='10' fill='%23282523'/%3E%3Crect x='60' y='32' width='72' height='128' rx='6' fill='%23141412'/%3E%3Cpolygon points='80,84 112,96 80,108' fill='%236A8A58' opacity='.9'/%3E%3Crect x='140' y='46' width='42' height='100' rx='21' fill='%236A8A58'/%3E%3Ccircle cx='161' cy='124' r='10' fill='rgba(0,0,0,.3)'/%3E%3C/svg%3E">
   <meta name="theme-color" content="#111110">
@@ -207,10 +208,10 @@
       border-radius: 3px;
       background: linear-gradient(90deg, var(--teal), var(--blue), var(--gold));
       background-size: 200% 100%;
-      animation: shimmer 3s linear infinite;
       transition: width .5s cubic-bezier(.4,0,.2,1);
     }
     @keyframes shimmer { 0% { background-position: 200% 0 } 100% { background-position: -200% 0 } }
+    .prog-fill.shimmering { animation: shimmer 3s linear infinite; }
 
     /* === DASHBOARD === */
     .dashboard {
@@ -2064,6 +2065,7 @@
 
     // === DOM BUILD LOOP ===
     const list = document.getElementById('list');
+    const _initFrag = document.createDocumentFragment();
     const cards = [];
 
     function edgeColor(tags) { return TC[tags[0]]?.color || '#444'; }
@@ -2109,33 +2111,34 @@
             <button class="cact dup-btn"    data-i="${i}" title="Duplicate">⧉</button>
           </div>
         </div>`;
-      list.appendChild(card);
+      _initFrag.appendChild(card);
       cards.push(card);
 
       const nr = document.createElement('div');
       nr.className = 'note-row';
       nr.dataset.for = i;
       nr.innerHTML = `<textarea class="note-input" placeholder="Add a note for this idea…"></textarea><button class="note-save" data-i="${i}">Save</button>`;
-      list.appendChild(nr);
+      _initFrag.appendChild(nr);
 
       const hr = document.createElement('div');
       hr.className = 'hook-row';
       hr.dataset.hfor = i;
       hr.innerHTML = `<div class="hook-label">🎣 Hook — first 3 seconds</div><textarea class="hook-input" placeholder="e.g. "You've been playing Switch wrong your whole life…""></textarea><button class="hook-save" data-i="${i}">Save</button>`;
-      list.appendChild(hr);
+      _initFrag.appendChild(hr);
 
       const tr = document.createElement('div');
       tr.className = 'thumb-row';
       tr.dataset.tfor = i;
       tr.innerHTML = `<div class="hook-label">🖼 Thumbnail concept</div><input class="thumb-input" type="text" placeholder="e.g. Shocked face, controller closeup, text: INSANE…" maxlength="200"><button class="thumb-save" data-i="${i}">Save</button><button class="thumb-clear" data-i="${i}">Clear</button>`;
-      list.appendChild(tr);
+      _initFrag.appendChild(tr);
 
       const dr = document.createElement('div');
       dr.className = 'date-row';
       dr.dataset.dfor = i;
       dr.innerHTML = `<input type="date" class="date-input" data-i="${i}"><button class="date-save" data-i="${i}">Set date</button><button class="date-clear" data-i="${i}">Clear</button>`;
-      list.appendChild(dr);
+      _initFrag.appendChild(dr);
     });
+    list.appendChild(_initFrag);
 
 
     // === UI APPLIERS ===
@@ -2290,6 +2293,7 @@
       EL.hcSched.textContent  = Object.keys(scheds).length;
       const pct = total > 0 ? done.size / total * 100 : 0;
       EL.progFill.style.width = pct + '%';
+      EL.progFill.classList.toggle('shimmering', done.size > 0);
       EL.progLabel.textContent = `${done.size.toLocaleString()} / ${total.toLocaleString()} done`;
       if (EL.footerTot) EL.footerTot.textContent = `${total.toLocaleString()} ideas · 14 categories · All data saved`;
 
@@ -3191,7 +3195,7 @@
     }
 
     // === SAVE / LOAD ===
-    function saveAll() {
+    function _doSave() {
       lsSet(KEYS.favs,      JSON.stringify([...favs]));
       lsSet(KEYS.done,      JSON.stringify([...done]));
       lsSet(KEYS.notes,     JSON.stringify(notes));
@@ -3216,6 +3220,13 @@
       lsSet(KEYS.producing, JSON.stringify([...producing]));
       pushSync();
     }
+    let _saveTimer;
+    function saveAll() {
+      clearTimeout(_saveTimer);
+      _saveTimer = setTimeout(_doSave, 300);
+    }
+    // Flush immediately if page is closed mid-debounce
+    window.addEventListener('pagehide', () => { clearTimeout(_saveTimer); _doSave(); });
 
     async function loadAll() { // returns Promise
       try { const v = lsGet(KEYS.favs);      if(v) favs          = new Set(JSON.parse(v)); } catch(e) {}

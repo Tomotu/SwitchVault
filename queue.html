@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SwitchVault — Queue</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="preload" href="data.js" as="script">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='32' fill='%23111110'/%3E%3Crect x='10' y='46' width='42' height='100' rx='21' fill='%23A0453F'/%3E%3Ccircle cx='31' cy='68' r='10' fill='rgba(0,0,0,.3)'/%3E%3Crect x='50' y='20' width='92' height='152' rx='10' fill='%23282523'/%3E%3Crect x='60' y='32' width='72' height='128' rx='6' fill='%23141412'/%3E%3Cpolygon points='80,84 112,96 80,108' fill='%236A8A58' opacity='.9'/%3E%3Crect x='140' y='46' width='42' height='100' rx='21' fill='%236A8A58'/%3E%3Ccircle cx='161' cy='124' r='10' fill='rgba(0,0,0,.3)'/%3E%3C/svg%3E">
+  <meta name="theme-color" content="#111110">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <style>
+    :root {
+      --bg:#111110; --s1:#171614; --s2:#1e1e1c; --s3:#262422;
+      --b0:#1c1b19; --b1:#282523; --b2:#363330; --b3:#484440;
+      --acc:#A0453F; --acc2:#7C2F2F; --gold:#C8A870; --gold2:#E6E1D6;
+      --teal:#6A8A58; --blue:#7A9878; --pur:#A0453F;
+      --txt:#E6E1D6; --txt2:#A09080; --mut:#605850; --mut2:#3A3530;
+      --hi:#D8C8B2; --r:6px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; overflow-x: hidden; }
+    body {
+      background: var(--bg); color: var(--txt);
+      font-family: 'Inter', sans-serif; font-size: 14px;
+      line-height: 1.5; min-height: 100vh;
+      overflow-x: hidden; max-width: 100%;
+      padding-bottom: 64px;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0; opacity: .035;
+      pointer-events: none; z-index: 0;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    /* ── TOOLBAR ── */
+    .q-toolbar {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--s1); border-bottom: 1px solid var(--b1);
+      width: 100%; max-width: 100%;
+    }
+    .q-toolbar-top {
+      padding: 12px clamp(12px,3vw,24px) 8px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .q-title-row {
+      display: flex; align-items: center; gap: 10px;
+      flex-wrap: nowrap; min-width: 0;
+    }
+    .app-logo { flex-shrink: 0; opacity: .92; display: flex; align-items: center; }
+    .q-heading {
+      font-family: 'Anton', sans-serif; font-size: 22px;
+      font-weight: 400; color: var(--txt); letter-spacing: .02em; flex: 1;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .q-count-badge {
+      background: rgba(200,168,112,.12); border: 1px solid rgba(200,168,112,.3);
+      border-radius: 20px; color: var(--gold); font-size: 11px; font-weight: 700;
+      padding: 2px 10px; white-space: nowrap; flex-shrink: 0;
+    }
+
+    /* Search */
+    .sbox {
+      width: 100%; position: relative;
+      display: flex; align-items: center;
+    }
+    .sbox-ico {
+      position: absolute; left: 10px; font-size: 18px;
+      color: var(--mut); pointer-events: none; line-height: 1;
+    }
+    .sbox input {
+      width: 100%; background: var(--s2); border: 1px solid var(--b1);
+      border-radius: var(--r); color: var(--txt);
+      font-family: 'Inter', sans-serif; font-size: 14px;
+      padding: 8px 32px 8px 36px; outline: none;
+      transition: border-color .15s;
+    }
+    .sbox input::placeholder { color: var(--mut); }
+    .sbox input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(200,168,112,.12); }
+    .sbox-clear {
+      position: absolute; right: 8px; background: none; border: none;
+      color: var(--mut); cursor: pointer; font-size: 12px; padding: 4px;
+      display: none;
+    }
+    .sbox-clear:hover { color: var(--txt); }
+
+    /* Category chips */
+    .q-cats-row {
+      padding: 6px clamp(12px,3vw,24px) 10px;
+      display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none;
+    }
+    .q-cats-row::-webkit-scrollbar { display: none; }
+    .chip {
+      background: var(--s1); border: 1px solid var(--b1);
+      border-radius: 20px; color: var(--txt2); cursor: pointer;
+      font-size: 12px; font-weight: 500; padding: 5px 13px;
+      white-space: nowrap; transition: all .15s; flex-shrink: 0;
+    }
+    .chip:hover { background: var(--s3); border-color: var(--b2); }
+    .chip.on { background:rgba(200,168,112,.1); border-color:rgba(200,168,112,.3); color:var(--gold); }
+
+    /* Sort bar */
+    .q-sort-bar {
+      padding: 0 clamp(12px,3vw,24px) 10px;
+      display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none;
+    }
+    .q-sort-bar::-webkit-scrollbar { display: none; }
+    .sort-btn {
+      background: var(--s2); border: 1px solid var(--b1);
+      border-radius: 6px; color: var(--txt2); cursor: pointer;
+      font-size: 11px; font-weight: 600; padding: 5px 11px;
+      white-space: nowrap; transition: all .15s; flex-shrink: 0;
+      letter-spacing: .02em;
+    }
+    .sort-btn:hover { background: var(--s3); color: var(--txt); }
+    .sort-btn.on { background:rgba(200,168,112,.1); border-color:rgba(200,168,112,.3); color:var(--gold); }
+
+    /* ── BODY ── */
+    .q-body {
+      padding: 16px clamp(12px,3vw,24px) 24px;
+      max-width: 720px;
+      position: relative; z-index: 1;
+    }
+
+    /* Cards */
+    .q-card {
+      background: var(--s2); border: 1px solid var(--b1);
+      border-radius: 10px; margin-bottom: 10px;
+      display: flex; overflow: hidden;
+      transition: background .12s, border-color .15s, transform .12s;
+    }
+    .q-card:hover { background: var(--s3); transform: translateY(-1px); }
+    .q-card-edge { width: 4px; flex-shrink: 0; background: var(--gold); }
+    .q-card-main { flex: 1; padding: 14px 16px; min-width: 0; }
+    .q-card-title {
+      font-size: 14px; font-weight: 600; color: var(--txt);
+      margin-bottom: 7px; line-height: 1.35;
+    }
+    .q-card-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 9px; }
+    .q-card-note {
+      font-size: 11px; color: var(--txt2); margin-bottom: 9px;
+      font-style: italic;
+      display: -webkit-box; -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .q-card-meta { display: flex; gap: 6px; align-items: center; margin-bottom: 9px; flex-wrap: wrap; }
+    .q-dur-badge {
+      font-size: 9px; font-weight: 700; letter-spacing: .05em;
+      text-transform: uppercase; border-radius: 4px; padding: 2px 6px; border: 1px solid;
+    }
+    .q-dur-badge.quick  { color:var(--teal); background:rgba(106,138,88,.1);  border-color:rgba(106,138,88,.25); }
+    .q-dur-badge.medium { color:var(--gold); background:rgba(200,168,112,.1); border-color:rgba(200,168,112,.25); }
+    .q-dur-badge.full   { color:var(--acc);  background:rgba(160,69,63,.08);  border-color:rgba(160,69,63,.2); }
+    .q-sched-badge {
+      font-size: 9px; font-weight: 700; letter-spacing: .04em;
+      text-transform: uppercase; color: var(--txt2);
+      background: var(--s1); border: 1px solid var(--b2);
+      border-radius: 4px; padding: 2px 6px;
+    }
+    .q-card-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+    .q-btn {
+      background: var(--s1); border: 1px solid var(--b2); border-radius: 6px;
+      color: var(--txt2); cursor: pointer; font-size: 11px; font-weight: 600;
+      padding: 6px 13px; white-space: nowrap; transition: all .15s; letter-spacing: .02em;
+    }
+    .q-btn:hover { background: var(--s3); color: var(--txt); }
+    .q-btn.primary { background:rgba(106,138,88,.12); border-color:rgba(106,138,88,.3); color:var(--teal); }
+    .q-btn.primary:hover { background:rgba(106,138,88,.22); }
+    .q-btn.danger  { background:rgba(160,69,63,.08); border-color:rgba(160,69,63,.25); color:var(--acc); }
+    .q-btn.danger:hover { background:rgba(160,69,63,.15); }
+
+    /* Tag pills */
+    .tag { font-size: 8px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 2px 6px; border-radius: 3px; }
+    .tgaming    { color:#80BC78; background:rgba(112,170,104,.09);  border:1px solid rgba(112,170,104,.18); }
+    .tgear      { color:#D87068; background:rgba(200,96,88,.09);    border:1px solid rgba(200,96,88,.18); }
+    .ttutorial  { color:#8AB888; background:rgba(106,150,96,.09);   border:1px solid rgba(106,150,96,.17); }
+    .treview    { color:#D8B870; background:rgba(200,168,96,.08);   border:1px solid rgba(200,168,96,.16); }
+    .tlifestyle { color:#C8A880; background:rgba(190,160,112,.08);  border:1px solid rgba(190,160,112,.16); }
+    .tstory     { color:#C87868; background:rgba(184,112,96,.09);   border:1px solid rgba(184,112,96,.17); }
+    .teducation { color:#B0C870; background:rgba(160,184,96,.08);   border:1px solid rgba(160,184,96,.15); }
+    .tchallenge { color:#D87070; background:rgba(200,96,96,.09);    border:1px solid rgba(200,96,96,.17); }
+    .treaction  { color:#96A890; background:rgba(138,152,136,.08);  border:1px solid rgba(138,152,136,.16); }
+    .ttrend     { color:#C89868; background:rgba(190,144,96,.08);   border:1px solid rgba(190,144,96,.16); }
+    .tcomedy    { color:#D8C8A0; background:rgba(200,184,144,.08);  border:1px solid rgba(200,184,144,.16); }
+    .tcollab    { color:#C89080; background:rgba(184,136,120,.09);  border:1px solid rgba(184,136,120,.17); }
+    .tseries    { color:#8AA888; background:rgba(120,160,128,.08);  border:1px solid rgba(120,160,128,.16); }
+
+    /* Empty state */
+    .q-empty {
+      text-align: center; color: var(--txt2); font-size: 13px;
+      padding: 64px 24px; line-height: 1.9; position: relative; z-index: 1;
+    }
+    .q-empty-ico { font-size: 44px; margin-bottom: 16px; }
+    .q-empty-title { font-size: 16px; font-weight: 600; color: var(--txt); margin-bottom: 8px; }
+    .q-empty a { color: var(--gold); text-decoration: none; font-weight: 600; }
+    .q-empty-cta {
+      display: inline-flex; align-items: center; gap: 6px;
+      margin-top: 20px; background: var(--gold); border: none; border-radius: 10px;
+      color: #1a1510; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 700;
+      padding: 12px 24px; cursor: pointer; text-decoration: none;
+      transition: opacity .15s;
+    }
+    .q-empty-cta:hover { opacity: .85; }
+
+    /* ── BOTTOM NAV ── */
+    .bottom-nav {
+      display: flex; position: fixed; bottom: 0; left: 0; right: 0; z-index: 150;
+      background: var(--s2); border-top: 1px solid var(--b1);
+      padding: 6px 0 env(safe-area-inset-bottom, 6px);
+      justify-content: space-around; align-items: center;
+    }
+    .bnav-btn {
+      background: none; border: none; color: var(--txt2); cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+      padding: 4px 8px; font-size: 18px; transition: color .15s; min-width: 48px;
+      text-decoration: none;
+    }
+    .bnav-btn span { font-size: 9px; font-weight: 600; letter-spacing: .04em; display: block; }
+    .bnav-btn.active { color: var(--gold); }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+      background: var(--b2); color: var(--txt); border-radius: 20px;
+      padding: 8px 18px; font-size: 13px; font-weight: 500;
+      pointer-events: none; opacity: 0; transition: opacity .2s;
+      white-space: nowrap; z-index: 500;
+    }
+    .toast.show { opacity: 1; }
+
+    /* ── LIGHT MODE ── */
+    html.light {
+      --bg:#F4F1EC; --s1:#FFFDF9; --s2:#F0EDE6; --s3:#E8E4DC;
+      --b0:#E0DCD2; --b1:#D4CEC4; --b2:#C0BAB0; --b3:#A8A298;
+      --txt:#2A2520; --txt2:#706860; --mut:#A09080; --mut2:#D4CEC4; --hi:#3A3028;
+    }
+    html.light body::before { opacity: .02; }
+
+    /* ── THEME TOGGLE ── */
+    .q-theme-toggle {
+      background: none; border: 1px solid var(--b2); border-radius: 6px;
+      color: var(--txt2); cursor: pointer; font-size: 14px; padding: 4px 8px;
+      transition: all .15s; flex-shrink: 0;
+    }
+    .q-theme-toggle:hover { background: var(--s3); color: var(--txt); }
+
+    /* ── FADE IN ── */
+    @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+    body > *:not(.bottom-nav) { animation: fadeIn .25s ease both; }
+
+    /* ── MOBILE ── */
+    @media (max-width: 640px) {
+      .q-toolbar-top { padding: 10px 12px 6px; }
+      .q-title-row { gap: 6px; }
+      .q-heading { font-size: 17px; }
+      .app-logo { display: none; }
+      .q-body { padding: 12px 12px 24px; }
+      .sbox input { font-size: 13px; padding: 7px 28px 7px 32px; }
+      .q-btn { padding: 9px 14px; font-size: 12px; min-height: 38px; }
+      .q-card-main { padding: 12px 14px; }
+      .q-card-title { font-size: 13px; }
+    }
+
+    @media (min-width: 900px) {
+      .q-body { max-width: 860px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Toolbar -->
+  <div class="q-toolbar">
+    <div class="q-toolbar-top">
+      <div class="q-title-row">
+        <div class="app-logo" title="SwitchVault">
+          <svg viewBox="0 0 40 26" width="30" height="19" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="0" y="3" width="11" height="20" rx="5.5" fill="#A0453F"/>
+            <circle cx="5.5" cy="9" r="2" fill="rgba(0,0,0,.3)"/>
+            <rect x="10" y="0" width="20" height="26" rx="2" fill="#282523"/>
+            <rect x="12" y="3" width="16" height="20" rx="1.5" fill="#141412"/>
+            <polygon points="17.5,10.5 23.5,13 17.5,15.5" fill="#6A8A58" opacity=".9"/>
+            <rect x="29" y="3" width="11" height="20" rx="5.5" fill="#6A8A58"/>
+            <circle cx="34.5" cy="17" r="2" fill="rgba(0,0,0,.3)"/>
+          </svg>
+        </div>
+        <h2 class="q-heading">Queue</h2>
+        <span class="q-count-badge" id="q-count">0 ideas</span>
+        <button class="q-theme-toggle" id="q-theme-toggle" title="Toggle light/dark">🌙</button>
+      </div>
+      <div class="sbox">
+        <span class="sbox-ico">⌕</span>
+        <input id="q-search" type="text" placeholder="Search your queue…" autocomplete="off" spellcheck="false"/>
+        <button class="sbox-clear" id="q-clear">✕</button>
+      </div>
+    </div>
+    <div class="q-cats-row" id="q-cats">
+      <button class="chip on" data-qc="all">All</button>
+      <button class="chip" data-qc="gaming">Gaming</button>
+      <button class="chip" data-qc="gear">Gear</button>
+      <button class="chip" data-qc="tutorial">Tutorial</button>
+      <button class="chip" data-qc="review">Review</button>
+      <button class="chip" data-qc="lifestyle">Lifestyle</button>
+      <button class="chip" data-qc="story">Story</button>
+      <button class="chip" data-qc="comedy">Comedy</button>
+      <button class="chip" data-qc="education">Education</button>
+      <button class="chip" data-qc="series">Series</button>
+      <button class="chip" data-qc="challenge">Challenge</button>
+      <button class="chip" data-qc="reaction">Reaction</button>
+      <button class="chip" data-qc="trend">Trend</button>
+      <button class="chip" data-qc="collab">Collab</button>
+    </div>
+    <div class="q-sort-bar">
+      <button class="sort-btn on" data-sort="priority">⭐ Priority first</button>
+      <button class="sort-btn" data-sort="scheduled">📅 Scheduled</button>
+      <button class="sort-btn" data-sort="recent">📥 Recent</button>
+    </div>
+  </div>
+
+  <!-- Queue content -->
+  <div id="q-body" class="q-body"></div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Bottom nav -->
+  <nav class="bottom-nav">
+    <a class="bnav-btn" href="index.html"><span>💡</span><span>Ideas</span></a>
+    <a class="bnav-btn active" href="queue.html"><span>📋</span><span>Queue</span></a>
+    <a class="bnav-btn" href="production.html"><span>🎬</span><span>Record</span></a>
+    <a class="bnav-btn" href="done.html"><span>✅</span><span>Done</span></a>
+    <a class="bnav-btn" href="index.html#sync"><span>☁</span><span>Sync</span></a>
+  </nav>
+
+  <script src="data.js"></script>
+  <script>
+    const KEYS = {
+      favs:'sv_favs', done:'sv_done', notes:'sv_notes', pris:'sv_pris',
+      scheds:'sv_scheds', custom:'sv_custom', durations:'sv_durations',
+      rejected:'sv_rejected', producing:'sv_producing', light:'sv_light',
+    };
+    const TC = {
+      gaming:   {cls:'tgaming',   l:'Gaming'},
+      gear:     {cls:'tgear',     l:'Gear'},
+      tutorial: {cls:'ttutorial', l:'Tutorial'},
+      review:   {cls:'treview',   l:'Review'},
+      lifestyle:{cls:'tlifestyle',l:'Lifestyle'},
+      story:    {cls:'tstory',    l:'Story'},
+      education:{cls:'teducation',l:'Education'},
+      challenge:{cls:'tchallenge',l:'Challenge'},
+      reaction: {cls:'treaction', l:'Reaction'},
+      trend:    {cls:'ttrend',    l:'Trend'},
+      comedy:   {cls:'tcomedy',   l:'Comedy'},
+      collab:   {cls:'tcollab',   l:'Collab'},
+      series:   {cls:'tseries',   l:'Series'},
+    };
+    const DUR_LABELS = {quick:'⚡ Quick', medium:'⏳ Medium', full:'🎬 Full day'};
+
+    // State
+    let favs = new Set(), done = new Set(), producing = new Set(), rejected = new Set();
+    let notes = {}, pris = {}, scheds = {}, durations = {}, customIdeas = [];
+    let searchQ = '', filterCat = 'all', sortMode = 'priority';
+
+    // Utils
+    function lsGet(k) { try { return localStorage.getItem(k); } catch(e) { return null; } }
+    function lsSet(k, v) { try { localStorage.setItem(k, v); } catch(e) {} }
+
+    function getIdea(i) {
+      return i < window.ALL_IDEAS.length
+        ? window.ALL_IDEAS[i]
+        : customIdeas[i - window.ALL_IDEAS.length];
+    }
+
+    let _toastTimer;
+    function showToast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg; el.classList.add('show');
+      clearTimeout(_toastTimer);
+      _toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+    }
+
+    // Load
+    function loadState() {
+      try { const v = lsGet(KEYS.favs);      if(v) favs      = new Set(JSON.parse(v)); } catch(e){}
+      try { const v = lsGet(KEYS.done);      if(v) done      = new Set(JSON.parse(v)); } catch(e){}
+      try { const v = lsGet(KEYS.producing); if(v) producing = new Set(JSON.parse(v)); } catch(e){}
+      try { const v = lsGet(KEYS.rejected);  if(v) rejected  = new Set(JSON.parse(v)); } catch(e){}
+      try { const v = lsGet(KEYS.notes);     if(v) notes     = JSON.parse(v); } catch(e){}
+      try { const v = lsGet(KEYS.pris);      if(v) pris      = JSON.parse(v); } catch(e){}
+      try { const v = lsGet(KEYS.scheds);    if(v) scheds    = JSON.parse(v); } catch(e){}
+      try { const v = lsGet(KEYS.durations); if(v) durations = JSON.parse(v); } catch(e){}
+      try { const v = lsGet(KEYS.custom);    if(v) customIdeas = JSON.parse(v); } catch(e){}
+      const lightOn = lsGet(KEYS.light) === '1';
+      document.documentElement.classList.toggle('light', lightOn);
+    }
+
+    // Save
+    let _saveTimer;
+    function saveState() {
+      clearTimeout(_saveTimer);
+      _saveTimer = setTimeout(_flush, 300);
+    }
+    function _flush() {
+      lsSet(KEYS.favs,      JSON.stringify([...favs]));
+      lsSet(KEYS.done,      JSON.stringify([...done]));
+      lsSet(KEYS.producing, JSON.stringify([...producing]));
+      lsSet(KEYS.rejected,  JSON.stringify([...rejected]));
+    }
+    window.addEventListener('pagehide', () => { clearTimeout(_saveTimer); _flush(); });
+
+    // Sort queue array
+    function sortQueue(arr) {
+      const PRI_ORDER = {h:0, m:1, l:2};
+      if (sortMode === 'priority') {
+        return [...arr].sort((a, b) => {
+          const pa = PRI_ORDER[pris[a]] ?? 3;
+          const pb = PRI_ORDER[pris[b]] ?? 3;
+          return pa - pb;
+        });
+      }
+      if (sortMode === 'scheduled') {
+        return [...arr].sort((a, b) => {
+          const sa = scheds[a] || 'zzzz';
+          const sb = scheds[b] || 'zzzz';
+          return sa < sb ? -1 : sa > sb ? 1 : 0;
+        });
+      }
+      // recent: reverse order
+      return [...arr].reverse();
+    }
+
+    // Render
+    function render() {
+      const body = document.getElementById('q-body');
+
+      // Queue = favs - producing - done
+      const queueAll = [...favs].filter(i => !producing.has(i) && !done.has(i));
+
+      // Update count badge
+      const countEl = document.getElementById('q-count');
+      countEl.textContent = queueAll.length === 1 ? '1 idea' : queueAll.length + ' ideas';
+
+      if (!queueAll.length) {
+        body.innerHTML = `<div class="q-empty">
+          <div class="q-empty-ico">📋</div>
+          <div class="q-empty-title">Queue is empty</div>
+          <p>Go to Ideas and tap <strong>★</strong> on ideas you want to film.</p>
+          <a class="q-empty-cta" href="index.html">💡 Browse Ideas</a>
+        </div>`;
+        return;
+      }
+
+      // Apply search + category filter
+      const filtered = sortQueue(queueAll).filter(i => {
+        const idea = getIdea(i);
+        if (!idea) return false;
+        if (filterCat !== 'all' && !idea.tags.includes(filterCat)) return false;
+        if (searchQ && !idea.t.toLowerCase().includes(searchQ)) return false;
+        return true;
+      });
+
+      if (!filtered.length) {
+        body.innerHTML = `<div class="q-empty">
+          <div class="q-empty-ico">🔍</div>
+          <div class="q-empty-title">No matches</div>
+          Try a different search or category.
+        </div>`;
+        return;
+      }
+
+      let html = '';
+      filtered.forEach(i => {
+        const idea = getIdea(i);
+        if (!idea) return;
+
+        const tags = idea.tags.map(t => {
+          const c = TC[t] || {cls:'tgaming', l:t};
+          return `<span class="tag ${c.cls}">${c.l}</span>`;
+        }).join('');
+
+        const noteHtml = notes[i] ? `<div class="q-card-note">${notes[i]}</div>` : '';
+        const durHtml  = durations[i] ? `<span class="q-dur-badge ${durations[i]}">${DUR_LABELS[durations[i]] || durations[i]}</span>` : '';
+        const schedFormatted = scheds[i] ? (() => {
+          try { return new Date(scheds[i] + 'T00:00:00').toLocaleDateString('en-US', {month:'short', day:'numeric'}); }
+          catch(e) { return scheds[i]; }
+        })() : '';
+        const schedHtml = scheds[i] ? `<span class="q-sched-badge">Sched: ${schedFormatted}</span>` : '';
+        const metaHtml  = (durHtml || schedHtml) ? `<div class="q-card-meta">${durHtml}${schedHtml}</div>` : '';
+
+        const priLabel = pris[i] === 'h' ? '<span style="margin-right:5px">🔴</span>' : pris[i] === 'm' ? '<span style="margin-right:5px">🟡</span>' : '';
+        const titleHtml = `${priLabel}${idea.t}`;
+
+        html += `<div class="q-card">
+          <div class="q-card-edge"></div>
+          <div class="q-card-main">
+            <div class="q-card-title">${titleHtml}</div>
+            <div class="q-card-tags">${tags}</div>
+            ${noteHtml}${metaHtml}
+            <div class="q-card-actions">
+              <button class="q-btn primary" data-start="${i}">▶ Start Recording</button>
+              <button class="q-btn danger" data-remove="${i}">Remove</button>
+            </div>
+          </div>
+        </div>`;
+      });
+
+      body.innerHTML = html;
+    }
+
+    // Event delegation
+    document.getElementById('q-body').addEventListener('click', e => {
+      const startBtn  = e.target.closest('[data-start]');
+      const removeBtn = e.target.closest('[data-remove]');
+
+      if (startBtn) {
+        const i = +startBtn.dataset.start;
+        producing.add(i);
+        saveState();
+        render();
+        showToast('🎬 Recording started!');
+        return;
+      }
+      if (removeBtn) {
+        const i = +removeBtn.dataset.remove;
+        favs.delete(i);
+        saveState();
+        render();
+        showToast('Removed from queue');
+        return;
+      }
+    });
+
+    // Search
+    const searchEl = document.getElementById('q-search');
+    const clearEl  = document.getElementById('q-clear');
+    searchEl.addEventListener('input', () => {
+      searchQ = searchEl.value.trim().toLowerCase();
+      clearEl.style.display = searchQ ? '' : 'none';
+      render();
+    });
+    clearEl.addEventListener('click', () => {
+      searchQ = ''; searchEl.value = ''; clearEl.style.display = 'none'; render();
+    });
+
+    // Category chips
+    document.getElementById('q-cats').addEventListener('click', e => {
+      const btn = e.target.closest('[data-qc]');
+      if (!btn) return;
+      filterCat = btn.dataset.qc;
+      document.querySelectorAll('[data-qc]').forEach(b => b.classList.toggle('on', b.dataset.qc === filterCat));
+      render();
+    });
+
+    // Sort buttons
+    document.querySelectorAll('[data-sort]').forEach(btn => {
+      btn.addEventListener('click', function() {
+        sortMode = this.dataset.sort;
+        document.querySelectorAll('[data-sort]').forEach(b => b.classList.toggle('on', b.dataset.sort === sortMode));
+        render();
+      });
+    });
+
+    // Theme toggle
+    (function() {
+      const btn = document.getElementById('q-theme-toggle');
+      const lightOn = lsGet(KEYS.light) === '1';
+      btn.textContent = lightOn ? '☀' : '🌙';
+      btn.addEventListener('click', function() {
+        const on = document.documentElement.classList.toggle('light');
+        this.textContent = on ? '☀' : '🌙';
+        lsSet(KEYS.light, on ? '1' : '0');
+      });
+    })();
+
+    // Boot
+    loadState();
+    render();
+  </script>
+</body>
+</html>

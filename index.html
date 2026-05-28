@@ -54,7 +54,7 @@
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
+    html { scroll-behavior: smooth; overflow-x: hidden; }
     body {
       background: var(--bg);
       color: var(--txt);
@@ -63,6 +63,8 @@
       line-height: 1.5;
       min-height: 100vh;
       position: relative;
+      overflow-x: hidden;
+      max-width: 100%;
     }
 
     body::before {
@@ -265,12 +267,14 @@
       background: var(--s2);
       border-bottom: 1px solid var(--b1);
       padding: 10px clamp(12px, 3vw, 24px);
+      width: 100%;
     }
     .row1 {
       display: flex;
       align-items: center;
       gap: 8px;
       margin-bottom: 10px;
+      min-width: 0;
     }
     .sbox {
       flex: 1;
@@ -409,6 +413,8 @@
       overflow-x: auto;
       scrollbar-width: none;
       flex-wrap: nowrap;
+      width: 100%;
+      max-width: 100%;
     }
     .statusbar::-webkit-scrollbar { display: none; }
     .vis-num { color: var(--txt); font-weight: 600; }
@@ -907,10 +913,14 @@
     ::-webkit-scrollbar-thumb:hover { background: var(--mut); }
 
     @media (max-width: 480px) {
-      .hstats { gap: 12px; }
+      .hstats { gap: 8px; }
+      .hst { min-width: 48px; padding: 8px 10px; }
+      .best-cat, .days-since { display: none; }
       .row1 { gap: 4px; }
+      .row1 .tbtn-group { display: none; }
       .card-acts { gap: 1px; }
       .cact { padding: 3px 4px; font-size: 12px; }
+      .right-ctrls .dash-toggle:not(#btn-pipeline):not(#dash-toggle) { display: none; }
     }
 
     /* === LIGHT MODE === */
@@ -1196,12 +1206,13 @@
     .pipe-toolbar {
       position: sticky; top: 0; z-index: 100;
       background: var(--s1); border-bottom: 1px solid var(--b1);
+      width: 100%; max-width: 100%;
     }
     .pipe-toolbar-top {
       padding: 12px clamp(12px,3vw,24px) 8px;
       display: flex; flex-direction: column; gap: 10px;
     }
-    .pipe-title-row { display: flex; align-items: center; gap: 10px; }
+    .pipe-title-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; min-width: 0; }
     .pipe-heading {
       font-family: 'Anton', sans-serif; font-size: 22px; font-weight: 400;
       color: var(--txt); letter-spacing: .02em; flex: 1;

@@ -912,15 +912,59 @@
     ::-webkit-scrollbar-thumb { background: var(--b3); border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: var(--mut); }
 
-    @media (max-width: 480px) {
-      .hstats { gap: 8px; }
-      .hst { min-width: 48px; padding: 8px 10px; }
+    /* Mobile-only controls (hidden on desktop) */
+    .mobile-ctrls {
+      display: none; gap: 5px; align-items: center; margin-left: auto;
+    }
+    /* Sort popover */
+    .sort-popover {
+      position: fixed; bottom: 72px; left: 12px; right: 12px; z-index: 300;
+      background: var(--s2); border: 1px solid var(--b2); border-radius: 14px;
+      padding: 12px 14px; display: none; flex-direction: column; gap: 10px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.4);
+    }
+    .sort-popover.open { display: flex; }
+    .sort-popover-row { display: flex; gap: 6px; flex-wrap: wrap; }
+    .sort-popover-label { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--txt2); }
+
+    /* === MOBILE LAYOUT === */
+    @media (max-width: 640px) {
+      /* Compact hero on mobile */
+      .hero { padding: 16px 16px 14px; }
+      .hero-tag { font-size: 10px; padding: 3px 10px; margin-bottom: 10px; }
+      .hero h1 { font-size: 38px; margin-bottom: 2px; }
+      .hero-desc { font-size: 12px; margin: 8px auto 12px; }
+      .hstats { gap: 6px; margin-bottom: 12px; }
+      .hst { min-width: 44px; padding: 7px 8px; }
+      .hst-n { font-size: 20px; }
+      .hst-l { font-size: 9px; }
       .best-cat, .days-since { display: none; }
-      .row1 { gap: 4px; }
+      .streak-badge { font-size: 11px; padding: 3px 10px; margin-bottom: 10px; }
+      .prog-wrap { margin-bottom: 0; }
+      /* Hide Idea of the Day and goal widget on mobile — they take too much vertical space */
+      .iotd-card, .goal-widget { display: none; }
+
+      /* Toolbar: single tight row */
+      .toolbar { padding: 8px 12px; }
+      .row1 { margin-bottom: 8px; gap: 6px; }
       .row1 .tbtn-group { display: none; }
+      .app-logo { display: none; }
+      #btn-rand { padding: 7px 9px; font-size: 14px; min-width: 34px; }
+      #btn-filter-row { font-size: 11px; padding: 7px 9px; }
+      #search { font-size: 13px; padding: 7px 28px 7px 32px; }
+
+      /* Category chips: tighter */
+      .chips { gap: 5px; }
+      .chip { font-size: 11px; padding: 4px 10px; }
+
+      /* Statusbar: just the count + two buttons on mobile */
+      .statusbar { padding: 5px 12px; min-height: 0; }
+      .right-ctrls { display: none; }
+      .mobile-ctrls { display: flex; }
+
+      /* Cards */
       .card-acts { gap: 1px; }
       .cact { padding: 3px 4px; font-size: 12px; }
-      .right-ctrls .dash-toggle:not(#btn-pipeline):not(#dash-toggle) { display: none; }
     }
 
     /* === LIGHT MODE === */
@@ -1681,6 +1725,11 @@
   <!-- Status bar -->
   <div class="statusbar">
     <div style="flex-shrink:0">Showing <span class="vis-num" id="vis-n">—</span></div>
+    <!-- Mobile-only compact controls -->
+    <div class="mobile-ctrls">
+      <button class="sbtn" id="mob-select">Select</button>
+      <button class="sbtn" id="mob-sort" style="font-size:10px">Sort ▾</button>
+    </div>
     <div class="right-ctrls">
       <button class="dash-toggle" id="btn-pipeline" style="color:var(--teal)">🎬 Pipeline</button>
       <button class="dash-toggle" id="dash-toggle">Stats</button>
@@ -2074,6 +2123,24 @@
   </div>
 
   <!-- Bottom navigation (mobile) -->
+  <!-- Mobile sort popover -->
+  <div class="sort-popover" id="sort-popover">
+    <div class="sort-popover-label">Sort by</div>
+    <div class="sort-popover-row">
+      <button class="sbtn on" data-s="num">№ Number</button>
+      <button class="sbtn" data-s="az">A–Z</button>
+      <button class="sbtn" data-s="fav">★ Approved</button>
+      <button class="sbtn" data-s="undone">Todo first</button>
+      <button class="sbtn" data-s="sched">Date</button>
+      <button class="sbtn" data-s="pri">Priority</button>
+    </div>
+    <div class="sort-popover-label" style="margin-top:2px">View</div>
+    <div class="sort-popover-row">
+      <button class="sbtn" data-v="normal" id="mob-vn">Full cards</button>
+      <button class="sbtn on" data-v="compact" id="mob-vc">Compact</button>
+    </div>
+  </div>
+
   <nav class="bottom-nav" id="bottom-nav">
     <button class="bnav-btn active" id="bnav-home" data-bnav="home"><span>💡</span><span>Ideas</span></button>
     <button class="bnav-btn" id="bnav-pipe" data-bnav="pipe">
@@ -4215,6 +4282,39 @@
 
     document.getElementById('btn-select-mode').addEventListener('click', () => {
       selectMode ? exitSelectMode() : enterSelectMode();
+    });
+
+    // Mobile compact controls
+    document.getElementById('mob-select')?.addEventListener('click', () => {
+      selectMode ? exitSelectMode() : enterSelectMode();
+    });
+    const sortPopover = document.getElementById('sort-popover');
+    document.getElementById('mob-sort')?.addEventListener('click', e => {
+      e.stopPropagation();
+      sortPopover?.classList.toggle('open');
+    });
+    document.addEventListener('click', e => {
+      if (sortPopover?.classList.contains('open') && !sortPopover.contains(e.target) && e.target.id !== 'mob-sort') {
+        sortPopover.classList.remove('open');
+      }
+    });
+    sortPopover?.querySelectorAll('[data-s]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        sortMode = btn.dataset.s;
+        sortPopover.querySelectorAll('[data-s]').forEach(b => b.classList.toggle('on', b.dataset.s === sortMode));
+        document.querySelectorAll('[data-s]').forEach(b => b.classList.toggle('on', b.dataset.s === sortMode));
+        saveAll(); render();
+        sortPopover.classList.remove('open');
+      });
+    });
+    sortPopover?.querySelectorAll('[data-v]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        viewMode = btn.dataset.v;
+        list.classList.toggle('compact', viewMode === 'compact');
+        sortPopover.querySelectorAll('[data-v]').forEach(b => b.classList.toggle('on', b.dataset.v === viewMode));
+        document.querySelectorAll('[data-v]').forEach(b => b.classList.toggle('on', b.dataset.v === viewMode));
+        sortPopover.classList.remove('open');
+      });
     });
     document.getElementById('sel-cancel').addEventListener('click', exitSelectMode);
     document.getElementById('sel-star').addEventListener('click', () => {

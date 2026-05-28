@@ -1245,101 +1245,6 @@
     .cal-item:hover { background: var(--s3); }
     .cal-item-date { font-size: 10px; color: var(--txt2); margin-bottom: 3px; }
 
-    /* === PIPELINE PAGE === */
-    #pg-pipeline { min-height: 100vh; background: var(--bg); }
-    .pipe-toolbar {
-      position: sticky; top: 0; z-index: 100;
-      background: var(--s1); border-bottom: 1px solid var(--b1);
-      width: 100%; max-width: 100%;
-    }
-    .pipe-toolbar-top {
-      padding: 12px clamp(12px,3vw,24px) 8px;
-      display: flex; flex-direction: column; gap: 10px;
-    }
-    .pipe-title-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; min-width: 0; }
-    .pipe-heading {
-      font-family: 'Anton', sans-serif; font-size: 22px; font-weight: 400;
-      color: var(--txt); letter-spacing: .02em; flex: 1;
-    }
-    .pipe-stage-pills { display: flex; gap: 5px; flex-wrap: wrap; }
-    .pipe-pill {
-      font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
-      border-radius: 20px; padding: 3px 9px; border: 1px solid; white-space: nowrap;
-    }
-    .pipe-pill.ready  { color: var(--gold); background: rgba(200,168,112,.08); border-color: rgba(200,168,112,.25); }
-    .pipe-pill.prod   { color: var(--teal); background: rgba(106,138,88,.08);  border-color: rgba(106,138,88,.25); }
-    .pipe-pill.pdone  { color: var(--txt2); background: rgba(96,88,80,.1);      border-color: rgba(96,88,80,.25); }
-    .pipe-sbox { width: 100%; }
-    .pipe-cats-row {
-      padding: 6px clamp(12px,3vw,24px) 10px; display: flex; gap: 6px;
-      overflow-x: auto; scrollbar-width: none;
-    }
-    .pipe-cats-row::-webkit-scrollbar { display: none; }
-    .pipe-body {
-      padding: 16px clamp(12px,3vw,24px) 80px;
-      max-width: 720px;
-    }
-    .pipe-stage { margin-bottom: 32px; }
-    .pipe-stage-hdr {
-      font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
-      margin-bottom: 12px; padding: 0 0 8px; border-bottom: 2px solid;
-      display: flex; align-items: center; gap: 8px;
-    }
-    .pipe-stage-hdr.ready { color: var(--gold); border-color: rgba(200,168,112,.3); }
-    .pipe-stage-hdr.prod  { color: var(--teal); border-color: rgba(106,138,88,.3); }
-    .pipe-stage-hdr.pdone { color: var(--txt2); border-color: rgba(96,88,80,.2); }
-    .pipe-stage-count {
-      background: var(--b1); border-radius: 10px; padding: 1px 7px;
-      font-size: 10px; color: var(--txt2); font-weight: 700;
-    }
-    .pipe-card {
-      background: var(--s2); border: 1px solid var(--b1); border-radius: 10px;
-      margin-bottom: 10px; display: flex; overflow: hidden; transition: background .12s;
-    }
-    .pipe-card:hover { background: var(--s3); }
-    .pipe-card-edge { width: 4px; flex-shrink: 0; }
-    .pipe-card-main { flex: 1; padding: 14px 16px; min-width: 0; }
-    .pipe-card-title {
-      font-size: 14px; font-weight: 600; color: var(--txt);
-      margin-bottom: 7px; line-height: 1.35;
-    }
-    .pipe-card-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 9px; }
-    .pipe-card-note {
-      font-size: 11px; color: var(--txt2); margin-bottom: 9px; font-style: italic;
-      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-    }
-    .pipe-card-meta { display: flex; gap: 6px; align-items: center; margin-bottom: 9px; flex-wrap: wrap; }
-    .pipe-dur-badge {
-      font-size: 9px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
-      border-radius: 4px; padding: 2px 6px; border: 1px solid;
-    }
-    .pipe-dur-badge.quick  { color: var(--teal); background: rgba(106,138,88,.1); border-color: rgba(106,138,88,.25); }
-    .pipe-dur-badge.medium { color: var(--gold); background: rgba(200,168,112,.1); border-color: rgba(200,168,112,.25); }
-    .pipe-dur-badge.full   { color: var(--acc);  background: rgba(160,69,63,.08); border-color: rgba(160,69,63,.2); }
-    .pipe-card-actions { display: flex; gap: 6px; flex-wrap: wrap; }
-    .pipe-btn {
-      background: var(--s1); border: 1px solid var(--b2); border-radius: 6px;
-      color: var(--txt2); cursor: pointer; font-size: 11px; font-weight: 600;
-      padding: 6px 13px; white-space: nowrap; transition: all .15s; letter-spacing: .02em;
-    }
-    .pipe-btn:hover { background: var(--s3); color: var(--txt); }
-    .pipe-btn.primary { background: rgba(106,138,88,.12); border-color: rgba(106,138,88,.3); color: var(--teal); }
-    .pipe-btn.primary:hover { background: rgba(106,138,88,.22); }
-    .pipe-btn.danger  { background: rgba(160,69,63,.08); border-color: rgba(160,69,63,.25); color: var(--acc); }
-    .pipe-btn.danger:hover { background: rgba(160,69,63,.15); }
-    .pipe-card.is-pdone { opacity: .55; }
-    .pipe-card.is-pdone .pipe-card-title { text-decoration: line-through; color: var(--txt2); }
-    .pipe-empty {
-      text-align: center; color: var(--txt2); font-size: 13px; padding: 64px 24px; line-height: 1.9;
-    }
-    .pipe-empty-ico { font-size: 36px; margin-bottom: 16px; }
-    .pipe-empty-title { font-size: 16px; font-weight: 600; color: var(--txt); margin-bottom: 8px; }
-    .pipe-sched-badge {
-      font-size: 9px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
-      color: var(--txt2); background: var(--s1); border: 1px solid var(--b2);
-      border-radius: 4px; padding: 2px 6px;
-    }
-    .prod-badge { display: inline-block; font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--teal); background: rgba(106,138,88,.12); border: 1px solid rgba(106,138,88,.25); border-radius: 4px; padding: 1px 5px; margin-left: 6px; vertical-align: middle; }
     .overlay-hdr { display: flex; align-items: center; justify-content: space-between; padding: 16px clamp(12px,3vw,24px) 0; }
     .overlay-title { font-family: 'Anton',sans-serif; font-size: 20px; font-weight: 400; color: var(--txt); }
     .overlay-close { background: var(--s1); border: 1px solid var(--b2); border-radius: 8px; color: var(--txt2); cursor: pointer; font-size: 14px; padding: 5px 10px; }
@@ -1731,7 +1636,7 @@
       <button class="sbtn" id="mob-sort" style="font-size:10px">Sort ▾</button>
     </div>
     <div class="right-ctrls">
-      <button class="dash-toggle" id="btn-pipeline" style="color:var(--teal)">🎬 Pipeline</button>
+      <a class="dash-toggle" id="btn-pipeline" href="pipeline.html" style="color:var(--teal);text-decoration:none">🎬 Pipeline</a>
       <button class="dash-toggle" id="dash-toggle">Stats</button>
       <button class="dash-toggle" id="btn-charts">Charts</button>
       <button class="dash-toggle" id="btn-cal">Cal</button>
@@ -1822,55 +1727,6 @@
   </div>
 
   </div><!-- end #pg-ideas -->
-
-  <!-- PIPELINE PAGE -->
-  <div id="pg-pipeline" style="display:none">
-    <div class="pipe-toolbar" id="pipe-toolbar">
-      <div class="pipe-toolbar-top">
-        <div class="pipe-title-row">
-          <div class="app-logo" title="Pipeline">
-            <svg viewBox="0 0 40 26" width="30" height="19" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="0" y="3" width="11" height="20" rx="5.5" fill="#A0453F"/>
-              <circle cx="5.5" cy="9" r="2" fill="rgba(0,0,0,.3)"/>
-              <rect x="10" y="0" width="20" height="26" rx="2" fill="#282523"/>
-              <rect x="12" y="3" width="16" height="20" rx="1.5" fill="#141412"/>
-              <polygon points="17.5,10.5 23.5,13 17.5,15.5" fill="#6A8A58" opacity=".9"/>
-              <rect x="29" y="3" width="11" height="20" rx="5.5" fill="#6A8A58"/>
-              <circle cx="34.5" cy="17" r="2" fill="rgba(0,0,0,.3)"/>
-            </svg>
-          </div>
-          <h2 class="pipe-heading">Pipeline</h2>
-          <div class="pipe-stage-pills">
-            <span class="pipe-pill ready"><b id="pipe-cnt-ready">0</b> Ready</span>
-            <span class="pipe-pill prod"><b id="pipe-cnt-prod">0</b> Filming</span>
-            <span class="pipe-pill pdone"><b id="pipe-cnt-done">0</b> Done</span>
-          </div>
-        </div>
-        <div class="sbox pipe-sbox">
-          <span class="sbox-ico">⌕</span>
-          <input id="pipe-search" type="text" placeholder="Search pipeline…" autocomplete="off" spellcheck="false"/>
-          <button class="sbox-clear" id="pipe-search-clear" style="display:none">✕</button>
-        </div>
-      </div>
-      <div class="pipe-cats-row" id="pipe-cats">
-        <button class="chip on" data-pc="all">All</button>
-        <button class="chip" data-pc="gaming">Gaming</button>
-        <button class="chip" data-pc="gear">Gear</button>
-        <button class="chip" data-pc="tutorial">Tutorial</button>
-        <button class="chip" data-pc="review">Review</button>
-        <button class="chip" data-pc="lifestyle">Lifestyle</button>
-        <button class="chip" data-pc="story">Story</button>
-        <button class="chip" data-pc="comedy">Comedy</button>
-        <button class="chip" data-pc="education">Education</button>
-        <button class="chip" data-pc="series">Series</button>
-        <button class="chip" data-pc="challenge">Challenge</button>
-        <button class="chip" data-pc="reaction">Reaction</button>
-        <button class="chip" data-pc="trend">Trend</button>
-        <button class="chip" data-pc="collab">Collab</button>
-      </div>
-    </div>
-    <div id="pipe-body" class="pipe-body"></div>
-  </div><!-- end #pg-pipeline -->
 
   <!-- Random modal -->
   <div class="overlay" id="overlay">
@@ -2143,14 +1999,7 @@
 
   <nav class="bottom-nav" id="bottom-nav">
     <button class="bnav-btn active" id="bnav-home" data-bnav="home"><span>💡</span><span>Ideas</span></button>
-    <button class="bnav-btn" id="bnav-pipe" data-bnav="pipe">
-      <svg viewBox="0 0 18 18" width="18" height="18" fill="none" style="display:block">
-        <rect x="1" y="4" width="6" height="10" rx="1.5" fill="currentColor" opacity=".5"/>
-        <rect x="8.5" y="1" width="6" height="16" rx="1.5" fill="currentColor" opacity=".8"/>
-        <rect x="16" y="6" width="1.5" height="6" rx=".75" fill="currentColor"/>
-      </svg>
-      <span>Pipeline</span>
-    </button>
+    <a class="bnav-btn" id="bnav-pipe" href="pipeline.html"><span>🎬</span><span>Pipeline</span></a>
     <button class="bnav-btn" id="bnav-rand" data-bnav="rand"><span>🎲</span><span>Random</span></button>
     <button class="bnav-btn" id="bnav-charts" data-bnav="charts"><span>📊</span><span>Stats</span></button>
     <button class="bnav-btn" id="bnav-sync" data-bnav="sync"><span id="bnav-sync-ico">☁</span><span>Sync</span></button>
@@ -2227,10 +2076,6 @@
     let searchHistory = [];
     let durTarget = null;
     let activeCollection = '';
-
-    let currentPage = 'ideas';
-    let pipeQ = '';
-    let pipeCat = 'all';
 
     let filt = 'all';
     let q = '';
@@ -2851,112 +2696,6 @@
         });
         chips.appendChild(ch);
       });
-    }
-
-    // === APPROVED PAGE ===
-    // === PIPELINE PAGE ===
-
-    function _pipeMatches(i, idea) {
-      if (pipeCat !== 'all' && !idea.tags.includes(pipeCat)) return false;
-      if (pipeQ) {
-        const sq = pipeQ.toLowerCase();
-        if (!idea.t.toLowerCase().includes(sq)) return false;
-      }
-      return true;
-    }
-
-    function _pipeCard(i, stage) {
-      const idea = getIdea(i); if (!idea) return '';
-      const edgeColor = stage === 'ready' ? 'var(--gold)' : stage === 'prod' ? 'var(--teal)' : 'var(--mut)';
-      const tagsHtml = idea.tags.map(t => {
-        const c = TC[t] || { cls: 'tgaming', l: t };
-        return `<span class="tag ${c.cls}">${c.l}</span>`;
-      }).join('');
-      const noteHtml = notes[i] ? `<div class="pipe-card-note">${notes[i]}</div>` : '';
-      const durHtml = durations[i] ? `<span class="pipe-dur-badge ${durations[i]}">${DUR_LABELS[durations[i]] || durations[i]}</span>` : '';
-      const schedHtml = scheds[i] ? `<span class="pipe-sched-badge">📅 ${scheds[i]}</span>` : '';
-      const metaHtml = (durHtml || schedHtml) ? `<div class="pipe-card-meta">${durHtml}${schedHtml}</div>` : '';
-      let actionsHtml = '';
-      if (stage === 'ready') {
-        actionsHtml = `<button class="pipe-btn primary" data-pipe-prod="${i}">▶ Start Filming</button><button class="pipe-btn danger" data-pipe-unappr="${i}">Remove</button>`;
-      } else if (stage === 'prod') {
-        actionsHtml = `<button class="pipe-btn primary" data-pipe-done="${i}">✓ Mark Done</button><button class="pipe-btn" data-pipe-unprod="${i}">← Back to Ready</button>`;
-      } else {
-        actionsHtml = `<button class="pipe-btn" data-pipe-undone="${i}">↩ Undo Done</button>`;
-      }
-      const doneClass = stage === 'done' ? ' is-pdone' : '';
-      return `<div class="pipe-card${doneClass}"><div class="pipe-card-edge" style="background:${edgeColor}"></div><div class="pipe-card-main"><div class="pipe-card-title">${idea.t}</div><div class="pipe-card-tags">${tagsHtml}</div>${noteHtml}${metaHtml}<div class="pipe-card-actions">${actionsHtml}</div></div></div>`;
-    }
-
-    function renderPipeline() {
-      const body = document.getElementById('pipe-body');
-      if (!body) return;
-
-      const allApproved = [...favs];
-      const bankAll  = allApproved.filter(i => !producing.has(i) && !done.has(i));
-      const prodAll  = [...producing].filter(i => !done.has(i));
-      const doneAll  = allApproved.filter(i => done.has(i));
-
-      // update pill counts (unfiltered)
-      const cntReady = document.getElementById('pipe-cnt-ready');
-      const cntProd  = document.getElementById('pipe-cnt-prod');
-      const cntDone  = document.getElementById('pipe-cnt-done');
-      if (cntReady) cntReady.textContent = bankAll.length;
-      if (cntProd)  cntProd.textContent  = prodAll.length;
-      if (cntDone)  cntDone.textContent  = doneAll.length;
-
-      if (!allApproved.length) {
-        body.innerHTML = `<div class="pipe-empty"><div class="pipe-empty-ico">💡</div><div class="pipe-empty-title">No ideas approved yet</div>Go to the <strong>Ideas</strong> page and tap the ★ on ideas you want to make into videos.</div>`;
-        return;
-      }
-
-      const bank  = bankAll.filter(i => { const idea = getIdea(i); return idea && _pipeMatches(i, idea); });
-      const inProd = prodAll.filter(i => { const idea = getIdea(i); return idea && _pipeMatches(i, idea); });
-      const completed = doneAll.filter(i => { const idea = getIdea(i); return idea && _pipeMatches(i, idea); });
-
-      let html = '';
-
-      if (bank.length) {
-        html += `<div class="pipe-stage"><div class="pipe-stage-hdr ready">Ready to Film <span class="pipe-stage-count">${bank.length}</span></div>`;
-        bank.forEach(i => { html += _pipeCard(i, 'ready'); });
-        html += '</div>';
-      }
-
-      if (inProd.length) {
-        html += `<div class="pipe-stage"><div class="pipe-stage-hdr prod">In Production <span class="pipe-stage-count">${inProd.length}</span></div>`;
-        inProd.forEach(i => { html += _pipeCard(i, 'prod'); });
-        html += '</div>';
-      }
-
-      if (completed.length) {
-        html += `<div class="pipe-stage"><div class="pipe-stage-hdr pdone">Done <span class="pipe-stage-count">${completed.length}</span></div>`;
-        completed.forEach(i => { html += _pipeCard(i, 'done'); });
-        html += '</div>';
-      }
-
-      if (!bank.length && !inProd.length && !completed.length) {
-        html = `<div class="pipe-empty"><div class="pipe-empty-ico">🔍</div><div class="pipe-empty-title">No matches</div>Try a different search or category filter.</div>`;
-      }
-
-      body.innerHTML = html;
-    }
-
-    // Keep old name as alias so any stray calls don't crash
-    function renderApprovedPage() { renderPipeline(); }
-
-    // === PAGE SWITCHING ===
-    function goPage(name) {
-      currentPage = name;
-      const pgIdeas = document.getElementById('pg-ideas');
-      const pgPipe  = document.getElementById('pg-pipeline');
-      if (pgIdeas) pgIdeas.style.display = name === 'ideas' ? '' : 'none';
-      if (pgPipe)  pgPipe.style.display  = name === 'pipeline' ? '' : 'none';
-      const fab = document.getElementById('fab-add');
-      if (fab) fab.style.display = name === 'ideas' ? '' : 'none';
-      document.querySelectorAll('.bnav-btn').forEach(b => b.classList.remove('active'));
-      const activeBtn = name === 'ideas' ? 'bnav-home' : name === 'pipeline' ? 'bnav-pipe' : null;
-      if (activeBtn) document.getElementById(activeBtn)?.classList.add('active');
-      if (name === 'pipeline') renderPipeline();
     }
 
     // === GOAL WIDGET ===
@@ -4121,13 +3860,11 @@
 
     // === BOTTOM NAV ===
     document.getElementById('bnav-home')?.addEventListener('click', () => {
-      goPage('ideas');
       filt = 'all'; showFavsOnly = false; showDoneOnly = false; q = '';
       document.getElementById('search').value = '';
       document.querySelectorAll('.chip').forEach(c => c.classList.toggle('on', c.dataset.f === 'all'));
       render();
     });
-    document.getElementById('bnav-pipe')?.addEventListener('click', () => goPage('pipeline'));
     document.getElementById('bnav-rand')?.addEventListener('click', pickRand);
     document.getElementById('bnav-charts')?.addEventListener('click', () => { renderCharts(); document.getElementById('charts-overlay').classList.add('open'); });
     document.getElementById('bnav-sync')?.addEventListener('click', () => {
@@ -4138,60 +3875,6 @@
       document.getElementById('sync-disconnect-btn').style.display = syncConfigured ? '' : 'none';
       document.getElementById('sync-status-msg').textContent = syncConfigured ? '✓ Connected' : '';
       document.getElementById('sync-overlay').classList.add('open');
-    });
-
-    // Desktop pipeline button
-    document.getElementById('btn-pipeline')?.addEventListener('click', () => goPage('pipeline'));
-
-    // === PIPELINE PAGE EVENTS ===
-    document.getElementById('pipe-search')?.addEventListener('input', e => {
-      pipeQ = e.target.value.trim().toLowerCase();
-      document.getElementById('pipe-search-clear').style.display = pipeQ ? '' : 'none';
-      renderPipeline();
-    });
-    document.getElementById('pipe-search-clear')?.addEventListener('click', () => {
-      pipeQ = ''; document.getElementById('pipe-search').value = '';
-      document.getElementById('pipe-search-clear').style.display = 'none';
-      renderPipeline();
-    });
-    document.getElementById('pipe-cats')?.addEventListener('click', e => {
-      const btn = e.target.closest('[data-pc]');
-      if (!btn) return;
-      pipeCat = btn.dataset.pc;
-      document.querySelectorAll('#pipe-cats [data-pc]').forEach(b => b.classList.toggle('on', b.dataset.pc === pipeCat));
-      renderPipeline();
-    });
-
-    // Delegation for pipeline actions
-    document.getElementById('pipe-body')?.addEventListener('click', e => {
-      const prodBtn = e.target.closest('[data-pipe-prod]');
-      if (prodBtn) {
-        const i = +prodBtn.dataset.pipeProd;
-        producing.add(i); saveAll(); _setProdUI(i, true); renderPipeline();
-        showToast('🎬 Filming started'); return;
-      }
-      const unprodBtn = e.target.closest('[data-pipe-unprod]');
-      if (unprodBtn) {
-        const i = +unprodBtn.dataset.pipeUnprod;
-        producing.delete(i); saveAll(); _setProdUI(i, false); renderPipeline(); return;
-      }
-      const doneBtn = e.target.closest('[data-pipe-done]');
-      if (doneBtn) {
-        const i = +doneBtn.dataset.pipeDone;
-        producing.delete(i); applyDone(i, true); saveAll(); updateCounts(); renderPipeline();
-        showToast('🎉 Video done!'); return;
-      }
-      const undoneBtn = e.target.closest('[data-pipe-undone]');
-      if (undoneBtn) {
-        const i = +undoneBtn.dataset.pipeUndone;
-        applyDone(i, false); saveAll(); updateCounts(); renderPipeline(); return;
-      }
-      const unapprBtn = e.target.closest('[data-pipe-unappr]');
-      if (unapprBtn) {
-        const i = +unapprBtn.dataset.pipeUnappr;
-        favs.delete(i); producing.delete(i); _setFavUI(i, false);
-        saveAll(); updateCounts(); renderPipeline(); return;
-      }
     });
 
     // === IOTD click ===
@@ -4474,7 +4157,6 @@
         document.getElementById('sfilter-overlay').classList.remove('open');
         document.getElementById('coll-overlay').classList.remove('open');
         document.getElementById('hash-overlay').classList.remove('open');
-        if (currentPage === 'pipeline') goPage('ideas');
         if (selectMode) exitSelectMode();
       }
       else if (e.key === 'ArrowRight') {

@@ -198,9 +198,17 @@
       text-align: center; color: var(--txt2); font-size: 13px;
       padding: 64px 24px; line-height: 1.9; position: relative; z-index: 1;
     }
-    .pipe-empty-ico { font-size: 36px; margin-bottom: 16px; }
+    .pipe-empty-ico { font-size: 44px; margin-bottom: 16px; }
     .pipe-empty-title { font-size: 16px; font-weight: 600; color: var(--txt); margin-bottom: 8px; }
     .pipe-empty a { color: var(--teal); text-decoration: none; font-weight: 600; }
+    .pipe-empty-cta {
+      display: inline-flex; align-items: center; gap: 6px;
+      margin-top: 20px; background: var(--teal); border: none; border-radius: 10px;
+      color: #fff; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;
+      padding: 12px 24px; cursor: pointer; text-decoration: none;
+      transition: opacity .15s;
+    }
+    .pipe-empty-cta:hover { opacity: .85; }
 
     /* ── BOTTOM NAV ── */
     .bottom-nav {
@@ -481,11 +489,27 @@
       document.getElementById('cnt-prod').textContent  = prodAll.length;
       document.getElementById('cnt-done').textContent  = doneAll.length;
 
+      // Show progress bar whenever there are favs
+      const totalFavs = favs.size;
+      const doneCount = doneAll.length;
+      const progEl = document.getElementById('pipe-progress');
+      if (totalFavs > 0) {
+        progEl.style.display = '';
+        document.getElementById('pipe-prog-done').textContent = doneCount;
+        document.getElementById('pipe-prog-total').textContent = totalFavs;
+        const pct = Math.round(doneCount / totalFavs * 100);
+        document.getElementById('pipe-prog-fill').style.width = pct + '%';
+      } else {
+        progEl.style.display = 'none';
+      }
+
       if (!favs.size) {
         body.innerHTML = `<div class="pipe-empty">
           <div class="pipe-empty-ico">💡</div>
           <div class="pipe-empty-title">No ideas approved yet</div>
-          Go to the <a href="index.html">Ideas page</a> and tap ★ on ideas you want to make into videos.
+          <p>Go to the Ideas page and tap <strong>★</strong> on ideas you want to turn into videos. They'll appear here.</p>
+          <br>
+          <a class="pipe-empty-cta" href="index.html">💡 Browse Ideas</a>
         </div>`;
         return;
       }

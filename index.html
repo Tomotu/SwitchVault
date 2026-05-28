@@ -890,22 +890,24 @@
     /* === TOAST === */
     .toast {
       position: fixed;
-      bottom: 20px;
+      bottom: 76px;
       left: 50%;
-      transform: translateX(-50%) translateY(56px);
+      transform: translateX(-50%) translateY(20px);
       z-index: 600;
       background: var(--s2);
       border: 1px solid var(--b2);
-      border-radius: 8px;
+      border-radius: 20px;
       box-shadow: 0 4px 16px rgba(0,0,0,.4);
       color: var(--txt);
       font-size: 13px;
       font-weight: 500;
-      padding: 8px 16px;
-      transition: transform .22s cubic-bezier(.34,1.56,.64,1);
+      padding: 8px 18px;
+      transition: opacity .2s, transform .22s cubic-bezier(.34,1.56,.64,1);
       white-space: nowrap;
+      opacity: 0;
     }
-    .toast.show { transform: translateX(-50%) translateY(0); }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    @media (min-width: 641px) { .toast { bottom: 20px; } }
 
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: var(--s1); }
@@ -3872,7 +3874,7 @@
       render();
     });
     document.getElementById('bnav-rand')?.addEventListener('click', pickRand);
-    document.getElementById('bnav-charts')?.addEventListener('click', () => { renderCharts(); document.getElementById('charts-overlay').classList.add('open'); });
+    // bnav-charts is now a direct link to stats.html (no modal intercept needed)
     document.getElementById('bnav-sync')?.addEventListener('click', () => {
       const creds = getSyncCredentials();
       document.getElementById('sync-url-input').value = creds.url;

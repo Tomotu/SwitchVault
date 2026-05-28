@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SwitchVault — Stats</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="preload" href="data.js" as="script">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='32' fill='%23111110'/%3E%3Crect x='10' y='46' width='42' height='100' rx='21' fill='%23A0453F'/%3E%3Ccircle cx='31' cy='68' r='10' fill='rgba(0,0,0,.3)'/%3E%3Crect x='50' y='20' width='92' height='152' rx='10' fill='%23282523'/%3E%3Crect x='60' y='32' width='72' height='128' rx='6' fill='%23141412'/%3E%3Cpolygon points='80,84 112,96 80,108' fill='%236A8A58' opacity='.9'/%3E%3Crect x='140' y='46' width='42' height='100' rx='21' fill='%236A8A58'/%3E%3Ccircle cx='161' cy='124' r='10' fill='rgba(0,0,0,.3)'/%3E%3C/svg%3E">
+  <meta name="theme-color" content="#111110">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <style>
+    :root {
+      --bg:#111110; --s1:#171614; --s2:#1e1e1c; --s3:#262422;
+      --b0:#1c1b19; --b1:#282523; --b2:#363330; --b3:#484440;
+      --acc:#A0453F; --acc2:#7C2F2F; --gold:#C8A870; --gold2:#E6E1D6;
+      --teal:#6A8A58; --blue:#7A9878; --pur:#A0453F;
+      --txt:#E6E1D6; --txt2:#A09080; --mut:#605850; --mut2:#3A3530;
+      --hi:#D8C8B2; --r:6px;
+      --cat-gaming:#70AA68; --cat-gear:#C86058; --cat-series:#8AA888;
+      --cat-education:#AABB80; --cat-story:#B87060; --cat-lifestyle:#C8A880;
+      --cat-review:#D8B870; --cat-tutorial:#80A870; --cat-comedy:#D8C8A0;
+      --cat-challenge:#D86060; --cat-collab:#C89080; --cat-reaction:#8A9888;
+      --cat-trend:#C89060;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; overflow-x: hidden; }
+    body {
+      background: var(--bg); color: var(--txt);
+      font-family: 'Inter', sans-serif; font-size: 14px;
+      line-height: 1.5; min-height: 100vh;
+      overflow-x: hidden; max-width: 100%;
+      padding-bottom: 80px;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0; opacity: .035;
+      pointer-events: none; z-index: 0;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    /* ── HEADER ── */
+    .stats-header {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--s1); border-bottom: 1px solid var(--b1);
+      padding: 14px clamp(12px,3vw,24px) 12px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .stats-logo { flex-shrink: 0; opacity: .92; }
+    .stats-heading {
+      font-family: 'Anton', sans-serif; font-size: 22px;
+      font-weight: 400; color: var(--txt); letter-spacing: .02em; flex: 1;
+    }
+
+    /* ── HERO STATS ROW ── */
+    .hero-stats {
+      display: grid; grid-template-columns: repeat(2, 1fr);
+      gap: 10px; padding: 16px clamp(12px,3vw,24px) 0;
+      position: relative; z-index: 1;
+    }
+    @media (min-width: 480px) { .hero-stats { grid-template-columns: repeat(4, 1fr); } }
+    .hstat {
+      background: var(--s2); border: 1px solid var(--b1);
+      border-radius: 10px; padding: 14px 16px;
+      text-align: center;
+    }
+    .hstat-n {
+      font-family: 'Anton', sans-serif; font-size: 32px; font-weight: 400;
+      color: var(--txt); line-height: 1; margin-bottom: 4px;
+    }
+    .hstat-n.green { color: var(--teal); }
+    .hstat-n.gold  { color: var(--gold); }
+    .hstat-n.red   { color: var(--acc); }
+    .hstat-l { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--txt2); font-weight: 600; }
+
+    /* ── PROGRESS BAR ── */
+    .overall-progress {
+      padding: 16px clamp(12px,3vw,24px) 0;
+      position: relative; z-index: 1;
+    }
+    .prog-hdr { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .prog-title { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--txt2); }
+    .prog-pct { font-family: 'Anton', sans-serif; font-size: 18px; color: var(--txt); }
+    .prog-track { height: 10px; background: var(--b1); border-radius: 5px; overflow: hidden; }
+    .prog-fill {
+      height: 100%; border-radius: 5px;
+      background: linear-gradient(90deg, var(--teal), var(--blue), var(--gold));
+      background-size: 200% 100%;
+      transition: width .6s cubic-bezier(.4,0,.2,1);
+    }
+    .prog-fill.shimmer { animation: shimmer 3s linear infinite; }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+    /* ── STREAK BANNER ── */
+    .streak-banner {
+      margin: 16px clamp(12px,3vw,24px) 0;
+      background: rgba(200,168,112,.08); border: 1px solid rgba(200,168,112,.2);
+      border-radius: 10px; padding: 12px 16px;
+      display: flex; align-items: center; gap: 12px;
+      position: relative; z-index: 1;
+    }
+    .streak-banner.hidden { display: none; }
+    .streak-flame-big { font-size: 28px; }
+    .streak-info { flex: 1; }
+    .streak-main { font-family: 'Anton', sans-serif; font-size: 22px; color: var(--gold); line-height: 1; }
+    .streak-sub  { font-size: 11px; color: var(--txt2); margin-top: 2px; }
+
+    /* ── SECTION ── */
+    .section {
+      padding: 20px clamp(12px,3vw,24px) 0;
+      position: relative; z-index: 1;
+    }
+    .section-title {
+      font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--txt2); margin-bottom: 14px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .section-title::after {
+      content: ''; flex: 1; height: 1px; background: var(--b1);
+    }
+
+    /* ── WEEKLY CHART ── */
+    .week-chart { display: flex; flex-direction: column; gap: 7px; }
+    .wc-row { display: flex; align-items: center; gap: 8px; }
+    .wc-label { width: 48px; font-size: 10px; color: var(--txt2); text-align: right; flex-shrink: 0; font-variant-numeric: tabular-nums; }
+    .wc-track { flex: 1; height: 20px; background: var(--s2); border-radius: 4px; overflow: hidden; position: relative; }
+    .wc-fill { height: 100%; border-radius: 4px; background: var(--acc); transition: width .5s ease; min-width: 0; }
+    .wc-val { width: 20px; font-size: 11px; color: var(--txt2); text-align: right; flex-shrink: 0; }
+    .wc-row.current .wc-fill { background: var(--teal); }
+    .wc-row.current .wc-label { color: var(--teal); font-weight: 700; }
+
+    /* ── CAT BREAKDOWN ── */
+    .cat-grid { display: flex; flex-direction: column; gap: 8px; }
+    .cat-row { display: flex; align-items: center; gap: 10px; }
+    .cat-name { width: 74px; font-size: 11px; color: var(--txt2); text-align: right; flex-shrink: 0; }
+    .cat-track { flex: 1; height: 18px; background: var(--s2); border-radius: 4px; overflow: hidden; }
+    .cat-fill  { height: 100%; border-radius: 4px; transition: width .5s ease; }
+    .cat-pct   { width: 28px; font-size: 10px; color: var(--txt2); text-align: right; flex-shrink: 0; }
+    .cat-count { width: 28px; font-size: 10px; color: var(--txt2); flex-shrink: 0; }
+
+    /* ── STREAK CALENDAR ── */
+    .streak-cal { display: flex; flex-direction: column; gap: 4px; overflow: hidden; }
+    .scal-months { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+    .scal-months::-webkit-scrollbar { display: none; }
+    .scal-month { display: flex; flex-direction: column; gap: 2px; }
+    .scal-month-label { font-size: 8px; color: var(--txt2); text-transform: uppercase; letter-spacing: .06em; padding-left: 2px; margin-bottom: 2px; }
+    .scal-week { display: flex; gap: 2px; }
+    .scal-day {
+      width: 11px; height: 11px; border-radius: 2px; background: var(--b1);
+      transition: background .2s;
+    }
+    .scal-day.empty { background: transparent; }
+    .scal-day.done  { background: var(--teal); }
+    .scal-day.today { outline: 1px solid var(--gold); outline-offset: 1px; }
+
+    /* ── BADGES ── */
+    .badge-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px,1fr)); gap: 8px; }
+    .badge-item {
+      background: var(--s2); border: 1px solid var(--b1); border-radius: 8px;
+      padding: 12px 10px; text-align: center;
+    }
+    .badge-item.earned { border-color: rgba(200,168,112,.3); background: rgba(200,168,112,.05); }
+    .badge-item.locked { opacity: .4; filter: grayscale(.7); }
+    .badge-ico  { font-size: 26px; margin-bottom: 5px; }
+    .badge-name { font-size: 11px; font-weight: 600; color: var(--txt); margin-bottom: 2px; }
+    .badge-desc { font-size: 9px; color: var(--txt2); line-height: 1.4; }
+    .badge-date { font-size: 9px; color: var(--teal); margin-top: 3px; }
+
+    /* ── QUICK ACTIONS ── */
+    .quick-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .qa-btn {
+      background: var(--s2); border: 1px solid var(--b1); border-radius: 10px;
+      color: var(--txt2); cursor: pointer; font-size: 12px; font-weight: 500;
+      padding: 14px 12px; text-align: center; text-decoration: none;
+      transition: background .15s, border-color .15s; display: block;
+    }
+    .qa-btn:hover { background: var(--s3); border-color: var(--b2); color: var(--txt); }
+    .qa-ico { font-size: 22px; display: block; margin-bottom: 5px; }
+    .qa-btn.primary { background: rgba(106,138,88,.12); border-color: rgba(106,138,88,.28); color: var(--teal); }
+    .qa-btn.accent  { background: rgba(160,69,63,.08); border-color: rgba(160,69,63,.22); color: var(--acc); }
+
+    /* ── BOTTOM NAV ── */
+    .bottom-nav {
+      display: flex; position: fixed; bottom: 0; left: 0; right: 0; z-index: 150;
+      background: var(--s2); border-top: 1px solid var(--b1);
+      padding: 6px 0 env(safe-area-inset-bottom, 6px);
+      justify-content: space-around; align-items: center;
+    }
+    .bnav-btn {
+      background: none; border: none; color: var(--txt2); cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+      padding: 4px 8px; font-size: 18px; transition: color .15s; min-width: 48px;
+      text-decoration: none;
+    }
+    .bnav-btn span { font-size: 9px; font-weight: 600; letter-spacing: .04em; display: block; }
+    .bnav-btn.active { color: var(--teal); }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 76px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--b2); color: var(--txt); border-radius: 20px;
+      padding: 8px 18px; font-size: 13px; font-weight: 500;
+      pointer-events: none; opacity: 0; transition: opacity .2s, transform .2s;
+      white-space: nowrap; z-index: 500;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── LIGHT MODE ── */
+    html.light {
+      --bg:#F4F1EC; --s1:#FFFDF9; --s2:#F0EDE6; --s3:#E8E4DC;
+      --b0:#E0DCD2; --b1:#D4CEC4; --b2:#C0BAB0; --b3:#A8A298;
+      --txt:#2A2520; --txt2:#706860; --mut:#A09080; --mut2:#D4CEC4; --hi:#3A3028;
+    }
+    html.light body::before { opacity: .02; }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="stats-header">
+    <div class="stats-logo">
+      <svg viewBox="0 0 40 26" width="30" height="19" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0" y="3" width="11" height="20" rx="5.5" fill="#A0453F"/>
+        <circle cx="5.5" cy="9" r="2" fill="rgba(0,0,0,.3)"/>
+        <rect x="10" y="0" width="20" height="26" rx="2" fill="#282523"/>
+        <rect x="12" y="3" width="16" height="20" rx="1.5" fill="#141412"/>
+        <polygon points="17.5,10.5 23.5,13 17.5,15.5" fill="#6A8A58" opacity=".9"/>
+        <rect x="29" y="3" width="11" height="20" rx="5.5" fill="#6A8A58"/>
+        <circle cx="34.5" cy="17" r="2" fill="rgba(0,0,0,.3)"/>
+      </svg>
+    </div>
+    <h2 class="stats-heading">Analytics</h2>
+  </div>
+
+  <!-- Hero stat cards -->
+  <div class="hero-stats">
+    <div class="hstat">
+      <div class="hstat-n" id="hs-total">—</div>
+      <div class="hstat-l">Total Ideas</div>
+    </div>
+    <div class="hstat">
+      <div class="hstat-n green" id="hs-done">0</div>
+      <div class="hstat-l">Done</div>
+    </div>
+    <div class="hstat">
+      <div class="hstat-n gold" id="hs-fav">0</div>
+      <div class="hstat-l">Approved</div>
+    </div>
+    <div class="hstat">
+      <div class="hstat-n red" id="hs-pri">0</div>
+      <div class="hstat-l">Priority</div>
+    </div>
+  </div>
+
+  <!-- Overall progress -->
+  <div class="overall-progress">
+    <div class="prog-hdr">
+      <span class="prog-title">Overall completion</span>
+      <span class="prog-pct" id="prog-pct">0%</span>
+    </div>
+    <div class="prog-track">
+      <div class="prog-fill" id="prog-fill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <!-- Streak banner -->
+  <div class="streak-banner hidden" id="streak-banner">
+    <div class="streak-flame-big">🔥</div>
+    <div class="streak-info">
+      <div class="streak-main"><span id="streak-n">0</span>-day streak</div>
+      <div class="streak-sub" id="streak-sub">Keep posting daily to keep your streak!</div>
+    </div>
+  </div>
+
+  <!-- Weekly chart -->
+  <div class="section">
+    <div class="section-title">Done per week — last 8 weeks</div>
+    <div class="week-chart" id="week-chart"></div>
+  </div>
+
+  <!-- Category breakdown -->
+  <div class="section">
+    <div class="section-title">Category completion</div>
+    <div class="cat-grid" id="cat-grid"></div>
+  </div>
+
+  <!-- Activity heatmap / streak calendar -->
+  <div class="section">
+    <div class="section-title">Activity — last 90 days</div>
+    <div class="streak-cal">
+      <div class="scal-months" id="scal-months"></div>
+      <div style="display:flex;gap:4px;align-items:center;margin-top:6px">
+        <span style="font-size:9px;color:var(--txt2)">Less</span>
+        <div class="scal-day" style="background:var(--b1)"></div>
+        <div class="scal-day" style="background:rgba(106,138,88,.3)"></div>
+        <div class="scal-day" style="background:rgba(106,138,88,.6)"></div>
+        <div class="scal-day done"></div>
+        <span style="font-size:9px;color:var(--txt2)">More</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick actions -->
+  <div class="section">
+    <div class="section-title">Quick actions</div>
+    <div class="quick-actions">
+      <a class="qa-btn primary" href="index.html">
+        <span class="qa-ico">💡</span>
+        Browse Ideas
+      </a>
+      <a class="qa-btn primary" href="pipeline.html">
+        <span class="qa-ico">🎬</span>
+        Pipeline
+      </a>
+      <button class="qa-btn accent" id="qa-export">
+        <span class="qa-ico">⬇</span>
+        Export CSV
+      </button>
+      <button class="qa-btn" id="qa-copy-week">
+        <span class="qa-ico">📅</span>
+        Copy Schedule
+      </button>
+    </div>
+  </div>
+
+  <!-- Achievements -->
+  <div class="section" style="padding-bottom:20px">
+    <div class="section-title">Achievements</div>
+    <div class="badge-grid" id="badge-grid"></div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Bottom nav -->
+  <nav class="bottom-nav">
+    <a class="bnav-btn" href="index.html"><span>💡</span><span>Ideas</span></a>
+    <a class="bnav-btn" href="pipeline.html"><span>🎬</span><span>Pipeline</span></a>
+    <a class="bnav-btn" href="index.html#rand"><span>🎲</span><span>Random</span></a>
+    <a class="bnav-btn active" href="stats.html"><span>📊</span><span>Stats</span></a>
+    <a class="bnav-btn" href="index.html#sync"><span>☁</span><span>Sync</span></a>
+  </nav>
+
+  <script src="data.js"></script>
+  <script>
+    // ── Keys (same as index.html) ──
+    const KEYS = {
+      favs:'sv_favs', done:'sv_done', notes:'sv_notes', pris:'sv_pris',
+      scheds:'sv_scheds', streak:'sv_streak', custom:'sv_custom',
+      streakhist:'sv_streakhist', achiev:'sv_achievements', light:'sv_light',
+    };
+
+    const TC = {
+      gaming:    { l:'Gaming',    color:'#70AA68' },
+      gear:      { l:'Gear',      color:'#C86058' },
+      tutorial:  { l:'Tutorial',  color:'#80A870' },
+      review:    { l:'Review',    color:'#D8B870' },
+      lifestyle: { l:'Lifestyle', color:'#C8A880' },
+      story:     { l:'Story',     color:'#B87060' },
+      education: { l:'Education', color:'#AABB80' },
+      challenge: { l:'Challenge', color:'#D86060' },
+      reaction:  { l:'Reaction',  color:'#8A9888' },
+      trend:     { l:'Trend',     color:'#C89060' },
+      comedy:    { l:'Comedy',    color:'#D8C8A0' },
+      collab:    { l:'Collab',    color:'#C89080' },
+      series:    { l:'Series',    color:'#8AA888' },
+    };
+    const catList = ['gaming','gear','series','education','story','lifestyle','review','tutorial','comedy','challenge','collab','reaction','trend'];
+
+    const ACHIEVEMENTS_DEF = [
+      { id:'first',  name:'First Star',      ico:'⭐', desc:'Star your first idea' },
+      { id:'done5',  name:'Getting Started', ico:'✅', desc:'Complete 5 ideas' },
+      { id:'done25', name:'Content Grinder', ico:'📹', desc:'Complete 25 ideas' },
+      { id:'done100',name:'Century',         ico:'💯', desc:'Complete 100 ideas' },
+      { id:'streak3',name:'On Fire',         ico:'🔥', desc:'3-day done streak' },
+      { id:'streak7',name:'Week Warrior',    ico:'⚡', desc:'7-day done streak' },
+      { id:'allcat', name:'Category King',   ico:'👑', desc:'Do an idea in every category' },
+      { id:'sched10',name:'Planner',         ico:'📅', desc:'Schedule 10 ideas' },
+      { id:'pri10',  name:'Prioritiser',     ico:'🎯', desc:'Set priority on 10 ideas' },
+      { id:'note10', name:'Scribe',          ico:'📝', desc:'Add notes to 10 ideas' },
+      { id:'fav50',  name:'Fan Favourite',   ico:'💛', desc:'Star 50 ideas' },
+    ];
+
+    function lsGet(k) { try { return localStorage.getItem(k); } catch(e) { return null; } }
+
+    // ── Load state ──
+    let favs = new Set(), done = new Set(), pris = {}, scheds = {}, notes = {};
+    let streakData = {}, streakHistory = [], achievements = {}, customIdeas = [];
+
+    try { const v=lsGet(KEYS.favs);       if(v) favs         = new Set(JSON.parse(v)); } catch(e){}
+    try { const v=lsGet(KEYS.done);       if(v) done         = new Set(JSON.parse(v)); } catch(e){}
+    try { const v=lsGet(KEYS.pris);       if(v) pris         = JSON.parse(v); } catch(e){}
+    try { const v=lsGet(KEYS.scheds);     if(v) scheds       = JSON.parse(v); } catch(e){}
+    try { const v=lsGet(KEYS.notes);      if(v) notes        = JSON.parse(v); } catch(e){}
+    try { const v=lsGet(KEYS.streak);     if(v) streakData   = JSON.parse(v); } catch(e){}
+    try { const v=lsGet(KEYS.streakhist); if(v) streakHistory= JSON.parse(v); } catch(e){}
+    try { const v=lsGet(KEYS.achiev);     if(v) achievements = JSON.parse(v); } catch(e){}
+    try { const v=lsGet(KEYS.custom);     if(v) customIdeas  = JSON.parse(v); } catch(e){}
+
+    const lightOn = lsGet(KEYS.light) === '1';
+    document.documentElement.classList.toggle('light', lightOn);
+
+    const totalIdeas = window.ALL_IDEAS.length + customIdeas.length;
+
+    // ── Toast ──
+    let _toastTimer;
+    function showToast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg; el.classList.add('show');
+      clearTimeout(_toastTimer);
+      _toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
+    }
+
+    // ── Hero stats ──
+    const pct = totalIdeas > 0 ? Math.round(done.size / totalIdeas * 100) : 0;
+    document.getElementById('hs-total').textContent = totalIdeas;
+    document.getElementById('hs-done').textContent  = done.size;
+    document.getElementById('hs-fav').textContent   = favs.size;
+    document.getElementById('hs-pri').textContent   = Object.keys(pris).length;
+    document.getElementById('prog-pct').textContent = pct + '%';
+    const pf = document.getElementById('prog-fill');
+    pf.style.width = pct + '%';
+    if (done.size > 0) pf.classList.add('shimmer');
+
+    // ── Streak banner ──
+    const strCount = streakData.count || 0;
+    if (strCount > 0) {
+      document.getElementById('streak-banner').classList.remove('hidden');
+      document.getElementById('streak-n').textContent = strCount;
+      const lastDate = streakData.lastDate;
+      const today = new Date().toISOString().slice(0,10);
+      const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
+      let subText = 'Keep posting daily!';
+      if (lastDate === today) subText = 'Great — you posted today!';
+      else if (lastDate === yesterday) subText = 'Post today to keep your streak!';
+      else subText = `Last post: ${lastDate || 'never'}`;
+      document.getElementById('streak-sub').textContent = subText;
+    }
+
+    // ── Weekly chart ──
+    function renderWeekChart() {
+      const container = document.getElementById('week-chart');
+      container.innerHTML = '';
+      const weeks = [];
+      for (let w = 7; w >= 0; w--) {
+        const wStart = new Date();
+        wStart.setHours(0,0,0,0);
+        wStart.setDate(wStart.getDate() - wStart.getDay() - w*7);
+        const wEnd = new Date(wStart); wEnd.setDate(wStart.getDate() + 7);
+        const ws = wStart.toISOString().slice(0,10);
+        const we = wEnd.toISOString().slice(0,10);
+        const count = streakHistory.filter(h => h.date >= ws && h.date < we).length;
+        const isCur = w === 0;
+        weeks.push({ label: isCur ? 'This wk' : `${w}w ago`, count, isCur });
+      }
+      const max = Math.max(...weeks.map(w => w.count), 1);
+      weeks.forEach(w => {
+        const row = document.createElement('div');
+        row.className = 'wc-row' + (w.isCur ? ' current' : '');
+        row.innerHTML = `<div class="wc-label">${w.label}</div><div class="wc-track"><div class="wc-fill" style="width:${w.count/max*100}%"></div></div><div class="wc-val">${w.count}</div>`;
+        container.appendChild(row);
+      });
+    }
+
+    // ── Category breakdown ──
+    function renderCatGrid() {
+      const container = document.getElementById('cat-grid');
+      container.innerHTML = '';
+      const catCounts = {};
+      catList.forEach(c => catCounts[c] = 0);
+      window.ALL_IDEAS.forEach(idea => idea.tags.forEach(t => { if (catCounts[t] !== undefined) catCounts[t]++; }));
+
+      catList.forEach(cat => {
+        const tot = catCounts[cat] || 0;
+        if (!tot) return;
+        const dc = [...done].filter(i => window.ALL_IDEAS[i]?.tags.includes(cat)).length;
+        const favC = [...favs].filter(i => window.ALL_IDEAS[i]?.tags.includes(cat)).length;
+        const pct = tot > 0 ? Math.round(dc / tot * 100) : 0;
+        const color = TC[cat]?.color || '#888';
+
+        const row = document.createElement('div');
+        row.className = 'cat-row';
+        row.innerHTML = `
+          <div class="cat-name" style="color:${color}">${TC[cat]?.l || cat}</div>
+          <div class="cat-track"><div class="cat-fill" style="width:${pct}%;background:${color}"></div></div>
+          <div class="cat-count">${dc}/${tot}</div>
+          <div class="cat-pct">${pct}%</div>`;
+        container.appendChild(row);
+      });
+    }
+
+    // ── Streak heatmap (90 days) ──
+    function renderStreakCal() {
+      const container = document.getElementById('scal-months');
+      container.innerHTML = '';
+
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      const startDate = new Date(today);
+      startDate.setDate(today.getDate() - 89); // 90 days back
+
+      // group by month
+      const doneDates = new Set(streakHistory.map(h => h.date));
+      const todayStr = today.toISOString().slice(0,10);
+
+      // Build day objects
+      const days = [];
+      for (let d = new Date(startDate); d <= today; d.setDate(d.getDate()+1)) {
+        days.push({ ds: d.toISOString().slice(0,10), month: d.getMonth(), year: d.getFullYear(), dow: d.getDay() });
+      }
+
+      // Group into 7-day columns
+      // Pad the start so first column starts on Sunday
+      const firstDow = days[0].dow;
+      const padded = Array(firstDow).fill(null).concat(days);
+
+      const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      let col = [];
+      const cols = [];
+      for (let i = 0; i < padded.length; i++) {
+        col.push(padded[i]);
+        if (col.length === 7) { cols.push(col); col = []; }
+      }
+      if (col.length) { while (col.length < 7) col.push(null); cols.push(col); }
+
+      // Render week columns
+      let lastMonth = -1;
+      const wrapper = document.createElement('div');
+      wrapper.style.cssText = 'display:flex;gap:2px;align-items:flex-start';
+      cols.forEach(wk => {
+        // Check if any day in this week starts a new month
+        const firstDay = wk.find(d => d !== null);
+        if (firstDay && firstDay.month !== lastMonth) {
+          const lbl = document.createElement('div');
+          lbl.style.cssText = 'display:flex;flex-direction:column;gap:2px';
+          lbl.innerHTML = `<div style="font-size:8px;color:var(--txt2);text-align:center;letter-spacing:.04em;height:12px;line-height:12px">${MONTHS[firstDay.month]}</div>`;
+          const col = document.createElement('div');
+          col.style.cssText = 'display:flex;flex-direction:column;gap:2px;margin-top:12px';
+          wk.forEach(day => {
+            const cell = document.createElement('div');
+            cell.className = 'scal-day' + (day === null ? ' empty' : day.ds === todayStr ? ' today' : doneDates.has(day.ds) ? ' done' : '');
+            col.appendChild(cell);
+          });
+          lbl.appendChild(col);
+          wrapper.appendChild(lbl);
+          lastMonth = firstDay.month;
+        } else {
+          const col = document.createElement('div');
+          col.style.cssText = 'display:flex;flex-direction:column;gap:2px;margin-top:12px';
+          wk.forEach(day => {
+            const cell = document.createElement('div');
+            cell.className = 'scal-day' + (day === null ? ' empty' : day.ds === todayStr ? ' today' : doneDates.has(day.ds) ? ' done' : '');
+            col.appendChild(cell);
+          });
+          wrapper.appendChild(col);
+        }
+      });
+      container.appendChild(wrapper);
+    }
+
+    // ── Achievements ──
+    function renderBadges() {
+      const catCounts = {};
+      catList.forEach(c => catCounts[c] = 0);
+      window.ALL_IDEAS.forEach(idea => idea.tags.forEach(t => { if (catCounts[t] !== undefined) catCounts[t]++; }));
+      const catsWithDone = new Set([...done].map(i => window.ALL_IDEAS[i]?.tags[0]).filter(Boolean));
+
+      const checks = {
+        first:   favs.size >= 1,
+        done5:   done.size >= 5,
+        done25:  done.size >= 25,
+        done100: done.size >= 100,
+        streak3: strCount >= 3,
+        streak7: strCount >= 7,
+        allcat:  catList.every(c => catsWithDone.has(c)),
+        sched10: Object.keys(scheds).length >= 10,
+        pri10:   Object.keys(pris).length >= 10,
+        note10:  Object.keys(notes).length >= 10,
+        fav50:   favs.size >= 50,
+      };
+
+      const grid = document.getElementById('badge-grid');
+      grid.innerHTML = '';
+      ACHIEVEMENTS_DEF.forEach(a => {
+        const earned = achievements[a.id];
+        const progress = checks[a.id];
+        const div = document.createElement('div');
+        div.className = 'badge-item ' + (earned ? 'earned' : progress ? 'earned' : 'locked');
+        div.innerHTML = `<div class="badge-ico">${a.ico}</div><div class="badge-name">${a.name}</div><div class="badge-desc">${a.desc}</div>${earned ? `<div class="badge-date">${earned}</div>` : ''}`;
+        grid.appendChild(div);
+      });
+    }
+
+    // ── Quick actions ──
+    document.getElementById('qa-export').addEventListener('click', () => {
+      const rows = [['#','Title','Tags','Note','Date','Priority','Done']];
+      [...favs].sort((a,b)=>a-b).forEach(i => {
+        const idea = window.ALL_IDEAS[i] || customIdeas[i - window.ALL_IDEAS.length];
+        if (!idea) return;
+        rows.push([i+1, `"${idea.t.replace(/"/g,'""')}"`, idea.tags.join(';'), notes[i]||'', scheds[i]||'', pris[i]||'', done.has(i)?'yes':'no']);
+      });
+      const csv = rows.map(r=>r.join(',')).join('\n');
+      const a = document.createElement('a');
+      a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+      a.download = 'switchvault-starred.csv';
+      a.click();
+      showToast('Exported ' + favs.size + ' starred ideas');
+    });
+
+    document.getElementById('qa-copy-week').addEventListener('click', () => {
+      const today = new Date();
+      const lines = ['SwitchVault — Week Schedule', ''];
+      for (let k = 0; k < 7; k++) {
+        const d = new Date(today); d.setDate(today.getDate() + k);
+        const ds = d.toISOString().slice(0,10);
+        const items = Object.entries(scheds).filter(([,v]) => v === ds);
+        const dayName = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()];
+        lines.push(dayName + ' ' + ds + ':');
+        if (items.length) {
+          items.forEach(([idxStr]) => {
+            const i = +idxStr;
+            const idea = window.ALL_IDEAS[i] || customIdeas[i - window.ALL_IDEAS.length];
+            if (idea) lines.push('  • ' + idea.t);
+          });
+        } else { lines.push('  (nothing scheduled)'); }
+        lines.push('');
+      }
+      navigator.clipboard?.writeText(lines.join('\n')).then(() => showToast('Week schedule copied'));
+    });
+
+    // ── Init ──
+    renderWeekChart();
+    renderCatGrid();
+    renderStreakCal();
+    renderBadges();
+  </script>
+</body>
+</html>

@@ -1,7 +1,10 @@
-const CACHE = 'contentvault-v3';
+const CACHE = 'contentvault-v4';
 const ASSETS = [
   '/SwitchVault/',
   '/SwitchVault/index.html',
+  '/SwitchVault/queue.html',
+  '/SwitchVault/production.html',
+  '/SwitchVault/done.html',
   '/SwitchVault/data.js',
   '/SwitchVault/manifest.json',
 ];

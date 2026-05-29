@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SwitchVault — Done</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="preload" href="data.js" as="script">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='32' fill='%23111110'/%3E%3Crect x='10' y='46' width='42' height='100' rx='21' fill='%23A0453F'/%3E%3Ccircle cx='31' cy='68' r='10' fill='rgba(0,0,0,.3)'/%3E%3Crect x='50' y='20' width='92' height='152' rx='10' fill='%23282523'/%3E%3Crect x='60' y='32' width='72' height='128' rx='6' fill='%23141412'/%3E%3Cpolygon points='80,84 112,96 80,108' fill='%236A8A58' opacity='.9'/%3E%3Crect x='140' y='46' width='42' height='100' rx='21' fill='%236A8A58'/%3E%3Ccircle cx='161' cy='124' r='10' fill='rgba(0,0,0,.3)'/%3E%3C/svg%3E">
+  <meta name="theme-color" content="#111110">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <style>
+    :root {
+      --bg:#111110; --s1:#171614; --s2:#1e1e1c; --s3:#262422;
+      --b0:#1c1b19; --b1:#282523; --b2:#363330; --b3:#484440;
+      --acc:#A0453F; --acc2:#7C2F2F; --gold:#C8A870; --gold2:#E6E1D6;
+      --teal:#6A8A58; --blue:#7A9878; --pur:#A0453F;
+      --txt:#E6E1D6; --txt2:#A09080; --mut:#605850; --mut2:#3A3530;
+      --hi:#D8C8B2; --r:6px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; overflow-x: hidden; }
+    body {
+      background: var(--bg); color: var(--txt);
+      font-family: 'Inter', sans-serif; font-size: 14px;
+      line-height: 1.5; min-height: 100vh;
+      overflow-x: hidden; max-width: 100%;
+      padding-bottom: 64px;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0; opacity: .035;
+      pointer-events: none; z-index: 0;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    /* ── HEADER ── */
+    .d-header {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--s1); border-bottom: 1px solid var(--b1);
+      padding: 14px clamp(12px,3vw,24px) 12px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .app-logo { flex-shrink: 0; opacity: .92; display: flex; align-items: center; }
+    .d-heading {
+      font-family: 'Anton', sans-serif; font-size: 22px;
+      font-weight: 400; color: var(--txt); letter-spacing: .02em; flex: 1;
+    }
+    .d-theme-toggle {
+      background: none; border: 1px solid var(--b2); border-radius: 6px;
+      color: var(--txt2); cursor: pointer; font-size: 14px; padding: 4px 8px;
+      transition: all .15s; flex-shrink: 0;
+    }
+    .d-theme-toggle:hover { background: var(--s3); color: var(--txt); }
+
+    /* ── HERO STATS ── */
+    .hero-stats {
+      display: grid; grid-template-columns: repeat(2, 1fr);
+      gap: 10px; padding: 16px clamp(12px,3vw,24px) 0;
+      position: relative; z-index: 1;
+    }
+    @media (min-width: 480px) { .hero-stats { grid-template-columns: repeat(4, 1fr); } }
+    .hstat {
+      background: var(--s2); border: 1px solid var(--b1);
+      border-radius: 10px; padding: 14px 16px;
+      text-align: center;
+      transition: background .15s, border-color .15s, transform .12s;
+    }
+    .hstat:hover { transform: translateY(-1px); }
+    .hstat-n {
+      font-family: 'Anton', sans-serif; font-size: 28px; font-weight: 400;
+      color: var(--txt); line-height: 1; margin-bottom: 4px;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .hstat-n.green { color: var(--teal); }
+    .hstat-n.gold  { color: var(--gold); }
+    .hstat-n.red   { color: var(--acc); }
+    .hstat-l { font-size: 9px; text-transform: uppercase; letter-spacing: .08em; color: var(--txt2); font-weight: 600; }
+
+    /* ── SORT + FILTER BAR ── */
+    .d-controls {
+      padding: 12px clamp(12px,3vw,24px) 0;
+      display: flex; flex-direction: column; gap: 8px;
+      position: relative; z-index: 1;
+    }
+    .d-sort-bar {
+      display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none;
+    }
+    .d-sort-bar::-webkit-scrollbar { display: none; }
+    .sort-btn {
+      background: var(--s2); border: 1px solid var(--b1);
+      border-radius: 6px; color: var(--txt2); cursor: pointer;
+      font-size: 11px; font-weight: 600; padding: 5px 11px;
+      white-space: nowrap; transition: all .15s; flex-shrink: 0;
+    }
+    .sort-btn:hover { background: var(--s3); color: var(--txt); }
+    .sort-btn.on { background:rgba(106,138,88,.1); border-color:rgba(106,138,88,.3); color:var(--teal); }
+
+    .d-cats-row {
+      display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px;
+    }
+    .d-cats-row::-webkit-scrollbar { display: none; }
+    .chip {
+      background: var(--s1); border: 1px solid var(--b1);
+      border-radius: 20px; color: var(--txt2); cursor: pointer;
+      font-size: 12px; font-weight: 500; padding: 5px 13px;
+      white-space: nowrap; transition: all .15s; flex-shrink: 0;
+    }
+    .chip:hover { background: var(--s3); border-color: var(--b2); }
+    .chip.on { background:rgba(106,138,88,.12); border-color:rgba(106,138,88,.28); color:var(--teal); }
+
+    /* ── BODY ── */
+    .d-body {
+      padding: 16px clamp(12px,3vw,24px) 24px;
+      max-width: 720px;
+      position: relative; z-index: 1;
+    }
+
+    /* Cards */
+    .d-card {
+      background: var(--s2); border: 1px solid var(--b1);
+      border-radius: 10px; margin-bottom: 12px;
+      display: flex; overflow: hidden;
+      transition: background .12s, border-color .15s, transform .12s;
+    }
+    .d-card:hover { background: var(--s3); transform: translateY(-1px); }
+    .d-card-edge { width: 4px; flex-shrink: 0; background: var(--teal); }
+    .d-card-main { flex: 1; padding: 14px 16px; min-width: 0; }
+    .d-card-title {
+      font-size: 14px; font-weight: 600; color: var(--txt);
+      margin-bottom: 7px; line-height: 1.35;
+    }
+    .d-card-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 9px; }
+    .d-card-date {
+      font-size: 10px; color: var(--txt2); margin-bottom: 9px; font-weight: 500;
+    }
+    .d-card-meta { display: flex; gap: 6px; align-items: center; margin-bottom: 9px; flex-wrap: wrap; }
+    .d-dur-badge {
+      font-size: 9px; font-weight: 700; letter-spacing: .05em;
+      text-transform: uppercase; border-radius: 4px; padding: 2px 6px; border: 1px solid;
+    }
+    .d-dur-badge.quick  { color:var(--teal); background:rgba(106,138,88,.1);  border-color:rgba(106,138,88,.25); }
+    .d-dur-badge.medium { color:var(--gold); background:rgba(200,168,112,.1); border-color:rgba(200,168,112,.25); }
+    .d-dur-badge.full   { color:var(--acc);  background:rgba(160,69,63,.08);  border-color:rgba(160,69,63,.2); }
+    .d-sched-badge {
+      font-size: 9px; font-weight: 700; letter-spacing: .04em;
+      text-transform: uppercase; color: var(--txt2);
+      background: var(--s1); border: 1px solid var(--b2);
+      border-radius: 4px; padding: 2px 6px;
+    }
+
+    /* Stats entry */
+    .vstats-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:10px; }
+    .vstats-field { display:flex; flex-direction:column; gap:3px; }
+    .vstats-label { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--txt2); }
+    .vstats-input {
+      width:100%; background:var(--s1); border:1px solid var(--b1);
+      border-radius:4px; color:var(--txt); font-family:'Inter',sans-serif;
+      font-size:13px; padding:5px 8px; outline:none;
+      transition:border-color .15s;
+    }
+    .vstats-input:focus { border-color:var(--teal); }
+    .vstats-total-row {
+      grid-column:1/-1; font-size:10px; color:var(--txt2);
+      padding-top:4px; border-top:1px solid var(--b1); margin-top:2px;
+    }
+
+    .d-card-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
+    .d-btn {
+      background: var(--s1); border: 1px solid var(--b2); border-radius: 6px;
+      color: var(--txt2); cursor: pointer; font-size: 11px; font-weight: 600;
+      padding: 6px 13px; white-space: nowrap; transition: all .15s; letter-spacing: .02em;
+    }
+    .d-btn:hover { background: var(--s3); color: var(--txt); }
+
+    /* Tag pills */
+    .tag { font-size: 8px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 2px 6px; border-radius: 3px; }
+    .tgaming    { color:#80BC78; background:rgba(112,170,104,.09);  border:1px solid rgba(112,170,104,.18); }
+    .tgear      { color:#D87068; background:rgba(200,96,88,.09);    border:1px solid rgba(200,96,88,.18); }
+    .ttutorial  { color:#8AB888; background:rgba(106,150,96,.09);   border:1px solid rgba(106,150,96,.17); }
+    .treview    { color:#D8B870; background:rgba(200,168,96,.08);   border:1px solid rgba(200,168,96,.16); }
+    .tlifestyle { color:#C8A880; background:rgba(190,160,112,.08);  border:1px solid rgba(190,160,112,.16); }
+    .tstory     { color:#C87868; background:rgba(184,112,96,.09);   border:1px solid rgba(184,112,96,.17); }
+    .teducation { color:#B0C870; background:rgba(160,184,96,.08);   border:1px solid rgba(160,184,96,.15); }
+    .tchallenge { color:#D87070; background:rgba(200,96,96,.09);    border:1px solid rgba(200,96,96,.17); }
+    .treaction  { color:#96A890; background:rgba(138,152,136,.08);  border:1px solid rgba(138,152,136,.16); }
+    .ttrend     { color:#C89868; background:rgba(190,144,96,.08);   border:1px solid rgba(190,144,96,.16); }
+    .tcomedy    { color:#D8C8A0; background:rgba(200,184,144,.08);  border:1px solid rgba(200,184,144,.16); }
+    .tcollab    { color:#C89080; background:rgba(184,136,120,.09);  border:1px solid rgba(184,136,120,.17); }
+    .tseries    { color:#8AA888; background:rgba(120,160,128,.08);  border:1px solid rgba(120,160,128,.16); }
+
+    /* Empty state */
+    .d-empty {
+      text-align: center; color: var(--txt2); font-size: 13px;
+      padding: 64px 24px; line-height: 1.9; position: relative; z-index: 1;
+    }
+    .d-empty-ico { font-size: 44px; margin-bottom: 16px; }
+    .d-empty-title { font-size: 16px; font-weight: 600; color: var(--txt); margin-bottom: 8px; }
+    .d-empty-cta {
+      display: inline-flex; align-items: center; gap: 6px;
+      margin-top: 20px; background: var(--teal); border: none; border-radius: 10px;
+      color: #fff; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;
+      padding: 12px 24px; cursor: pointer; text-decoration: none;
+      transition: opacity .15s;
+    }
+    .d-empty-cta:hover { opacity: .85; }
+
+    /* ── BOTTOM NAV ── */
+    .bottom-nav {
+      display: flex; position: fixed; bottom: 0; left: 0; right: 0; z-index: 150;
+      background: var(--s2); border-top: 1px solid var(--b1);
+      padding: 6px 0 env(safe-area-inset-bottom, 6px);
+      justify-content: space-around; align-items: center;
+    }
+    .bnav-btn {
+      background: none; border: none; color: var(--txt2); cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+      padding: 4px 8px; font-size: 18px; transition: color .15s; min-width: 48px;
+      text-decoration: none;
+    }
+    .bnav-btn span { font-size: 9px; font-weight: 600; letter-spacing: .04em; display: block; }
+    .bnav-btn.active { color: var(--teal); }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+      background: var(--b2); color: var(--txt); border-radius: 20px;
+      padding: 8px 18px; font-size: 13px; font-weight: 500;
+      pointer-events: none; opacity: 0; transition: opacity .2s;
+      white-space: nowrap; z-index: 500;
+    }
+    .toast.show { opacity: 1; }
+
+    /* ── LIGHT MODE ── */
+    html.light {
+      --bg:#F4F1EC; --s1:#FFFDF9; --s2:#F0EDE6; --s3:#E8E4DC;
+      --b0:#E0DCD2; --b1:#D4CEC4; --b2:#C0BAB0; --b3:#A8A298;
+      --txt:#2A2520; --txt2:#706860; --mut:#A09080; --mut2:#D4CEC4; --hi:#3A3028;
+    }
+    html.light body::before { opacity: .02; }
+    html.light .vstats-input { background: var(--s2); }
+
+    /* ── FADE IN ── */
+    @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+    body > *:not(.bottom-nav) { animation: fadeIn .25s ease both; }
+    .hero-stats { animation-delay: .05s; }
+    .d-controls { animation-delay: .08s; }
+    .d-body { animation-delay: .1s; }
+
+    /* ── MOBILE ── */
+    @media (max-width: 640px) {
+      .d-header { padding: 10px 12px; }
+      .d-heading { font-size: 17px; }
+      .app-logo { display: none; }
+      .d-body { padding: 12px 12px 24px; }
+      .d-btn { padding: 9px 14px; font-size: 12px; min-height: 38px; }
+      .d-card-main { padding: 12px 14px; }
+      .d-card-title { font-size: 13px; }
+    }
+
+    @media (min-width: 900px) {
+      .d-body { max-width: 860px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="d-header">
+    <div class="app-logo" title="SwitchVault">
+      <svg viewBox="0 0 40 26" width="30" height="19" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0" y="3" width="11" height="20" rx="5.5" fill="#A0453F"/>
+        <circle cx="5.5" cy="9" r="2" fill="rgba(0,0,0,.3)"/>
+        <rect x="10" y="0" width="20" height="26" rx="2" fill="#282523"/>
+        <rect x="12" y="3" width="16" height="20" rx="1.5" fill="#141412"/>
+        <polygon points="17.5,10.5 23.5,13 17.5,15.5" fill="#6A8A58" opacity=".9"/>
+        <rect x="29" y="3" width="11" height="20" rx="5.5" fill="#6A8A58"/>
+        <circle cx="34.5" cy="17" r="2" fill="rgba(0,0,0,.3)"/>
+      </svg>
+    </div>
+    <h2 class="d-heading">Done</h2>
+    <button class="d-theme-toggle" id="d-theme-toggle" title="Toggle light/dark">🌙</button>
+  </div>
+
+  <!-- Hero stats -->
+  <div class="hero-stats">
+    <div class="hstat">
+      <div class="hstat-n green" id="hs-done">0</div>
+      <div class="hstat-l">Total Done</div>
+    </div>
+    <div class="hstat">
+      <div class="hstat-n gold" id="hs-views">0</div>
+      <div class="hstat-l">Total Views</div>
+    </div>
+    <div class="hstat">
+      <div class="hstat-n" id="hs-likes">0</div>
+      <div class="hstat-l">Total Likes</div>
+    </div>
+    <div class="hstat">
+      <div class="hstat-n" id="hs-best" style="font-size:16px;line-height:1.4">—</div>
+      <div class="hstat-l">Best Video</div>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="d-controls">
+    <div class="d-sort-bar">
+      <button class="sort-btn on" data-dsort="date">📅 Date</button>
+      <button class="sort-btn" data-dsort="views">👁 Views</button>
+      <button class="sort-btn" data-dsort="likes">❤️ Likes</button>
+    </div>
+    <div class="d-cats-row" id="d-cats">
+      <button class="chip on" data-dc="all">All</button>
+      <button class="chip" data-dc="gaming">Gaming</button>
+      <button class="chip" data-dc="gear">Gear</button>
+      <button class="chip" data-dc="tutorial">Tutorial</button>
+      <button class="chip" data-dc="review">Review</button>
+      <button class="chip" data-dc="lifestyle">Lifestyle</button>
+      <button class="chip" data-dc="story">Story</button>
+      <button class="chip" data-dc="comedy">Comedy</button>
+      <button class="chip" data-dc="education">Education</button>
+      <button class="chip" data-dc="series">Series</button>
+      <button class="chip" data-dc="challenge">Challenge</button>
+      <button class="chip" data-dc="reaction">Reaction</button>
+      <button class="chip" data-dc="trend">Trend</button>
+      <button class="chip" data-dc="collab">Collab</button>
+    </div>
+  </div>
+
+  <!-- Done content -->
+  <div id="d-body" class="d-body"></div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Bottom nav -->
+  <nav class="bottom-nav">
+    <a class="bnav-btn" href="index.html"><span>💡</span><span>Ideas</span></a>
+    <a class="bnav-btn" href="queue.html"><span>📋</span><span>Queue</span></a>
+    <a class="bnav-btn" href="production.html"><span>🎬</span><span>Record</span></a>
+    <a class="bnav-btn active" href="done.html"><span>✅</span><span>Done</span></a>
+    <a class="bnav-btn" href="index.html#sync"><span>☁</span><span>Sync</span></a>
+  </nav>
+
+  <script src="data.js"></script>
+  <script>
+    const KEYS = {
+      favs:'sv_favs', done:'sv_done', notes:'sv_notes', pris:'sv_pris',
+      scheds:'sv_scheds', custom:'sv_custom', durations:'sv_durations',
+      rejected:'sv_rejected', producing:'sv_producing', light:'sv_light',
+      vstats:'sv_vstats', streakhist:'sv_streakhist',
+    };
+    const TC = {
+      gaming:   {cls:'tgaming',   l:'Gaming'},
+      gear:     {cls:'tgear',     l:'Gear'},
+      tutorial: {cls:'ttutorial', l:'Tutorial'},
+      review:   {cls:'treview',   l:'Review'},
+      lifestyle:{cls:'tlifestyle',l:'Lifestyle'},
+      story:    {cls:'tstory',    l:'Story'},
+      education:{cls:'teducation',l:'Education'},
+      challenge:{cls:'tchallenge',l:'Challenge'},
+      reaction: {cls:'treaction', l:'Reaction'},
+      trend:    {cls:'ttrend',    l:'Trend'},
+      comedy:   {cls:'tcomedy',   l:'Comedy'},
+      collab:   {cls:'tcollab',   l:'Collab'},
+      series:   {cls:'tseries',   l:'Series'},
+    };
+    const DUR_LABELS = {quick:'⚡ Quick', medium:'⏳ Medium', full:'🎬 Full day'};
+
+    // State
+    let favs = new Set(), done = new Set(), producing = new Set(), rejected = new Set();
+    let notes = {}, pris = {}, scheds = {}, durations = {}, customIdeas = [];
+    let vstats = {}, streakHistory = [];
+    let sortMode = 'date', filterCat = 'all';
+
+    function lsGet(k) { try { return localStorage.getItem(k); } catch(e) { return null; } }
+    function lsSet(k, v) { try { localStorage.setItem(k, v); } catch(e) {} }
+
+    function getIdea(i) {
+      return i < window.ALL_IDEAS.length
+        ? window.ALL_IDEAS[i]
+        : customIdeas[i - window.ALL_IDEAS.length];
+    }
+
+    let _toastTimer;
+    function showToast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg; el.classList.add('show');
+      clearTimeout(_toastTimer);
+      _toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+    }
+
+    function loadState() {
+      try { const v = lsGet(KEYS.favs);       if(v) favs       = new Set(JSON.parse(v)); } catch(e){}
+      try { const v = lsGet(KEYS.done);       if(v) done       = new Set(JSON.parse(v)); } catch(e){}
+      try { const v = lsGet(KEYS.producing);  if(v) producing  = new Set(JSON.parse(v)); } catch(e){}
+      try { const v = lsGet(KEYS.rejected);   if(v) rejected   = new Set(JSON.parse(v)); } catch(e){}
+      try { const v = lsGet(KEYS.notes);      if(v) notes      = JSON.parse(v); } catch(e){}
+      try { const v = lsGet(KEYS.pris);       if(v) pris       = JSON.parse(v); } catch(e){}
+      try { const v = lsGet(KEYS.scheds);     if(v) scheds     = JSON.parse(v); } catch(e){}
+      try { const v = lsGet(KEYS.durations);  if(v) durations  = JSON.parse(v); } catch(e){}
+      try { const v = lsGet(KEYS.custom);     if(v) customIdeas = JSON.parse(v); } catch(e){}
+      try { const v = lsGet(KEYS.vstats);     if(v) vstats     = JSON.parse(v); } catch(e){}
+      try { const v = lsGet(KEYS.streakhist); if(v) streakHistory = JSON.parse(v); } catch(e){}
+      const lightOn = lsGet(KEYS.light) === '1';
+      document.documentElement.classList.toggle('light', lightOn);
+    }
+
+    let _saveTimer;
+    function saveState() {
+      clearTimeout(_saveTimer);
+      _saveTimer = setTimeout(_flush, 300);
+    }
+    function _flush() {
+      lsSet(KEYS.done,     JSON.stringify([...done]));
+      lsSet(KEYS.producing,JSON.stringify([...producing]));
+      lsSet(KEYS.vstats,   JSON.stringify(vstats));
+    }
+    window.addEventListener('pagehide', () => { clearTimeout(_saveTimer); _flush(); });
+
+    function getVStats(i) {
+      if (!vstats[i]) vstats[i] = {views:0, likes:0, comments:0, shares:0, postDate:''};
+      return vstats[i];
+    }
+
+    function getDoneDate(i) {
+      // Look through streakHistory for most recent entry with this id
+      const entries = streakHistory.filter(h => h.id === i);
+      if (!entries.length) return '';
+      const latest = entries[entries.length - 1];
+      try {
+        return new Date(latest.date + 'T00:00:00').toLocaleDateString('en-US', {month:'long', day:'numeric', year:'numeric'});
+      } catch(e) { return latest.date; }
+    }
+
+    function updateHeroStats() {
+      const doneArr = [...done];
+      const totalDone = doneArr.length;
+
+      let totalViews = 0, totalLikes = 0;
+      let bestViews = -1, bestTitle = '—';
+
+      doneArr.forEach(i => {
+        const s = vstats[i];
+        if (s) {
+          totalViews += (s.views || 0);
+          totalLikes += (s.likes || 0);
+          if ((s.views || 0) > bestViews) {
+            bestViews = s.views || 0;
+            const idea = getIdea(i);
+            if (idea) {
+              bestTitle = idea.t.length > 14 ? idea.t.slice(0, 12) + '…' : idea.t;
+            }
+          }
+        }
+      });
+
+      document.getElementById('hs-done').textContent  = totalDone;
+      document.getElementById('hs-views').textContent = totalViews.toLocaleString();
+      document.getElementById('hs-likes').textContent = totalLikes.toLocaleString();
+      document.getElementById('hs-best').textContent  = bestViews > 0 ? bestTitle : '—';
+    }
+
+    function sortDone(arr) {
+      if (sortMode === 'views') {
+        return [...arr].sort((a, b) => ((vstats[b]?.views || 0) - (vstats[a]?.views || 0)));
+      }
+      if (sortMode === 'likes') {
+        return [...arr].sort((a, b) => ((vstats[b]?.likes || 0) - (vstats[a]?.likes || 0)));
+      }
+      // date: use streakHistory date, most recent first
+      return [...arr].sort((a, b) => {
+        const da = streakHistory.filter(h => h.id === a).slice(-1)[0]?.date || '';
+        const db = streakHistory.filter(h => h.id === b).slice(-1)[0]?.date || '';
+        return db < da ? -1 : db > da ? 1 : 0;
+      });
+    }
+
+    function render() {
+      const body = document.getElementById('d-body');
+      updateHeroStats();
+
+      const doneAll = [...done];
+
+      if (!doneAll.length) {
+        body.innerHTML = `<div class="d-empty">
+          <div class="d-empty-ico">✅</div>
+          <div class="d-empty-title">No completed videos yet</div>
+          <p>Finish your first video in Recording to see it here.</p>
+          <a class="d-empty-cta" href="production.html">🎬 Go to Recording</a>
+        </div>`;
+        return;
+      }
+
+      // Filter + sort
+      const filtered = sortDone(doneAll).filter(i => {
+        const idea = getIdea(i);
+        if (!idea) return false;
+        if (filterCat !== 'all' && !idea.tags.includes(filterCat)) return false;
+        return true;
+      });
+
+      if (!filtered.length) {
+        body.innerHTML = `<div class="d-empty">
+          <div class="d-empty-ico">🔍</div>
+          <div class="d-empty-title">No matches</div>
+          Try a different category filter.
+        </div>`;
+        return;
+      }
+
+      let html = '';
+      filtered.forEach(i => {
+        const idea = getIdea(i);
+        if (!idea) return;
+
+        const tags = idea.tags.map(t => {
+          const c = TC[t] || {cls:'tgaming', l:t};
+          return `<span class="tag ${c.cls}">${c.l}</span>`;
+        }).join('');
+
+        const dateStr = getDoneDate(i);
+        const dateHtml = dateStr ? `<div class="d-card-date">Done: ${dateStr}</div>` : '';
+
+        const durHtml  = durations[i] ? `<span class="d-dur-badge ${durations[i]}">${DUR_LABELS[durations[i]] || durations[i]}</span>` : '';
+        const schedFormatted = scheds[i] ? (() => {
+          try { return new Date(scheds[i] + 'T00:00:00').toLocaleDateString('en-US', {month:'short', day:'numeric'}); }
+          catch(e) { return scheds[i]; }
+        })() : '';
+        const schedHtml = scheds[i] ? `<span class="d-sched-badge">Sched: ${schedFormatted}</span>` : '';
+        const metaHtml  = (durHtml || schedHtml) ? `<div class="d-card-meta">${durHtml}${schedHtml}</div>` : '';
+
+        const s = getVStats(i);
+        const totalEngagement = (s.views || 0) + (s.likes || 0) + (s.comments || 0) + (s.shares || 0);
+
+        html += `<div class="d-card">
+          <div class="d-card-edge"></div>
+          <div class="d-card-main">
+            <div class="d-card-title">${idea.t}</div>
+            <div class="d-card-tags">${tags}</div>
+            ${dateHtml}${metaHtml}
+            <div class="vstats-grid">
+              <div class="vstats-field">
+                <label class="vstats-label" for="vs-views-${i}">Views</label>
+                <input class="vstats-input" id="vs-views-${i}" type="number" min="0" placeholder="0"
+                  value="${s.views || ''}" data-idea-id="${i}" data-field="views">
+              </div>
+              <div class="vstats-field">
+                <label class="vstats-label" for="vs-likes-${i}">Likes</label>
+                <input class="vstats-input" id="vs-likes-${i}" type="number" min="0" placeholder="0"
+                  value="${s.likes || ''}" data-idea-id="${i}" data-field="likes">
+              </div>
+              <div class="vstats-field">
+                <label class="vstats-label" for="vs-comments-${i}">Comments</label>
+                <input class="vstats-input" id="vs-comments-${i}" type="number" min="0" placeholder="0"
+                  value="${s.comments || ''}" data-idea-id="${i}" data-field="comments">
+              </div>
+              <div class="vstats-field">
+                <label class="vstats-label" for="vs-shares-${i}">Shares</label>
+                <input class="vstats-input" id="vs-shares-${i}" type="number" min="0" placeholder="0"
+                  value="${s.shares || ''}" data-idea-id="${i}" data-field="shares">
+              </div>
+              <div class="vstats-field" style="grid-column:1/-1">
+                <label class="vstats-label" for="vs-post-${i}">Posted</label>
+                <input class="vstats-input" id="vs-post-${i}" type="date"
+                  value="${s.postDate || ''}" data-idea-id="${i}" data-field="postDate">
+              </div>
+              ${totalEngagement > 0 ? `<div class="vstats-total-row">Total engagement: ${totalEngagement.toLocaleString()}</div>` : ''}
+            </div>
+            <div class="d-card-actions">
+              <button class="d-btn" data-undo="${i}">↩ Undo Done</button>
+            </div>
+          </div>
+        </div>`;
+      });
+
+      body.innerHTML = html;
+    }
+
+    // Stats input handler (event delegation on body)
+    document.getElementById('d-body').addEventListener('change', e => {
+      const input = e.target.closest('.vstats-input');
+      if (!input) return;
+      const ideaId = +input.dataset.ideaId;
+      const field  = input.dataset.field;
+      const s = getVStats(ideaId);
+      if (field === 'postDate') {
+        s.postDate = input.value;
+      } else {
+        s[field] = parseInt(input.value, 10) || 0;
+      }
+      lsSet(KEYS.vstats, JSON.stringify(vstats));
+      updateHeroStats();
+    });
+
+    // Undo done
+    document.getElementById('d-body').addEventListener('click', e => {
+      const undoBtn = e.target.closest('[data-undo]');
+      if (!undoBtn) return;
+      const i = +undoBtn.dataset.undo;
+      done.delete(i);
+      producing.add(i);
+      saveState();
+      render();
+      showToast('Moved back to Recording');
+    });
+
+    // Category chips
+    document.getElementById('d-cats').addEventListener('click', e => {
+      const btn = e.target.closest('[data-dc]');
+      if (!btn) return;
+      filterCat = btn.dataset.dc;
+      document.querySelectorAll('[data-dc]').forEach(b => b.classList.toggle('on', b.dataset.dc === filterCat));
+      render();
+    });
+
+    // Sort buttons
+    document.querySelectorAll('[data-dsort]').forEach(btn => {
+      btn.addEventListener('click', function() {
+        sortMode = this.dataset.dsort;
+        document.querySelectorAll('[data-dsort]').forEach(b => b.classList.toggle('on', b.dataset.dsort === sortMode));
+        render();
+      });
+    });
+
+    // Theme toggle
+    (function() {
+      const btn = document.getElementById('d-theme-toggle');
+      const lightOn = lsGet(KEYS.light) === '1';
+      btn.textContent = lightOn ? '☀' : '🌙';
+      btn.addEventListener('click', function() {
+        const on = document.documentElement.classList.toggle('light');
+        this.textContent = on ? '☀' : '🌙';
+        lsSet(KEYS.light, on ? '1' : '0');
+      });
+    })();
+
+    // Boot
+    loadState();
+    render();
+  </script>
+</body>
+</html>

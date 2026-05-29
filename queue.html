@@ -29,7 +29,7 @@
       font-family: 'Inter', sans-serif; font-size: 14px;
       line-height: 1.5; min-height: 100vh;
       overflow-x: hidden; max-width: 100%;
-      padding-bottom: 64px;
+      padding-bottom: 80px;
     }
     body::before {
       content: ''; position: fixed; inset: 0; opacity: .035;
@@ -123,6 +123,7 @@
     .q-body {
       padding: 16px clamp(12px,3vw,24px) 24px;
       max-width: 720px;
+      margin: 0 auto;
       position: relative; z-index: 1;
     }
 
@@ -133,7 +134,7 @@
       display: flex; overflow: hidden;
       transition: background .12s, border-color .15s, transform .12s;
     }
-    .q-card:hover { background: var(--s3); transform: translateY(-1px); }
+    .q-card:hover { background: var(--s3); }
     .q-card-edge { width: 4px; flex-shrink: 0; background: var(--gold); }
     .q-card-main { flex: 1; padding: 14px 16px; min-width: 0; }
     .q-card-title {
@@ -208,10 +209,24 @@
 
     /* ── BOTTOM NAV ── */
     .bottom-nav {
-      display: flex; position: fixed; bottom: 0; left: 0; right: 0; z-index: 150;
+      display: flex; position: fixed; bottom: 0; left: 50%; right: auto; z-index: 150;
       background: var(--s2); border-top: 1px solid var(--b1);
       padding: 6px 0 env(safe-area-inset-bottom, 6px);
       justify-content: space-around; align-items: center;
+      max-width: 560px; width: 100%;
+      transform: translateX(-50%);
+      border-radius: 14px 14px 0 0;
+      box-shadow: 0 -2px 12px rgba(0,0,0,.2);
+    }
+    @media (max-width: 640px) {
+      .bottom-nav {
+        max-width: 100%;
+        left: 0;
+        right: 0;
+        transform: none;
+        border-radius: 0;
+        box-shadow: none;
+      }
     }
     .bnav-btn {
       background: none; border: none; color: var(--txt2); cursor: pointer;
@@ -250,7 +265,10 @@
 
     /* ── FADE IN ── */
     @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
-    body > *:not(.bottom-nav) { animation: fadeIn .25s ease both; }
+    .q-body, .toast { animation: fadeIn .25s ease both; }
+
+    /* ── CARD HOVER ── */
+    .q-card:hover { background: var(--s3); box-shadow: 0 4px 16px rgba(0,0,0,.15); }
 
     /* ── MOBILE ── */
     @media (max-width: 640px) {
@@ -265,8 +283,25 @@
       .q-card-title { font-size: 13px; }
     }
 
+    @media (min-width: 768px) {
+      .q-cats-row, .q-sort-bar {
+        overflow-x: visible;
+        flex-wrap: wrap;
+      }
+    }
+
     @media (min-width: 900px) {
-      .q-body { max-width: 860px; }
+      .q-body { max-width: 1120px; padding-bottom: 80px; }
+      .q-toolbar-top { max-width: 1120px; margin: 0 auto; }
+      .q-cats-row, .q-sort-bar { max-width: 1120px; margin-left: auto; margin-right: auto; }
+      #q-body {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        align-items: start;
+      }
+      #q-body .q-card { margin-bottom: 0; }
+      .q-empty { grid-column: 1 / -1; }
     }
   </style>
 </head>

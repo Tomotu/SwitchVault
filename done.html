@@ -29,7 +29,7 @@
       font-family: 'Inter', sans-serif; font-size: 14px;
       line-height: 1.5; min-height: 100vh;
       overflow-x: hidden; max-width: 100%;
-      padding-bottom: 64px;
+      padding-bottom: 80px;
     }
     body::before {
       content: ''; position: fixed; inset: 0; opacity: .035;
@@ -116,6 +116,7 @@
     .d-body {
       padding: 16px clamp(12px,3vw,24px) 24px;
       max-width: 720px;
+      margin: 0 auto;
       position: relative; z-index: 1;
     }
 
@@ -126,7 +127,7 @@
       display: flex; overflow: hidden;
       transition: background .12s, border-color .15s, transform .12s;
     }
-    .d-card:hover { background: var(--s3); transform: translateY(-1px); }
+    .d-card:hover { background: var(--s3); }
     .d-card-edge { width: 4px; flex-shrink: 0; background: var(--teal); }
     .d-card-main { flex: 1; padding: 14px 16px; min-width: 0; }
     .d-card-title {

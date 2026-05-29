@@ -184,10 +184,24 @@
 
     /* ── BOTTOM NAV ── */
     .bottom-nav {
-      display: flex; position: fixed; bottom: 0; left: 0; right: 0; z-index: 150;
+      display: flex; position: fixed; bottom: 0; left: 50%; right: auto; z-index: 150;
       background: var(--s2); border-top: 1px solid var(--b1);
       padding: 6px 0 env(safe-area-inset-bottom, 6px);
       justify-content: space-around; align-items: center;
+      max-width: 560px; width: 100%;
+      transform: translateX(-50%);
+      border-radius: 14px 14px 0 0;
+      box-shadow: 0 -2px 12px rgba(0,0,0,.2);
+    }
+    @media (max-width: 640px) {
+      .bottom-nav {
+        max-width: 100%;
+        left: 0;
+        right: 0;
+        transform: none;
+        border-radius: 0;
+        box-shadow: none;
+      }
     }
     .bnav-btn {
       background: none; border: none; color: var(--txt2); cursor: pointer;
@@ -225,16 +239,26 @@
     .stats-theme-toggle:hover { background: var(--s3); color: var(--txt); }
 
     /* ── CARD HOVER ── */
-    .hstat { transition: background .15s, border-color .15s, transform .12s; }
-    .hstat:hover { transform: translateY(-1px); }
+    .hstat { transition: background .15s, border-color .15s, box-shadow .12s; }
+    .hstat:hover { background: var(--s3); box-shadow: 0 4px 16px rgba(0,0,0,.15); }
 
     /* ── FADE IN ── */
     @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
-    body > *:not(.bottom-nav) { animation: fadeIn .25s ease both; }
+    .hero-stats, .overall-progress, .streak-banner, .section, .toast { animation: fadeIn .25s ease both; }
     .hero-stats { animation-delay: .05s; }
     .overall-progress { animation-delay: .08s; }
     .streak-banner { animation-delay: .1s; }
     .section { animation-delay: .12s; }
+
+    /* ── DESKTOP CONTENT CENTERING ── */
+    @media (min-width: 900px) {
+      .stats-header { max-width: 100%; }
+      .hero-stats, .overall-progress, .streak-banner, .section {
+        max-width: 860px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+    }
 
     /* ── TOP CATEGORIES ── */
     .top-cats-row { display: flex; gap: 8px; flex-wrap: wrap; }

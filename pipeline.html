@@ -29,7 +29,7 @@
       font-family: 'Inter', sans-serif; font-size: 14px;
       line-height: 1.5; min-height: 100vh;
       overflow-x: hidden; max-width: 100%;
-      padding-bottom: 64px;
+      padding-bottom: 80px;
     }
 
     /* Noise texture */
@@ -45,6 +45,7 @@
       background: var(--s1); border-bottom: 1px solid var(--b1);
       width: 100%; max-width: 100%;
     }
+
     .pipe-toolbar-top {
       padding: 12px clamp(12px,3vw,24px) 8px;
       display: flex; flex-direction: column; gap: 10px;
@@ -112,6 +113,7 @@
     .pipe-body {
       padding: 16px clamp(12px,3vw,24px) 24px;
       max-width: 720px;
+      margin: 0 auto;
       position: relative; z-index: 1;
     }
 
@@ -212,10 +214,24 @@
 
     /* ── BOTTOM NAV ── */
     .bottom-nav {
-      display: flex; position: fixed; bottom: 0; left: 0; right: 0; z-index: 150;
+      display: flex; position: fixed; bottom: 0; left: 50%; right: auto; z-index: 150;
       background: var(--s2); border-top: 1px solid var(--b1);
       padding: 6px 0 env(safe-area-inset-bottom, 6px);
       justify-content: space-around; align-items: center;
+      max-width: 560px; width: 100%;
+      transform: translateX(-50%);
+      border-radius: 14px 14px 0 0;
+      box-shadow: 0 -2px 12px rgba(0,0,0,.2);
+    }
+    @media (max-width: 640px) {
+      .bottom-nav {
+        max-width: 100%;
+        left: 0;
+        right: 0;
+        transform: none;
+        border-radius: 0;
+        box-shadow: none;
+      }
     }
     .bnav-btn {
       background: none; border: none; color: var(--txt2); cursor: pointer;
@@ -274,13 +290,13 @@
 
     /* ── CARD HOVER ── */
     .pipe-card {
-      transition: background .15s, border-color .15s, transform .12s;
+      transition: background .15s, border-color .15s, box-shadow .12s;
     }
-    .pipe-card:hover { transform: translateY(-1px); }
+    .pipe-card:hover { background: var(--s3); box-shadow: 0 4px 16px rgba(0,0,0,.15); }
 
     /* ── FADE IN ── */
     @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
-    body > *:not(.bottom-nav) { animation: fadeIn .25s ease both; }
+    .pipe-body, .toast { animation: fadeIn .25s ease both; }
 
     /* ── MOBILE ── */
     @media (max-width: 640px) {
@@ -300,9 +316,18 @@
       .pipe-card-title { font-size: 13px; }
     }
 
+    @media (min-width: 768px) {
+      .pipe-cats-row {
+        overflow-x: visible;
+        flex-wrap: wrap;
+      }
+    }
+
     /* Desktop — wider content area */
     @media (min-width: 900px) {
-      .pipe-body { max-width: 860px; }
+      .pipe-body { max-width: 1120px; padding-bottom: 80px; }
+      .pipe-toolbar-top { max-width: 1120px; margin: 0 auto; }
+      .pipe-cats-row { max-width: 1120px; margin-left: auto; margin-right: auto; }
     }
   </style>
 </head>

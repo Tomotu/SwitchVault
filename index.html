@@ -1520,6 +1520,16 @@
     /* === FADE IN ANIMATION === */
     @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
     body > *:not(.bottom-nav) { animation: fadeIn .25s ease both; }
+
+    /* === DESKTOP LAYOUT === */
+    @media (min-width: 768px) {
+      .hero { max-width: 760px; margin-left: auto; margin-right: auto; border-radius: 0 0 12px 12px; }
+      .hstats { max-width: 520px; margin-left: auto; margin-right: auto; }
+    }
+    @media (min-width: 900px) {
+      .list { max-width: 900px; margin-left: auto; margin-right: auto; }
+      .statusbar { max-width: 100%; }
+    }
   </style>
 </head>
 <body>

@@ -127,7 +127,7 @@
       display: flex; overflow: hidden;
       transition: background .12s, border-color .15s, transform .12s;
     }
-    .d-card:hover { background: var(--s3); }
+    .d-card:hover { background: var(--s3); box-shadow: 0 4px 16px rgba(0,0,0,.15); }
     .d-card-edge { width: 4px; flex-shrink: 0; background: var(--teal); }
     .d-card-main { flex: 1; padding: 14px 16px; min-width: 0; }
     .d-card-title {
@@ -211,10 +211,24 @@
 
     /* ── BOTTOM NAV ── */
     .bottom-nav {
-      display: flex; position: fixed; bottom: 0; left: 0; right: 0; z-index: 150;
+      display: flex; position: fixed; bottom: 0; left: 50%; right: auto; z-index: 150;
       background: var(--s2); border-top: 1px solid var(--b1);
       padding: 6px 0 env(safe-area-inset-bottom, 6px);
       justify-content: space-around; align-items: center;
+      max-width: 560px; width: 100%;
+      transform: translateX(-50%);
+      border-radius: 14px 14px 0 0;
+      box-shadow: 0 -2px 12px rgba(0,0,0,.2);
+    }
+    @media (max-width: 640px) {
+      .bottom-nav {
+        max-width: 100%;
+        left: 0;
+        right: 0;
+        transform: none;
+        border-radius: 0;
+        box-shadow: none;
+      }
     }
     .bnav-btn {
       background: none; border: none; color: var(--txt2); cursor: pointer;
@@ -246,7 +260,7 @@
 
     /* ── FADE IN ── */
     @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
-    body > *:not(.bottom-nav) { animation: fadeIn .25s ease both; }
+    .hero-stats, .d-controls, .d-body, .toast { animation: fadeIn .25s ease both; }
     .hero-stats { animation-delay: .05s; }
     .d-controls { animation-delay: .08s; }
     .d-body { animation-delay: .1s; }
@@ -262,8 +276,26 @@
       .d-card-title { font-size: 13px; }
     }
 
+    @media (min-width: 768px) {
+      .d-sort-bar, .d-cats-row {
+        overflow-x: visible;
+        flex-wrap: wrap;
+      }
+    }
+
     @media (min-width: 900px) {
-      .d-body { max-width: 860px; }
+      .d-body { max-width: 1120px; padding-bottom: 80px; }
+      .d-header { max-width: 1120px; margin: 0 auto; }
+      .d-controls { max-width: 1120px; margin-left: auto; margin-right: auto; }
+      .hero-stats { max-width: 1120px; margin-left: auto; margin-right: auto; }
+      #d-body {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        align-items: start;
+      }
+      #d-body .d-card { margin-bottom: 0; }
+      .d-empty { grid-column: 1 / -1; }
     }
   </style>
 </head>

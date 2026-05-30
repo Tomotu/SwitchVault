@@ -10,29 +10,35 @@
   <link rel="preload" href="data.js" as="script">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='32' fill='%23111110'/%3E%3Crect x='10' y='46' width='42' height='100' rx='21' fill='%23A0453F'/%3E%3Ccircle cx='31' cy='68' r='10' fill='rgba(0,0,0,.3)'/%3E%3Crect x='50' y='20' width='92' height='152' rx='10' fill='%23282523'/%3E%3Crect x='60' y='32' width='72' height='128' rx='6' fill='%23141412'/%3E%3Cpolygon points='80,84 112,96 80,108' fill='%236A8A58' opacity='.9'/%3E%3Crect x='140' y='46' width='42' height='100' rx='21' fill='%236A8A58'/%3E%3Ccircle cx='161' cy='124' r='10' fill='rgba(0,0,0,.3)'/%3E%3C/svg%3E">
-  <meta name="theme-color" content="#111110">
+  <meta name="theme-color" content="#0E0E0D">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <style>
     :root {
-      --bg:#111110; --s1:#171614; --s2:#1e1e1c; --s3:#262422;
+      --bg:#0E0E0D; --s1:#171614; --s2:#1e1e1c; --s3:#262422;
       --b0:#1c1b19; --b1:#282523; --b2:#363330; --b3:#484440;
       --acc:#A0453F; --acc2:#7C2F2F; --gold:#C8A870; --gold2:#E6E1D6;
       --teal:#6A8A58; --blue:#7A9878; --pur:#A0453F;
       --txt:#E6E1D6; --txt2:#A09080; --mut:#605850; --mut2:#3A3530;
       --hi:#D8C8B2; --r:6px;
+      --r-lg: 12px;
+      --shadow: 0 6px 24px rgba(0,0,0,.22);
+      --ring: 0 0 0 2px var(--teal);
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; overflow-x: hidden; }
+    :focus-visible { outline: none; box-shadow: var(--ring); }
+    button, a, input, [tabindex] { outline: none; }
     body {
       background: var(--bg); color: var(--txt);
       font-family: 'Inter', sans-serif; font-size: 14px;
-      line-height: 1.5; min-height: 100vh;
+      line-height: 1.55; min-height: 100vh;
       overflow-x: hidden; max-width: 100%;
       padding-bottom: 80px;
+      -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
     }
     body::before {
-      content: ''; position: fixed; inset: 0; opacity: .035;
+      content: ''; display: none; position: fixed; inset: 0; opacity: .035;
       pointer-events: none; z-index: 0;
       background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     }
@@ -84,9 +90,17 @@
     }
     .p-theme-toggle:hover { background: var(--s3); color: var(--txt); }
 
+    .hdr-icon-btn {
+      background: none; border: 1px solid var(--b2); border-radius: 6px;
+      color: var(--txt2); cursor: pointer; font-size: 14px; padding: 4px 8px;
+      transition: all .15s; flex-shrink: 0; text-decoration: none;
+      display: inline-flex; align-items: center;
+    }
+    .hdr-icon-btn:hover { background: var(--s3); color: var(--txt); }
+
     /* ── BODY ── */
     .p-body {
-      padding: 16px clamp(12px,3vw,24px) 24px;
+      padding: 20px clamp(12px,3vw,24px) 24px;
       max-width: 720px;
       margin: 0 auto;
       position: relative; z-index: 1;
@@ -95,11 +109,11 @@
     /* Cards */
     .p-card {
       background: var(--s2); border: 1px solid var(--b1);
-      border-radius: 10px; margin-bottom: 12px;
+      border-radius: var(--r-lg); margin-bottom: 14px;
       display: flex; overflow: hidden;
-      transition: background .12s, border-color .15s, transform .12s;
+      transition: background .12s, border-color .15s, box-shadow .15s;
     }
-    .p-card:hover { background: var(--s3); }
+    .p-card:hover { background: var(--s3); border-color: var(--b2); box-shadow: var(--shadow); }
     .p-card-edge { width: 4px; flex-shrink: 0; background: var(--teal); }
     .p-card-main { flex: 1; padding: 14px 16px; min-width: 0; }
     .p-card-title {
@@ -130,12 +144,12 @@
 
     /* ── CHECKLIST ── */
     .p-checklist {
-      background: var(--s1); border: 1px solid var(--b0);
-      border-radius: 8px; padding: 10px 12px; margin-bottom: 10px;
+      background: var(--s1); border: 1px solid var(--b1);
+      border-radius: var(--r-lg); padding: 10px 12px; margin-bottom: 10px;
     }
     .p-check-item {
       display: flex; align-items: center; gap: 10px;
-      padding: 6px 0; cursor: pointer; user-select: none;
+      padding: 11px 0; cursor: pointer; user-select: none;
       border-bottom: 1px solid var(--b0);
     }
     .p-check-item:last-child { border-bottom: none; }
@@ -180,6 +194,7 @@
     .p-btn:hover { background: var(--s3); color: var(--txt); }
     .p-btn.primary { background:rgba(106,138,88,.12); border-color:rgba(106,138,88,.3); color:var(--teal); }
     .p-btn.primary:hover { background:rgba(106,138,88,.22); }
+    .p-btn:active { filter: brightness(.93); }
 
     /* Tag pills */
     .tag { font-size: 8px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 2px 6px; border-radius: 3px; }
@@ -255,19 +270,16 @@
 
     /* ── LIGHT MODE ── */
     html.light {
-      --bg:#F4F1EC; --s1:#FFFDF9; --s2:#F0EDE6; --s3:#E8E4DC;
+      --bg:#F6F3EE; --s1:#FFFDF9; --s2:#F0EDE6; --s3:#E8E4DC;
       --b0:#E0DCD2; --b1:#D4CEC4; --b2:#C0BAB0; --b3:#A8A298;
       --txt:#2A2520; --txt2:#706860; --mut:#A09080; --mut2:#D4CEC4; --hi:#3A3028;
+      --shadow: 0 6px 24px rgba(60,50,40,.08);
     }
-    html.light body::before { opacity: .02; }
     html.light .p-check-box { background: var(--s1); }
 
     /* ── FADE IN ── */
     @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
     .p-body, .toast { animation: fadeIn .25s ease both; }
-
-    /* ── CARD HOVER ── */
-    .p-card:hover { background: var(--s3); box-shadow: 0 4px 16px rgba(0,0,0,.15); }
 
     /* ── MOBILE ── */
     @media (max-width: 640px) {
@@ -292,6 +304,10 @@
       #p-body .p-card { margin-bottom: 0; }
       .p-empty { grid-column: 1 / -1; }
     }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
+    }
   </style>
 </head>
 <body>
@@ -312,6 +328,7 @@
       </div>
       <h2 class="p-heading">Recording</h2>
       <span class="p-count-badge" id="p-count">0 videos</span>
+      <a class="hdr-icon-btn" href="index.html#sync" title="Cloud sync" aria-label="Cloud sync">☁</a>
       <button class="p-theme-toggle" id="p-theme-toggle" title="Toggle light/dark">🌙</button>
     </div>
     <div class="p-progress" id="p-progress" style="display:none">
@@ -334,7 +351,7 @@
     <a class="bnav-btn" href="queue.html"><span>📋</span><span>Queue</span></a>
     <a class="bnav-btn active" href="production.html"><span>🎬</span><span>Record</span></a>
     <a class="bnav-btn" href="done.html"><span>✅</span><span>Done</span></a>
-    <a class="bnav-btn" href="index.html#sync"><span>☁</span><span>Sync</span></a>
+    <a class="bnav-btn" href="stats.html"><span>📊</span><span>Stats</span></a>
   </nav>
 
   <script src="data.js"></script>

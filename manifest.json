@@ -1,11 +1,11 @@
 {
-  "name": "ContentVault — Nintendo Switch TikTok",
-  "short_name": "ContentVault",
-  "description": "Nintendo Switch TikTok content idea manager",
+  "name": "SwitchVault — Nintendo Switch TikTok",
+  "short_name": "SwitchVault",
+  "description": "Nintendo Switch TikTok content production manager",
   "start_url": "/SwitchVault/",
   "display": "standalone",
-  "background_color": "#111110",
-  "theme_color": "#111110",
+  "background_color": "#0E0E0D",
+  "theme_color": "#0E0E0D",
   "orientation": "portrait-primary",
   "icons": [
     {

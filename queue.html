@@ -183,6 +183,37 @@
     .q-btn.danger:hover { background:rgba(160,69,63,.15); }
     .q-btn:active { filter: brightness(.93); }
 
+    /* ── INLINE EDIT PANEL ── */
+    .q-edit-panel {
+      margin-top: 12px; padding: 12px;
+      background: var(--s1); border: 1px solid var(--b1); border-radius: var(--r);
+    }
+    .q-edit-row {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+    }
+    .q-edit-row:last-child { margin-bottom: 0; }
+    .q-edit-label {
+      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em;
+      color: var(--txt2); width: 60px; flex-shrink: 0;
+    }
+    .q-pri-btns { display: flex; gap: 4px; flex-wrap: wrap; }
+    .q-pri-btn {
+      background: var(--s2); border: 1px solid var(--b1); border-radius: 4px;
+      color: var(--txt2); cursor: pointer; font-size: 10px; font-weight: 600;
+      padding: 3px 9px; transition: all .12s; white-space: nowrap;
+      font-family: 'Inter', sans-serif;
+    }
+    .q-pri-btn:hover { background: var(--s3); color: var(--txt); }
+    .q-pri-btn.on { background: rgba(200,168,112,.12); border-color: rgba(200,168,112,.3); color: var(--gold); }
+    .q-edit-sel, .q-edit-date, .q-edit-note {
+      background: var(--s2); border: 1px solid var(--b1); border-radius: 4px;
+      color: var(--txt); font-family: 'Inter', sans-serif; font-size: 12px;
+      padding: 5px 8px; outline: none; transition: border-color .15s; flex: 1;
+    }
+    .q-edit-sel:focus, .q-edit-date:focus, .q-edit-note:focus { border-color: var(--teal); }
+    .q-edit-note { resize: vertical; min-height: 44px; }
+    html.light .q-edit-sel, html.light .q-edit-date, html.light .q-edit-note { background: var(--s1); }
+
     /* Tag pills */
     .tag { font-size: 8px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 2px 6px; border-radius: 3px; }
     .tgaming    { color:#80BC78; background:rgba(112,170,104,.09);  border:1px solid rgba(112,170,104,.18); }
@@ -243,7 +274,7 @@
       padding: 4px 8px; font-size: 18px; transition: color .15s; min-width: 48px;
       text-decoration: none;
     }
-    .bnav-btn span { font-size: 9px; font-weight: 600; letter-spacing: .04em; display: block; }
+    .bnav-btn span { font-size: 10px; font-weight: 600; letter-spacing: .04em; display: block; }
     .bnav-btn.active { color: var(--gold); }
 
     /* ── TOAST ── */
@@ -463,7 +494,36 @@
       lsSet(KEYS.producing, JSON.stringify([...producing]));
       lsSet(KEYS.rejected,  JSON.stringify([...rejected]));
     }
+    function saveMetadata() {
+      lsSet(KEYS.pris,      JSON.stringify(pris));
+      lsSet(KEYS.scheds,    JSON.stringify(scheds));
+      lsSet(KEYS.durations, JSON.stringify(durations));
+      lsSet(KEYS.notes,     JSON.stringify(notes));
+    }
     window.addEventListener('pagehide', () => { clearTimeout(_saveTimer); _flush(); });
+
+    function updateCardDisplay(i, idea) {
+      const card = document.getElementById('qcard-' + i);
+      if (!card) return;
+      const titleEl = card.querySelector('.q-card-title');
+      if (titleEl) {
+        const priLabel = pris[i] === 'h' ? '<span style="margin-right:5px">🔴</span>' : pris[i] === 'm' ? '<span style="margin-right:5px">🟡</span>' : '';
+        titleEl.innerHTML = priLabel + idea.t;
+      }
+      const metaEl = card.querySelector('.q-card-meta');
+      if (metaEl) {
+        const dh = durations[i] ? `<span class="q-dur-badge ${durations[i]}">${DUR_LABELS[durations[i]]||durations[i]}</span>` : '';
+        const sf = scheds[i] ? (() => { try { return new Date(scheds[i]+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}); } catch(e){return scheds[i];} })() : '';
+        const sh = scheds[i] ? `<span class="q-sched-badge">Sched: ${sf}</span>` : '';
+        metaEl.innerHTML = dh + sh;
+        metaEl.style.display = (dh || sh) ? '' : 'none';
+      }
+      const noteEl = card.querySelector('.q-card-note');
+      if (noteEl) {
+        noteEl.textContent = notes[i] || '';
+        noteEl.style.display = notes[i] ? '' : 'none';
+      }
+    }
 
     // Sort queue array
     function sortQueue(arr) {
@@ -535,27 +595,53 @@
           return `<span class="tag ${c.cls}">${c.l}</span>`;
         }).join('');
 
-        const noteHtml = notes[i] ? `<div class="q-card-note">${notes[i]}</div>` : '';
-        const durHtml  = durations[i] ? `<span class="q-dur-badge ${durations[i]}">${DUR_LABELS[durations[i]] || durations[i]}</span>` : '';
+        const durHtml = durations[i] ? `<span class="q-dur-badge ${durations[i]}">${DUR_LABELS[durations[i]] || durations[i]}</span>` : '';
         const schedFormatted = scheds[i] ? (() => {
           try { return new Date(scheds[i] + 'T00:00:00').toLocaleDateString('en-US', {month:'short', day:'numeric'}); }
           catch(e) { return scheds[i]; }
         })() : '';
         const schedHtml = scheds[i] ? `<span class="q-sched-badge">Sched: ${schedFormatted}</span>` : '';
-        const metaHtml  = (durHtml || schedHtml) ? `<div class="q-card-meta">${durHtml}${schedHtml}</div>` : '';
-
         const priLabel = pris[i] === 'h' ? '<span style="margin-right:5px">🔴</span>' : pris[i] === 'm' ? '<span style="margin-right:5px">🟡</span>' : '';
-        const titleHtml = `${priLabel}${idea.t}`;
+        const noteText = notes[i] || '';
 
-        html += `<div class="q-card">
+        html += `<div class="q-card" id="qcard-${i}">
           <div class="q-card-edge"></div>
           <div class="q-card-main">
-            <div class="q-card-title">${titleHtml}</div>
+            <div class="q-card-title">${priLabel}${idea.t}</div>
             <div class="q-card-tags">${tags}</div>
-            ${noteHtml}${metaHtml}
+            <div class="q-card-note"${noteText ? '' : ' style="display:none"'}>${noteText}</div>
+            <div class="q-card-meta"${(durHtml || schedHtml) ? '' : ' style="display:none"'}>${durHtml}${schedHtml}</div>
             <div class="q-card-actions">
               <button class="q-btn primary" data-start="${i}">▶ Start Recording</button>
+              <button class="q-btn" data-toggle-edit="${i}">✏ Edit</button>
               <button class="q-btn danger" data-remove="${i}">Remove</button>
+            </div>
+            <div class="q-edit-panel" id="qedit-${i}" style="display:none">
+              <div class="q-edit-row">
+                <span class="q-edit-label">Priority</span>
+                <div class="q-pri-btns">
+                  <button class="q-pri-btn${pris[i]==='h'?' on':''}" data-pri="${i}" data-pv="h">🔴 High</button>
+                  <button class="q-pri-btn${pris[i]==='m'?' on':''}" data-pri="${i}" data-pv="m">🟡 Med</button>
+                  <button class="q-pri-btn${pris[i]==='l'?' on':''}" data-pri="${i}" data-pv="l">⚪ Low</button>
+                </div>
+              </div>
+              <div class="q-edit-row">
+                <span class="q-edit-label">Duration</span>
+                <select class="q-edit-sel" data-dur="${i}">
+                  <option value="">None</option>
+                  <option value="quick"${durations[i]==='quick'?' selected':''}>⚡ Quick</option>
+                  <option value="medium"${durations[i]==='medium'?' selected':''}>⏳ Medium</option>
+                  <option value="full"${durations[i]==='full'?' selected':''}>🎬 Full day</option>
+                </select>
+              </div>
+              <div class="q-edit-row">
+                <span class="q-edit-label">Schedule</span>
+                <input class="q-edit-date" type="date" value="${scheds[i]||''}" data-sched="${i}">
+              </div>
+              <div class="q-edit-row" style="align-items:flex-start">
+                <span class="q-edit-label" style="padding-top:5px">Note</span>
+                <textarea class="q-edit-note" data-note="${i}" rows="2">${noteText}</textarea>
+              </div>
             </div>
           </div>
         </div>`;
@@ -566,8 +652,10 @@
 
     // Event delegation
     document.getElementById('q-body').addEventListener('click', e => {
-      const startBtn  = e.target.closest('[data-start]');
-      const removeBtn = e.target.closest('[data-remove]');
+      const startBtn   = e.target.closest('[data-start]');
+      const removeBtn  = e.target.closest('[data-remove]');
+      const editToggle = e.target.closest('[data-toggle-edit]');
+      const priBtn     = e.target.closest('[data-pri]');
 
       if (startBtn) {
         const i = +startBtn.dataset.start;
@@ -583,6 +671,54 @@
         saveState();
         render();
         showToast('Removed from queue');
+        return;
+      }
+      if (editToggle) {
+        const i = +editToggle.dataset.toggleEdit;
+        const panel = document.getElementById('qedit-' + i);
+        if (panel) {
+          const open = panel.style.display === 'none';
+          panel.style.display = open ? '' : 'none';
+          editToggle.textContent = open ? '✕ Close' : '✏ Edit';
+        }
+        return;
+      }
+      if (priBtn) {
+        const i = +priBtn.dataset.pri;
+        const pv = priBtn.dataset.pv;
+        if (pris[i] === pv) delete pris[i]; else pris[i] = pv;
+        saveMetadata();
+        const panel = document.getElementById('qedit-' + i);
+        if (panel) panel.querySelectorAll('[data-pri]').forEach(b => b.classList.toggle('on', pris[i] === b.dataset.pv));
+        const idea = getIdea(i); if (idea) updateCardDisplay(i, idea);
+        return;
+      }
+    });
+
+    document.getElementById('q-body').addEventListener('change', e => {
+      const durSel  = e.target.closest('[data-dur]');
+      const schedIn = e.target.closest('[data-sched]');
+      const noteTA  = e.target.closest('[data-note]');
+      if (durSel) {
+        const i = +durSel.dataset.dur;
+        if (durSel.value) durations[i] = durSel.value; else delete durations[i];
+        saveMetadata();
+        const idea = getIdea(i); if (idea) updateCardDisplay(i, idea);
+        return;
+      }
+      if (schedIn) {
+        const i = +schedIn.dataset.sched;
+        if (schedIn.value) scheds[i] = schedIn.value; else delete scheds[i];
+        saveMetadata();
+        const idea = getIdea(i); if (idea) updateCardDisplay(i, idea);
+        return;
+      }
+      if (noteTA) {
+        const i = +noteTA.dataset.note;
+        const val = noteTA.value.trim();
+        if (val) notes[i] = val; else delete notes[i];
+        saveMetadata();
+        const idea = getIdea(i); if (idea) updateCardDisplay(i, idea);
         return;
       }
     });

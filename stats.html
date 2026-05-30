@@ -220,7 +220,7 @@
       padding: 4px 8px; font-size: 18px; transition: color .15s; min-width: 48px;
       text-decoration: none;
     }
-    .bnav-btn span { font-size: 9px; font-weight: 600; letter-spacing: .04em; display: block; }
+    .bnav-btn span { font-size: 10px; font-weight: 600; letter-spacing: .04em; display: block; }
     .bnav-btn.active { color: var(--teal); }
 
     /* ── TOAST ── */
@@ -286,6 +286,25 @@
       border-radius: 20px; padding: 5px 12px;
       font-size: 12px; font-weight: 600; border: 1px solid;
     }
+
+    /* ── TOP VIDEOS ── */
+    .top-video-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 0; border-bottom: 1px solid var(--b1);
+    }
+    .top-video-row:last-child { border-bottom: none; }
+    .top-video-medal { font-size: 18px; flex-shrink: 0; width: 24px; text-align: center; }
+    .top-video-info { flex: 1; min-width: 0; }
+    .top-video-title {
+      font-size: 13px; font-weight: 600; color: var(--txt);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .top-video-stats { font-size: 10px; color: var(--txt2); margin-top: 2px; }
+    .top-video-views {
+      font-family: 'Anton', sans-serif; font-size: 16px; color: var(--teal);
+      flex-shrink: 0; text-align: right;
+    }
+    .top-video-views small { font-family: 'Inter', sans-serif; font-size: 9px; color: var(--txt2); display: block; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
 
     /* ── REDUCED MOTION ── */
     @media (prefers-reduced-motion: reduce) {
@@ -387,6 +406,12 @@
     </div>
   </div>
 
+  <!-- Top videos -->
+  <div class="section" id="top-videos-section">
+    <div class="section-title">Top Videos by Views</div>
+    <div id="top-videos-list"></div>
+  </div>
+
   <!-- Quick actions -->
   <div class="section">
     <div class="section-title">Quick actions</div>
@@ -477,7 +502,7 @@
 
     // ── Load state ──
     let favs = new Set(), done = new Set(), producing = new Set(), pris = {}, scheds = {}, notes = {}, durations = {};
-    let streakData = {}, streakHistory = [], achievements = {}, customIdeas = [];
+    let streakData = {}, streakHistory = [], achievements = {}, customIdeas = [], vstats = {};
 
     try { const v=lsGet(KEYS.favs);       if(v) favs         = new Set(JSON.parse(v)); } catch(e){}
     try { const v=lsGet(KEYS.done);       if(v) done         = new Set(JSON.parse(v)); } catch(e){}
@@ -490,6 +515,7 @@
     try { const v=lsGet(KEYS.streakhist); if(v) streakHistory= JSON.parse(v); } catch(e){}
     try { const v=lsGet(KEYS.achiev);     if(v) achievements = JSON.parse(v); } catch(e){}
     try { const v=lsGet(KEYS.custom);     if(v) customIdeas  = JSON.parse(v); } catch(e){}
+    try { const v=lsGet('sv_vstats');     if(v) vstats       = JSON.parse(v); } catch(e){}
 
     const lightOn = lsGet(KEYS.light) === '1';
     document.documentElement.classList.toggle('light', lightOn);
@@ -723,6 +749,36 @@
       });
     }
 
+    // ── Top Videos ──
+    function renderTopVideos() {
+      const container = document.getElementById('top-videos-list');
+      if (!container) return;
+      const withStats = [...done]
+        .filter(i => vstats[i]?.views > 0)
+        .sort((a,b) => (vstats[b]?.views||0) - (vstats[a]?.views||0))
+        .slice(0, 5);
+      if (!withStats.length) {
+        container.innerHTML = '<p style="font-size:12px;color:var(--txt2);padding:8px 0">No stats yet — add view counts on the Done page.</p>';
+        return;
+      }
+      const medals = ['🥇','🥈','🥉','4️⃣','5️⃣'];
+      container.innerHTML = withStats.map((i, idx) => {
+        const idea = window.ALL_IDEAS[i] || customIdeas[i - window.ALL_IDEAS.length];
+        if (!idea) return '';
+        const s = vstats[i];
+        const likes = s.likes || 0;
+        const likeRate = s.views > 0 ? ((likes / s.views) * 100).toFixed(1) : 0;
+        return `<div class="top-video-row">
+          <div class="top-video-medal">${medals[idx]}</div>
+          <div class="top-video-info">
+            <div class="top-video-title">${idea.t}</div>
+            <div class="top-video-stats">${likes.toLocaleString()} likes · ${likeRate}% like rate${s.comments?` · ${(s.comments||0).toLocaleString()} comments`:''}</div>
+          </div>
+          <div class="top-video-views">${(s.views||0).toLocaleString()}<small>views</small></div>
+        </div>`;
+      }).join('');
+    }
+
     // ── Quick actions ──
     document.getElementById('qa-export').addEventListener('click', () => {
       // Build full idea list for export
@@ -781,6 +837,7 @@
     renderTopCategories();
     renderCatGrid();
     renderStreakCal();
+    renderTopVideos();
     renderBadges();
   </script>
 </body>

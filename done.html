@@ -94,6 +94,29 @@
     .hstat-n.red   { color: var(--acc); }
     .hstat-l { font-size: 9px; text-transform: uppercase; letter-spacing: .08em; color: var(--txt2); font-weight: 600; }
 
+    /* ── SEARCH ── */
+    .sbox {
+      width: 100%; position: relative; display: flex; align-items: center;
+    }
+    .sbox-ico {
+      position: absolute; left: 10px; font-size: 18px;
+      color: var(--mut); pointer-events: none; line-height: 1;
+    }
+    .sbox input {
+      width: 100%; background: var(--s2); border: 1px solid var(--b1);
+      border-radius: var(--r); color: var(--txt);
+      font-family: 'Inter', sans-serif; font-size: 14px;
+      padding: 8px 32px 8px 36px; outline: none; transition: border-color .15s;
+    }
+    .sbox input::placeholder { color: var(--mut); }
+    .sbox input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(106,138,88,.1); }
+    .sbox-clear {
+      position: absolute; right: 8px; background: none; border: none;
+      color: var(--mut); cursor: pointer; font-size: 12px; padding: 4px;
+      display: none;
+    }
+    .sbox-clear:hover { color: var(--txt); }
+
     /* ── SORT + FILTER BAR ── */
     .d-controls {
       padding: 12px clamp(12px,3vw,24px) 0;
@@ -253,7 +276,7 @@
       padding: 4px 8px; font-size: 18px; transition: color .15s; min-width: 48px;
       text-decoration: none;
     }
-    .bnav-btn span { font-size: 9px; font-weight: 600; letter-spacing: .04em; display: block; }
+    .bnav-btn span { font-size: 10px; font-weight: 600; letter-spacing: .04em; display: block; }
     .bnav-btn.active { color: var(--teal); }
 
     /* ── TOAST ── */
@@ -362,6 +385,11 @@
 
   <!-- Controls -->
   <div class="d-controls">
+    <div class="sbox">
+      <span class="sbox-ico">⌕</span>
+      <input id="d-search" type="text" placeholder="Search done videos…" autocomplete="off" spellcheck="false"/>
+      <button class="sbox-clear" id="d-clear">✕</button>
+    </div>
     <div class="d-sort-bar">
       <button class="sort-btn on" data-dsort="date">📅 Date</button>
       <button class="sort-btn" data-dsort="views">👁 Views</button>
@@ -429,7 +457,7 @@
     let favs = new Set(), done = new Set(), producing = new Set(), rejected = new Set();
     let notes = {}, pris = {}, scheds = {}, durations = {}, customIdeas = [];
     let vstats = {}, streakHistory = [];
-    let sortMode = 'date', filterCat = 'all';
+    let sortMode = 'date', filterCat = 'all', searchQ = '';
 
     function lsGet(k) { try { return localStorage.getItem(k); } catch(e) { return null; } }
     function lsSet(k, v) { try { localStorage.setItem(k, v); } catch(e) {} }
@@ -555,6 +583,7 @@
         const idea = getIdea(i);
         if (!idea) return false;
         if (filterCat !== 'all' && !idea.tags.includes(filterCat)) return false;
+        if (searchQ && !idea.t.toLowerCase().includes(searchQ)) return false;
         return true;
       });
 
@@ -562,7 +591,7 @@
         body.innerHTML = `<div class="d-empty">
           <div class="d-empty-ico">🔍</div>
           <div class="d-empty-title">No matches</div>
-          Try a different category filter.
+          Try a different search or category filter.
         </div>`;
         return;
       }
@@ -649,6 +678,25 @@
       }
       lsSet(KEYS.vstats, JSON.stringify(vstats));
       updateHeroStats();
+      // Update the inline total engagement row immediately
+      const card = input.closest('.d-card');
+      if (card) {
+        const total = (s.views||0) + (s.likes||0) + (s.comments||0) + (s.shares||0);
+        let totalRow = card.querySelector('.vstats-total-row');
+        if (totalRow) {
+          if (total > 0) totalRow.textContent = 'Total engagement: ' + total.toLocaleString();
+          else totalRow.remove();
+        } else if (total > 0) {
+          const grid = card.querySelector('.vstats-grid');
+          if (grid) {
+            totalRow = document.createElement('div');
+            totalRow.className = 'vstats-total-row';
+            totalRow.style.gridColumn = '1/-1';
+            totalRow.textContent = 'Total engagement: ' + total.toLocaleString();
+            grid.appendChild(totalRow);
+          }
+        }
+      }
     });
 
     // Undo done
@@ -661,6 +709,18 @@
       saveState();
       render();
       showToast('Moved back to Recording');
+    });
+
+    // Search
+    const dSearchEl = document.getElementById('d-search');
+    const dClearEl  = document.getElementById('d-clear');
+    dSearchEl.addEventListener('input', () => {
+      searchQ = dSearchEl.value.trim().toLowerCase();
+      dClearEl.style.display = searchQ ? '' : 'none';
+      render();
+    });
+    dClearEl.addEventListener('click', () => {
+      searchQ = ''; dSearchEl.value = ''; dClearEl.style.display = 'none'; render();
     });
 
     // Category chips

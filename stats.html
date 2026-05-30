@@ -10,17 +10,20 @@
   <link rel="preload" href="data.js" as="script">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='32' fill='%23111110'/%3E%3Crect x='10' y='46' width='42' height='100' rx='21' fill='%23A0453F'/%3E%3Ccircle cx='31' cy='68' r='10' fill='rgba(0,0,0,.3)'/%3E%3Crect x='50' y='20' width='92' height='152' rx='10' fill='%23282523'/%3E%3Crect x='60' y='32' width='72' height='128' rx='6' fill='%23141412'/%3E%3Cpolygon points='80,84 112,96 80,108' fill='%236A8A58' opacity='.9'/%3E%3Crect x='140' y='46' width='42' height='100' rx='21' fill='%236A8A58'/%3E%3Ccircle cx='161' cy='124' r='10' fill='rgba(0,0,0,.3)'/%3E%3C/svg%3E">
-  <meta name="theme-color" content="#111110">
+  <meta name="theme-color" content="#0E0E0D">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <style>
     :root {
-      --bg:#111110; --s1:#171614; --s2:#1e1e1c; --s3:#262422;
+      --bg:#0E0E0D; --s1:#171614; --s2:#1e1e1c; --s3:#262422;
       --b0:#1c1b19; --b1:#282523; --b2:#363330; --b3:#484440;
       --acc:#A0453F; --acc2:#7C2F2F; --gold:#C8A870; --gold2:#E6E1D6;
       --teal:#6A8A58; --blue:#7A9878; --pur:#A0453F;
       --txt:#E6E1D6; --txt2:#A09080; --mut:#605850; --mut2:#3A3530;
       --hi:#D8C8B2; --r:6px;
+      --r-lg:12px;
+      --shadow:0 6px 24px rgba(0,0,0,.22);
+      --ring:0 0 0 2px var(--teal);
       --cat-gaming:#70AA68; --cat-gear:#C86058; --cat-series:#8AA888;
       --cat-education:#AABB80; --cat-story:#B87060; --cat-lifestyle:#C8A880;
       --cat-review:#D8B870; --cat-tutorial:#80A870; --cat-comedy:#D8C8A0;
@@ -28,17 +31,22 @@
       --cat-trend:#C89060;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :focus-visible { outline: none; box-shadow: var(--ring); }
+    button, a, input, [tabindex] { outline: none; }
     html { scroll-behavior: smooth; overflow-x: hidden; }
     body {
       background: var(--bg); color: var(--txt);
       font-family: 'Inter', sans-serif; font-size: 14px;
-      line-height: 1.5; min-height: 100vh;
+      line-height: 1.55; min-height: 100vh;
       overflow-x: hidden; max-width: 100%;
       padding-bottom: 80px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
     body::before {
       content: ''; position: fixed; inset: 0; opacity: .035;
       pointer-events: none; z-index: 0;
+      display: none;
       background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     }
 
@@ -64,7 +72,7 @@
     @media (min-width: 480px) { .hero-stats { grid-template-columns: repeat(4, 1fr); } }
     .hstat {
       background: var(--s2); border: 1px solid var(--b1);
-      border-radius: 10px; padding: 14px 16px;
+      border-radius: var(--r-lg); padding: 14px 16px;
       text-align: center;
     }
     .hstat-n {
@@ -87,7 +95,7 @@
     .prog-track { height: 10px; background: var(--b1); border-radius: 5px; overflow: hidden; }
     .prog-fill {
       height: 100%; border-radius: 5px;
-      background: linear-gradient(90deg, var(--teal), var(--blue), var(--gold));
+      background: linear-gradient(90deg, var(--teal), var(--blue));
       background-size: 200% 100%;
       transition: width .6s cubic-bezier(.4,0,.2,1);
     }
@@ -110,7 +118,7 @@
 
     /* ── SECTION ── */
     .section {
-      padding: 20px clamp(12px,3vw,24px) 0;
+      padding: 24px clamp(12px,3vw,24px) 0;
       position: relative; z-index: 1;
     }
     .section-title {
@@ -159,9 +167,11 @@
     /* ── BADGES ── */
     .badge-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px,1fr)); gap: 8px; }
     .badge-item {
-      background: var(--s2); border: 1px solid var(--b1); border-radius: 8px;
+      background: var(--s2); border: 1px solid var(--b1); border-radius: var(--r-lg);
       padding: 12px 10px; text-align: center;
+      transition: border-color .15s, box-shadow .12s;
     }
+    .badge-item:hover { border-color: var(--b2); box-shadow: var(--shadow); }
     .badge-item.earned { border-color: rgba(200,168,112,.3); background: rgba(200,168,112,.05); }
     .badge-item.locked { opacity: .4; filter: grayscale(.7); }
     .badge-ico  { font-size: 26px; margin-bottom: 5px; }
@@ -172,22 +182,37 @@
     /* ── QUICK ACTIONS ── */
     .quick-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .qa-btn {
-      background: var(--s2); border: 1px solid var(--b1); border-radius: 10px;
+      background: var(--s2); border: 1px solid var(--b1); border-radius: var(--r-lg);
       color: var(--txt2); cursor: pointer; font-size: 12px; font-weight: 500;
       padding: 14px 12px; text-align: center; text-decoration: none;
-      transition: background .15s, border-color .15s; display: block;
+      transition: background .15s, border-color .15s, box-shadow .12s; display: block;
     }
-    .qa-btn:hover { background: var(--s3); border-color: var(--b2); color: var(--txt); }
+    .qa-btn:hover { background: var(--s3); border-color: var(--b2); color: var(--txt); box-shadow: var(--shadow); }
+    .qa-btn:active { filter: brightness(.93); }
     .qa-ico { font-size: 22px; display: block; margin-bottom: 5px; }
     .qa-btn.primary { background: rgba(106,138,88,.12); border-color: rgba(106,138,88,.28); color: var(--teal); }
     .qa-btn.accent  { background: rgba(160,69,63,.08); border-color: rgba(160,69,63,.22); color: var(--acc); }
 
     /* ── BOTTOM NAV ── */
     .bottom-nav {
-      display: flex; position: fixed; bottom: 0; left: 0; right: 0; z-index: 150;
+      display: flex; position: fixed; bottom: 0; left: 50%; right: auto; z-index: 150;
       background: var(--s2); border-top: 1px solid var(--b1);
       padding: 6px 0 env(safe-area-inset-bottom, 6px);
       justify-content: space-around; align-items: center;
+      max-width: 560px; width: 100%;
+      transform: translateX(-50%);
+      border-radius: 14px 14px 0 0;
+      box-shadow: 0 -2px 12px rgba(0,0,0,.2);
+    }
+    @media (max-width: 640px) {
+      .bottom-nav {
+        max-width: 100%;
+        left: 0;
+        right: 0;
+        transform: none;
+        border-radius: 0;
+        box-shadow: none;
+      }
     }
     .bnav-btn {
       background: none; border: none; color: var(--txt2); cursor: pointer;
@@ -195,7 +220,7 @@
       padding: 4px 8px; font-size: 18px; transition: color .15s; min-width: 48px;
       text-decoration: none;
     }
-    .bnav-btn span { font-size: 9px; font-weight: 600; letter-spacing: .04em; display: block; }
+    .bnav-btn span { font-size: 10px; font-weight: 600; letter-spacing: .04em; display: block; }
     .bnav-btn.active { color: var(--teal); }
 
     /* ── TOAST ── */
@@ -210,11 +235,12 @@
 
     /* ── LIGHT MODE ── */
     html.light {
-      --bg:#F4F1EC; --s1:#FFFDF9; --s2:#F0EDE6; --s3:#E8E4DC;
+      --bg:#F6F3EE; --s1:#FFFDF9; --s2:#F0EDE6; --s3:#E8E4DC;
       --b0:#E0DCD2; --b1:#D4CEC4; --b2:#C0BAB0; --b3:#A8A298;
       --txt:#2A2520; --txt2:#706860; --mut:#A09080; --mut2:#D4CEC4; --hi:#3A3028;
+      --shadow:0 6px 24px rgba(60,50,40,.08);
     }
-    html.light body::before { opacity: .02; }
+    html.light body::before { display: none; }
 
     /* ── THEME TOGGLE ── */
     .stats-theme-toggle {
@@ -223,18 +249,35 @@
       transition: all .15s; flex-shrink: 0;
     }
     .stats-theme-toggle:hover { background: var(--s3); color: var(--txt); }
+    .hdr-icon-btn {
+      background: none; border: 1px solid var(--b2); border-radius: 6px;
+      color: var(--txt2); cursor: pointer; font-size: 14px; padding: 4px 8px;
+      transition: all .15s; flex-shrink: 0; text-decoration: none;
+      display: inline-flex; align-items: center;
+    }
+    .hdr-icon-btn:hover { background: var(--s3); color: var(--txt); }
 
     /* ── CARD HOVER ── */
-    .hstat { transition: background .15s, border-color .15s, transform .12s; }
-    .hstat:hover { transform: translateY(-1px); }
+    .hstat { transition: background .15s, border-color .15s, box-shadow .12s; }
+    .hstat:hover { background: var(--s3); border-color: var(--b2); box-shadow: var(--shadow); }
 
     /* ── FADE IN ── */
     @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
-    body > *:not(.bottom-nav) { animation: fadeIn .25s ease both; }
+    .hero-stats, .overall-progress, .streak-banner, .section, .toast { animation: fadeIn .25s ease both; }
     .hero-stats { animation-delay: .05s; }
     .overall-progress { animation-delay: .08s; }
     .streak-banner { animation-delay: .1s; }
     .section { animation-delay: .12s; }
+
+    /* ── DESKTOP CONTENT CENTERING ── */
+    @media (min-width: 900px) {
+      .stats-header { max-width: 100%; }
+      .hero-stats, .overall-progress, .streak-banner, .section {
+        max-width: 860px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+    }
 
     /* ── TOP CATEGORIES ── */
     .top-cats-row { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -242,6 +285,30 @@
       display: inline-flex; align-items: center; gap: 6px;
       border-radius: 20px; padding: 5px 12px;
       font-size: 12px; font-weight: 600; border: 1px solid;
+    }
+
+    /* ── TOP VIDEOS ── */
+    .top-video-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 0; border-bottom: 1px solid var(--b1);
+    }
+    .top-video-row:last-child { border-bottom: none; }
+    .top-video-medal { font-size: 18px; flex-shrink: 0; width: 24px; text-align: center; }
+    .top-video-info { flex: 1; min-width: 0; }
+    .top-video-title {
+      font-size: 13px; font-weight: 600; color: var(--txt);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .top-video-stats { font-size: 10px; color: var(--txt2); margin-top: 2px; }
+    .top-video-views {
+      font-family: 'Anton', sans-serif; font-size: 16px; color: var(--teal);
+      flex-shrink: 0; text-align: right;
+    }
+    .top-video-views small { font-family: 'Inter', sans-serif; font-size: 9px; color: var(--txt2); display: block; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+
+    /* ── REDUCED MOTION ── */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
     }
   </style>
 </head>
@@ -261,6 +328,7 @@
       </svg>
     </div>
     <h2 class="stats-heading">Analytics</h2>
+    <a class="hdr-icon-btn" href="index.html#sync" title="Cloud sync" aria-label="Cloud sync">☁</a>
     <button class="stats-theme-toggle" id="stats-theme-toggle" title="Toggle light/dark">🌙</button>
   </div>
 
@@ -338,6 +406,12 @@
     </div>
   </div>
 
+  <!-- Top videos -->
+  <div class="section" id="top-videos-section">
+    <div class="section-title">Top Videos by Views</div>
+    <div id="top-videos-list"></div>
+  </div>
+
   <!-- Quick actions -->
   <div class="section">
     <div class="section-title">Quick actions</div>
@@ -346,9 +420,13 @@
         <span class="qa-ico">💡</span>
         Browse Ideas
       </a>
-      <a class="qa-btn primary" href="pipeline.html">
+      <a class="qa-btn" href="queue.html">
+        <span class="qa-ico">📋</span>
+        Queue
+      </a>
+      <a class="qa-btn primary" href="production.html">
         <span class="qa-ico">🎬</span>
-        Pipeline
+        Record
       </a>
       <button class="qa-btn accent" id="qa-export">
         <span class="qa-ico">⬇</span>
@@ -376,7 +454,7 @@
     <a class="bnav-btn" href="queue.html"><span>📋</span><span>Queue</span></a>
     <a class="bnav-btn" href="production.html"><span>🎬</span><span>Record</span></a>
     <a class="bnav-btn" href="done.html"><span>✅</span><span>Done</span></a>
-    <a class="bnav-btn" href="index.html#sync"><span>☁</span><span>Sync</span></a>
+    <a class="bnav-btn active" href="stats.html"><span>📊</span><span>Stats</span></a>
   </nav>
 
   <script src="data.js"></script>
@@ -424,7 +502,7 @@
 
     // ── Load state ──
     let favs = new Set(), done = new Set(), producing = new Set(), pris = {}, scheds = {}, notes = {}, durations = {};
-    let streakData = {}, streakHistory = [], achievements = {}, customIdeas = [];
+    let streakData = {}, streakHistory = [], achievements = {}, customIdeas = [], vstats = {};
 
     try { const v=lsGet(KEYS.favs);       if(v) favs         = new Set(JSON.parse(v)); } catch(e){}
     try { const v=lsGet(KEYS.done);       if(v) done         = new Set(JSON.parse(v)); } catch(e){}
@@ -437,6 +515,7 @@
     try { const v=lsGet(KEYS.streakhist); if(v) streakHistory= JSON.parse(v); } catch(e){}
     try { const v=lsGet(KEYS.achiev);     if(v) achievements = JSON.parse(v); } catch(e){}
     try { const v=lsGet(KEYS.custom);     if(v) customIdeas  = JSON.parse(v); } catch(e){}
+    try { const v=lsGet('sv_vstats');     if(v) vstats       = JSON.parse(v); } catch(e){}
 
     const lightOn = lsGet(KEYS.light) === '1';
     document.documentElement.classList.toggle('light', lightOn);
@@ -670,6 +749,36 @@
       });
     }
 
+    // ── Top Videos ──
+    function renderTopVideos() {
+      const container = document.getElementById('top-videos-list');
+      if (!container) return;
+      const withStats = [...done]
+        .filter(i => vstats[i]?.views > 0)
+        .sort((a,b) => (vstats[b]?.views||0) - (vstats[a]?.views||0))
+        .slice(0, 5);
+      if (!withStats.length) {
+        container.innerHTML = '<p style="font-size:12px;color:var(--txt2);padding:8px 0">No stats yet — add view counts on the Done page.</p>';
+        return;
+      }
+      const medals = ['🥇','🥈','🥉','4️⃣','5️⃣'];
+      container.innerHTML = withStats.map((i, idx) => {
+        const idea = window.ALL_IDEAS[i] || customIdeas[i - window.ALL_IDEAS.length];
+        if (!idea) return '';
+        const s = vstats[i];
+        const likes = s.likes || 0;
+        const likeRate = s.views > 0 ? ((likes / s.views) * 100).toFixed(1) : 0;
+        return `<div class="top-video-row">
+          <div class="top-video-medal">${medals[idx]}</div>
+          <div class="top-video-info">
+            <div class="top-video-title">${idea.t}</div>
+            <div class="top-video-stats">${likes.toLocaleString()} likes · ${likeRate}% like rate${s.comments?` · ${(s.comments||0).toLocaleString()} comments`:''}</div>
+          </div>
+          <div class="top-video-views">${(s.views||0).toLocaleString()}<small>views</small></div>
+        </div>`;
+      }).join('');
+    }
+
     // ── Quick actions ──
     document.getElementById('qa-export').addEventListener('click', () => {
       // Build full idea list for export
@@ -728,6 +837,7 @@
     renderTopCategories();
     renderCatGrid();
     renderStreakCal();
+    renderTopVideos();
     renderBadges();
   </script>
 </body>

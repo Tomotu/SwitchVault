@@ -10,29 +10,35 @@
   <link rel="preload" href="data.js" as="script">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='32' fill='%23111110'/%3E%3Crect x='10' y='46' width='42' height='100' rx='21' fill='%23A0453F'/%3E%3Ccircle cx='31' cy='68' r='10' fill='rgba(0,0,0,.3)'/%3E%3Crect x='50' y='20' width='92' height='152' rx='10' fill='%23282523'/%3E%3Crect x='60' y='32' width='72' height='128' rx='6' fill='%23141412'/%3E%3Cpolygon points='80,84 112,96 80,108' fill='%236A8A58' opacity='.9'/%3E%3Crect x='140' y='46' width='42' height='100' rx='21' fill='%236A8A58'/%3E%3Ccircle cx='161' cy='124' r='10' fill='rgba(0,0,0,.3)'/%3E%3C/svg%3E">
-  <meta name="theme-color" content="#111110">
+  <meta name="theme-color" content="#0E0E0D">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <style>
     :root {
-      --bg:#111110; --s1:#171614; --s2:#1e1e1c; --s3:#262422;
+      --bg:#0E0E0D; --s1:#171614; --s2:#1e1e1c; --s3:#262422;
       --b0:#1c1b19; --b1:#282523; --b2:#363330; --b3:#484440;
       --acc:#A0453F; --acc2:#7C2F2F; --gold:#C8A870; --gold2:#E6E1D6;
       --teal:#6A8A58; --blue:#7A9878; --pur:#A0453F;
       --txt:#E6E1D6; --txt2:#A09080; --mut:#605850; --mut2:#3A3530;
       --hi:#D8C8B2; --r:6px;
+      --r-lg: 12px;
+      --shadow: 0 6px 24px rgba(0,0,0,.22);
+      --ring: 0 0 0 2px var(--teal);
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; overflow-x: hidden; }
+    :focus-visible { outline: none; box-shadow: var(--ring); }
+    button, a, input, [tabindex] { outline: none; }
     body {
       background: var(--bg); color: var(--txt);
       font-family: 'Inter', sans-serif; font-size: 14px;
-      line-height: 1.5; min-height: 100vh;
+      line-height: 1.55; min-height: 100vh;
       overflow-x: hidden; max-width: 100%;
-      padding-bottom: 64px;
+      padding-bottom: 80px;
+      -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
     }
     body::before {
-      content: ''; position: fixed; inset: 0; opacity: .035;
+      content: ''; display: none; position: fixed; inset: 0; opacity: .035;
       pointer-events: none; z-index: 0;
       background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     }
@@ -56,6 +62,14 @@
     }
     .d-theme-toggle:hover { background: var(--s3); color: var(--txt); }
 
+    .hdr-icon-btn {
+      background: none; border: 1px solid var(--b2); border-radius: 6px;
+      color: var(--txt2); cursor: pointer; font-size: 14px; padding: 4px 8px;
+      transition: all .15s; flex-shrink: 0; text-decoration: none;
+      display: inline-flex; align-items: center;
+    }
+    .hdr-icon-btn:hover { background: var(--s3); color: var(--txt); }
+
     /* ── HERO STATS ── */
     .hero-stats {
       display: grid; grid-template-columns: repeat(2, 1fr);
@@ -65,11 +79,11 @@
     @media (min-width: 480px) { .hero-stats { grid-template-columns: repeat(4, 1fr); } }
     .hstat {
       background: var(--s2); border: 1px solid var(--b1);
-      border-radius: 10px; padding: 14px 16px;
+      border-radius: var(--r-lg); padding: 14px 16px;
       text-align: center;
-      transition: background .15s, border-color .15s, transform .12s;
+      transition: background .12s, border-color .15s, box-shadow .15s;
     }
-    .hstat:hover { transform: translateY(-1px); }
+    .hstat:hover { background: var(--s3); border-color: var(--b2); box-shadow: var(--shadow); }
     .hstat-n {
       font-family: 'Anton', sans-serif; font-size: 28px; font-weight: 400;
       color: var(--txt); line-height: 1; margin-bottom: 4px;
@@ -79,6 +93,29 @@
     .hstat-n.gold  { color: var(--gold); }
     .hstat-n.red   { color: var(--acc); }
     .hstat-l { font-size: 9px; text-transform: uppercase; letter-spacing: .08em; color: var(--txt2); font-weight: 600; }
+
+    /* ── SEARCH ── */
+    .sbox {
+      width: 100%; position: relative; display: flex; align-items: center;
+    }
+    .sbox-ico {
+      position: absolute; left: 10px; font-size: 18px;
+      color: var(--mut); pointer-events: none; line-height: 1;
+    }
+    .sbox input {
+      width: 100%; background: var(--s2); border: 1px solid var(--b1);
+      border-radius: var(--r); color: var(--txt);
+      font-family: 'Inter', sans-serif; font-size: 14px;
+      padding: 8px 32px 8px 36px; outline: none; transition: border-color .15s;
+    }
+    .sbox input::placeholder { color: var(--mut); }
+    .sbox input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(106,138,88,.1); }
+    .sbox-clear {
+      position: absolute; right: 8px; background: none; border: none;
+      color: var(--mut); cursor: pointer; font-size: 12px; padding: 4px;
+      display: none;
+    }
+    .sbox-clear:hover { color: var(--txt); }
 
     /* ── SORT + FILTER BAR ── */
     .d-controls {
@@ -98,6 +135,7 @@
     }
     .sort-btn:hover { background: var(--s3); color: var(--txt); }
     .sort-btn.on { background:rgba(106,138,88,.1); border-color:rgba(106,138,88,.3); color:var(--teal); }
+    .sort-btn:active { filter: brightness(.93); }
 
     .d-cats-row {
       display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px;
@@ -111,22 +149,24 @@
     }
     .chip:hover { background: var(--s3); border-color: var(--b2); }
     .chip.on { background:rgba(106,138,88,.12); border-color:rgba(106,138,88,.28); color:var(--teal); }
+    .chip:active { filter: brightness(.93); }
 
     /* ── BODY ── */
     .d-body {
-      padding: 16px clamp(12px,3vw,24px) 24px;
+      padding: 20px clamp(12px,3vw,24px) 24px;
       max-width: 720px;
+      margin: 0 auto;
       position: relative; z-index: 1;
     }
 
     /* Cards */
     .d-card {
       background: var(--s2); border: 1px solid var(--b1);
-      border-radius: 10px; margin-bottom: 12px;
+      border-radius: var(--r-lg); margin-bottom: 14px;
       display: flex; overflow: hidden;
-      transition: background .12s, border-color .15s, transform .12s;
+      transition: background .12s, border-color .15s, box-shadow .15s;
     }
-    .d-card:hover { background: var(--s3); transform: translateY(-1px); }
+    .d-card:hover { background: var(--s3); border-color: var(--b2); box-shadow: var(--shadow); }
     .d-card-edge { width: 4px; flex-shrink: 0; background: var(--teal); }
     .d-card-main { flex: 1; padding: 14px 16px; min-width: 0; }
     .d-card-title {
@@ -175,6 +215,7 @@
       padding: 6px 13px; white-space: nowrap; transition: all .15s; letter-spacing: .02em;
     }
     .d-btn:hover { background: var(--s3); color: var(--txt); }
+    .d-btn:active { filter: brightness(.93); }
 
     /* Tag pills */
     .tag { font-size: 8px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 2px 6px; border-radius: 3px; }
@@ -210,10 +251,24 @@
 
     /* ── BOTTOM NAV ── */
     .bottom-nav {
-      display: flex; position: fixed; bottom: 0; left: 0; right: 0; z-index: 150;
+      display: flex; position: fixed; bottom: 0; left: 50%; right: auto; z-index: 150;
       background: var(--s2); border-top: 1px solid var(--b1);
       padding: 6px 0 env(safe-area-inset-bottom, 6px);
       justify-content: space-around; align-items: center;
+      max-width: 560px; width: 100%;
+      transform: translateX(-50%);
+      border-radius: 14px 14px 0 0;
+      box-shadow: 0 -2px 12px rgba(0,0,0,.2);
+    }
+    @media (max-width: 640px) {
+      .bottom-nav {
+        max-width: 100%;
+        left: 0;
+        right: 0;
+        transform: none;
+        border-radius: 0;
+        box-shadow: none;
+      }
     }
     .bnav-btn {
       background: none; border: none; color: var(--txt2); cursor: pointer;
@@ -221,7 +276,7 @@
       padding: 4px 8px; font-size: 18px; transition: color .15s; min-width: 48px;
       text-decoration: none;
     }
-    .bnav-btn span { font-size: 9px; font-weight: 600; letter-spacing: .04em; display: block; }
+    .bnav-btn span { font-size: 10px; font-weight: 600; letter-spacing: .04em; display: block; }
     .bnav-btn.active { color: var(--teal); }
 
     /* ── TOAST ── */
@@ -236,16 +291,16 @@
 
     /* ── LIGHT MODE ── */
     html.light {
-      --bg:#F4F1EC; --s1:#FFFDF9; --s2:#F0EDE6; --s3:#E8E4DC;
+      --bg:#F6F3EE; --s1:#FFFDF9; --s2:#F0EDE6; --s3:#E8E4DC;
       --b0:#E0DCD2; --b1:#D4CEC4; --b2:#C0BAB0; --b3:#A8A298;
       --txt:#2A2520; --txt2:#706860; --mut:#A09080; --mut2:#D4CEC4; --hi:#3A3028;
+      --shadow: 0 6px 24px rgba(60,50,40,.08);
     }
-    html.light body::before { opacity: .02; }
     html.light .vstats-input { background: var(--s2); }
 
     /* ── FADE IN ── */
     @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
-    body > *:not(.bottom-nav) { animation: fadeIn .25s ease both; }
+    .hero-stats, .d-controls, .d-body, .toast { animation: fadeIn .25s ease both; }
     .hero-stats { animation-delay: .05s; }
     .d-controls { animation-delay: .08s; }
     .d-body { animation-delay: .1s; }
@@ -261,8 +316,30 @@
       .d-card-title { font-size: 13px; }
     }
 
+    @media (min-width: 768px) {
+      .d-sort-bar, .d-cats-row {
+        overflow-x: visible;
+        flex-wrap: wrap;
+      }
+    }
+
     @media (min-width: 900px) {
-      .d-body { max-width: 860px; }
+      .d-body { max-width: 1120px; padding-bottom: 80px; }
+      .d-header { max-width: 1120px; margin: 0 auto; }
+      .d-controls { max-width: 1120px; margin-left: auto; margin-right: auto; }
+      .hero-stats { max-width: 1120px; margin-left: auto; margin-right: auto; }
+      #d-body {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        align-items: start;
+      }
+      #d-body .d-card { margin-bottom: 0; }
+      .d-empty { grid-column: 1 / -1; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
     }
   </style>
 </head>
@@ -282,6 +359,7 @@
       </svg>
     </div>
     <h2 class="d-heading">Done</h2>
+    <a class="hdr-icon-btn" href="index.html#sync" title="Cloud sync" aria-label="Cloud sync">☁</a>
     <button class="d-theme-toggle" id="d-theme-toggle" title="Toggle light/dark">🌙</button>
   </div>
 
@@ -307,6 +385,11 @@
 
   <!-- Controls -->
   <div class="d-controls">
+    <div class="sbox">
+      <span class="sbox-ico">⌕</span>
+      <input id="d-search" type="text" placeholder="Search done videos…" autocomplete="off" spellcheck="false"/>
+      <button class="sbox-clear" id="d-clear">✕</button>
+    </div>
     <div class="d-sort-bar">
       <button class="sort-btn on" data-dsort="date">📅 Date</button>
       <button class="sort-btn" data-dsort="views">👁 Views</button>
@@ -342,7 +425,7 @@
     <a class="bnav-btn" href="queue.html"><span>📋</span><span>Queue</span></a>
     <a class="bnav-btn" href="production.html"><span>🎬</span><span>Record</span></a>
     <a class="bnav-btn active" href="done.html"><span>✅</span><span>Done</span></a>
-    <a class="bnav-btn" href="index.html#sync"><span>☁</span><span>Sync</span></a>
+    <a class="bnav-btn" href="stats.html"><span>📊</span><span>Stats</span></a>
   </nav>
 
   <script src="data.js"></script>
@@ -374,7 +457,7 @@
     let favs = new Set(), done = new Set(), producing = new Set(), rejected = new Set();
     let notes = {}, pris = {}, scheds = {}, durations = {}, customIdeas = [];
     let vstats = {}, streakHistory = [];
-    let sortMode = 'date', filterCat = 'all';
+    let sortMode = 'date', filterCat = 'all', searchQ = '';
 
     function lsGet(k) { try { return localStorage.getItem(k); } catch(e) { return null; } }
     function lsSet(k, v) { try { localStorage.setItem(k, v); } catch(e) {} }
@@ -500,6 +583,7 @@
         const idea = getIdea(i);
         if (!idea) return false;
         if (filterCat !== 'all' && !idea.tags.includes(filterCat)) return false;
+        if (searchQ && !idea.t.toLowerCase().includes(searchQ)) return false;
         return true;
       });
 
@@ -507,7 +591,7 @@
         body.innerHTML = `<div class="d-empty">
           <div class="d-empty-ico">🔍</div>
           <div class="d-empty-title">No matches</div>
-          Try a different category filter.
+          Try a different search or category filter.
         </div>`;
         return;
       }
@@ -594,6 +678,25 @@
       }
       lsSet(KEYS.vstats, JSON.stringify(vstats));
       updateHeroStats();
+      // Update the inline total engagement row immediately
+      const card = input.closest('.d-card');
+      if (card) {
+        const total = (s.views||0) + (s.likes||0) + (s.comments||0) + (s.shares||0);
+        let totalRow = card.querySelector('.vstats-total-row');
+        if (totalRow) {
+          if (total > 0) totalRow.textContent = 'Total engagement: ' + total.toLocaleString();
+          else totalRow.remove();
+        } else if (total > 0) {
+          const grid = card.querySelector('.vstats-grid');
+          if (grid) {
+            totalRow = document.createElement('div');
+            totalRow.className = 'vstats-total-row';
+            totalRow.style.gridColumn = '1/-1';
+            totalRow.textContent = 'Total engagement: ' + total.toLocaleString();
+            grid.appendChild(totalRow);
+          }
+        }
+      }
     });
 
     // Undo done
@@ -606,6 +709,18 @@
       saveState();
       render();
       showToast('Moved back to Recording');
+    });
+
+    // Search
+    const dSearchEl = document.getElementById('d-search');
+    const dClearEl  = document.getElementById('d-clear');
+    dSearchEl.addEventListener('input', () => {
+      searchQ = dSearchEl.value.trim().toLowerCase();
+      dClearEl.style.display = searchQ ? '' : 'none';
+      render();
+    });
+    dClearEl.addEventListener('click', () => {
+      searchQ = ''; dSearchEl.value = ''; dClearEl.style.display = 'none'; render();
     });
 
     // Category chips

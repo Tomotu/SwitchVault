@@ -1,68 +1,35 @@
-const CACHE = 'switchvault-v8';
-const ASSETS = [
-  '/SwitchVault/',
-  '/SwitchVault/index.html',
-  '/SwitchVault/queue.html',
-  '/SwitchVault/production.html',
-  '/SwitchVault/done.html',
-  '/SwitchVault/stats.html',
-  '/SwitchVault/data.js',
-  '/SwitchVault/manifest.json',
-];
+// KILL-SWITCH SERVICE WORKER
+// This unregisters itself, deletes all caches, and reloads open pages.
+// Purpose: recover clients stuck on a previously cached version of the app.
+// Once everyone is recovered, this can be replaced with a real caching SW.
 
-self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting())
+self.addEventListener('install', () => {
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    (async () => {
+      // Delete every cache this origin owns.
+      const keys = await caches.keys();
+      await Promise.all(keys.map(k => caches.delete(k)));
+
+      // Take control of all open clients.
+      await self.clients.claim();
+
+      // Unregister this service worker.
+      await self.registration.unregister();
+
+      // Force every open tab to reload from the network.
+      const clients = await self.clients.matchAll({ type: 'window' });
+      clients.forEach(client => {
+        try { client.navigate(client.url); } catch (e) {}
+      });
+    })()
   );
 });
 
-self.addEventListener('activate', e => {
-  e.waitUntil(
-    caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
-      .then(() => self.clients.claim())
-      .then(() => self.clients.matchAll({ type: 'window' }))
-      .then(clients => {
-        // Force all open tabs to reload so stale cached pages are evicted.
-        clients.forEach(c => {
-          try { c.navigate(c.url); } catch(e) {}
-        });
-      })
-  );
-});
-
-self.addEventListener('fetch', e => {
-  if (e.request.method !== 'GET') return;
-
-  const isHTML = e.request.mode === 'navigate' ||
-                 e.request.destination === 'document' ||
-                 (e.request.headers.get('accept') || '').includes('text/html');
-
-  // Network-first for HTML so users always get the latest app.
-  if (isHTML) {
-    e.respondWith(
-      fetch(e.request)
-        .then(res => {
-          const copy = res.clone();
-          caches.open(CACHE).then(c => c.put(e.request, copy));
-          return res;
-        })
-        .catch(() => caches.match(e.request)
-          .then(r => r || caches.match('/SwitchVault/index.html')))
-    );
-    return;
-  }
-
-  // Stale-while-revalidate for all other assets.
-  e.respondWith(
-    caches.open(CACHE).then(cache =>
-      cache.match(e.request).then(cached => {
-        const networkFetch = fetch(e.request).then(res => {
-          if (res.ok) cache.put(e.request, res.clone());
-          return res;
-        }).catch(() => null);
-        return cached || networkFetch;
-      })
-    )
-  );
+// Always go straight to the network — never serve from cache.
+self.addEventListener('fetch', event => {
+  event.respondWith(fetch(event.request));
 });

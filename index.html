@@ -4205,24 +4205,17 @@
       }
     });
 
-    // === PWA SERVICE WORKER ===
+    // === SERVICE WORKER CLEANUP ===
+    // Caching was causing clients to get stuck on stale versions of the app.
+    // Unregister any existing service worker and clear all caches on every
+    // load so the page is always served fresh from the network.
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/SwitchVault/sw.js').then(reg => {
-        // When a new SW takes over, reload so stale cached pages are evicted.
-        reg.addEventListener('updatefound', () => {
-          const newWorker = reg.installing;
-          if (!newWorker) return;
-          newWorker.addEventListener('statechange', () => {
-            if (newWorker.state === 'activated') {
-              window.location.reload();
-            }
-          });
-        });
+      navigator.serviceWorker.getRegistrations().then(regs => {
+        regs.forEach(reg => reg.unregister());
       }).catch(() => {});
-      // Also listen for the SW telling us to reload (cross-tab).
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
-        window.location.reload();
-      });
+      if (window.caches && caches.keys) {
+        caches.keys().then(keys => keys.forEach(k => caches.delete(k))).catch(() => {});
+      }
     }
 
     // === STAGGER ANIMATION ON LOAD ===

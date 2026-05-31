@@ -4175,9 +4175,6 @@
       else if (e.key.toLowerCase() === 'i') {
         insOverlay.classList.contains('open') ? insOverlay.classList.remove('open') : openInspire();
       }
-      else if (e.key.toLowerCase() === 'f') {
-        focusOpen ? document.getElementById('focus-overlay').classList.remove('open') : openFocusMode();
-      }
       else if (e.key.toLowerCase() === 'p') { window.print(); }
       else if (e.key.toLowerCase() === 'c' && !e.ctrlKey && !e.metaKey) {
         const vis = cards.filter(c => !c.classList.contains('hidden'));

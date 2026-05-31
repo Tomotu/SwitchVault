@@ -1,4 +1,4 @@
-const CACHE = 'switchvault-v5';
+const CACHE = 'switchvault-v6';
 const ASSETS = [
   '/SwitchVault/',
   '/SwitchVault/index.html',

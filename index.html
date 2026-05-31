@@ -317,6 +317,38 @@
     .sync-status.err { color: var(--acc); }
     .sync-hint { font-size: 11px; color: var(--mut); margin-top: 10px; line-height: 1.6; }
 
+    /* ── AI GENERATE ── */
+    .ai-count-row { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+    .ai-count-btn {
+      background: var(--s2); border: 1px solid var(--b1); border-radius: 6px;
+      color: var(--txt2); cursor: pointer; font-family: 'Inter', sans-serif;
+      font-size: 13px; font-weight: 600; padding: 6px 16px; transition: all .12s;
+    }
+    .ai-count-btn.on { background: rgba(200,168,112,.12); border-color: rgba(200,168,112,.3); color: var(--gold); }
+    .ai-spinner {
+      display: inline-block; width: 15px; height: 15px; vertical-align: middle;
+      border: 2px solid rgba(200,168,112,.25); border-top-color: var(--gold);
+      border-radius: 50%; animation: spin .7s linear infinite; margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .ai-key-saved-row { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+    .ai-key-saved { font-size: 12px; color: var(--teal); font-weight: 600; }
+    .ai-key-change {
+      background: none; border: none; color: var(--txt2); font-size: 11px;
+      cursor: pointer; text-decoration: underline; padding: 0; font-family: 'Inter', sans-serif;
+    }
+    .ai-key-change:hover { color: var(--txt); }
+    #ai-results-list { margin-top: 14px; }
+    .ai-idea-row {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 10px 0; border-bottom: 1px solid var(--b1);
+    }
+    .ai-idea-row:last-child { border-bottom: none; }
+    .ai-idea-cb { margin-top: 2px; flex-shrink: 0; cursor: pointer; accent-color: var(--gold); width: 15px; height: 15px; }
+    .ai-idea-lbl { cursor: pointer; flex: 1; }
+    .ai-idea-text { font-size: 13px; color: var(--txt); line-height: 1.4; }
+    .ai-idea-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 5px; }
+
     /* ── LIGHT MODE ── */
     html.light {
       --bg:#F6F3EE; --s1:#FFFDF9; --s2:#F0EDE6; --s3:#E8E4DC;
@@ -377,6 +409,7 @@
         <h1 class="i-heading"><span>Switch</span>Vault</h1>
         <span class="i-count-badge" id="i-count">0 ideas</span>
         <button class="hdr-icon-btn" id="i-sync-btn" title="Cloud sync" aria-label="Cloud sync">☁</button>
+        <button class="hdr-icon-btn" id="i-ai-btn" title="Generate ideas with Claude AI" aria-label="Generate ideas with AI">✨</button>
         <button class="i-theme-toggle" id="i-theme-toggle" title="Toggle light/dark">🌙</button>
       </div>
       <div class="sbox">
@@ -461,6 +494,53 @@
     </div>
   </div>
 
+  <!-- AI Generate modal -->
+  <div class="overlay" id="ai-overlay">
+    <div class="modal">
+      <button class="modal-close" id="ai-close">✕</button>
+      <h2>✨ AI Ideas</h2>
+      <p class="sub">Generate Nintendo Switch TikTok video ideas with Claude AI.</p>
+
+      <div id="ai-key-section">
+        <label>Anthropic API key</label>
+        <div class="ai-key-saved-row" id="ai-key-saved-row" style="display:none">
+          <span class="ai-key-saved">✓ Key saved</span>
+          <button class="ai-key-change" id="ai-key-change-btn">Change</button>
+        </div>
+        <input type="password" id="ai-key-input" placeholder="sk-ant-…" autocomplete="off" spellcheck="false">
+        <div class="sync-hint">Your key stays on this device only — never sent anywhere except Anthropic's API.</div>
+      </div>
+
+      <label for="ai-topic">Focus (optional)</label>
+      <input type="text" id="ai-topic" placeholder="e.g. Joy-Con mods, travel accessories, hidden features…" autocomplete="off">
+
+      <label>How many ideas?</label>
+      <div class="ai-count-row">
+        <button class="ai-count-btn on" data-cnt="5">5</button>
+        <button class="ai-count-btn" data-cnt="10">10</button>
+        <button class="ai-count-btn" data-cnt="15">15</button>
+        <button class="ai-count-btn" data-cnt="20">20</button>
+      </div>
+
+      <label>Content style</label>
+      <div class="cat-pick" id="ai-cats"></div>
+
+      <div class="sync-status" id="ai-status"></div>
+      <div class="modal-actions">
+        <button class="mbtn" id="ai-cancel">Cancel</button>
+        <button class="mbtn prime" id="ai-generate">✨ Generate</button>
+      </div>
+
+      <div id="ai-results" style="display:none">
+        <div id="ai-results-list"></div>
+        <div class="modal-actions" style="margin-top:14px">
+          <button class="mbtn" id="ai-select-toggle">Deselect all</button>
+          <button class="mbtn prime" id="ai-add-selected">Add selected</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Bottom nav -->
   <nav class="bottom-nav">
     <a class="bnav-btn active" href="index.html"><span>💡</span><span>Ideas</span></a>
@@ -494,6 +574,8 @@
     };
     // Supabase credentials live only in localStorage, never in code.
     const SB = { url:'sv_sb_url', key:'sv_sb_key', phrase:'sv_sb_phrase' };
+    // Anthropic API key lives only in localStorage, never in code.
+    const AI = { key: 'sv_ai_key' };
 
     const TC = {
       gaming:{cls:'tgaming',l:'Gaming'}, gear:{cls:'tgear',l:'Gear'},
@@ -956,9 +1038,213 @@
     document.getElementById('sync-push').addEventListener('click', syncPush);
     document.getElementById('sync-pull').addEventListener('click', syncPull);
 
+    // ── AI Generate modal ──
+    const aiOverlay = document.getElementById('ai-overlay');
+    let aiCount = 5;
+    let aiCats = new Set(['gear', 'review', 'tutorial']);
+    let generatedIdeas = [];
+    let aiKeyEditing = false;
+
+    function renderAiCats() {
+      document.getElementById('ai-cats').innerHTML = CAT_LIST.map(c =>
+        `<button class="cat-pick-btn${aiCats.has(c) ? ' on' : ''}" data-aic="${c}">${TC[c]?.l || c}</button>`).join('');
+    }
+    function setAiStatus(msg, kind) {
+      const el = document.getElementById('ai-status');
+      el.textContent = msg || '';
+      el.className = 'sync-status' + (kind ? ' ' + kind : '');
+    }
+    function showAiKeyInput(show) {
+      document.getElementById('ai-key-input').style.display = show ? '' : 'none';
+      document.getElementById('ai-key-section').querySelector('.sync-hint').style.display = show ? '' : 'none';
+      document.getElementById('ai-key-saved-row').style.display = show ? 'none' : '';
+      aiKeyEditing = show;
+    }
+    function openAi() {
+      const hasKey = !!(lsGet(AI.key) || '').trim();
+      if (hasKey) {
+        showAiKeyInput(false);
+      } else {
+        showAiKeyInput(true);
+        document.getElementById('ai-key-input').value = '';
+      }
+      document.getElementById('ai-topic').value = '';
+      document.getElementById('ai-results').style.display = 'none';
+      setAiStatus('');
+      renderAiCats();
+      aiOverlay.classList.add('open');
+      if (!hasKey) setTimeout(() => document.getElementById('ai-key-input').focus(), 50);
+    }
+    function closeAi() { aiOverlay.classList.remove('open'); }
+
+    document.getElementById('i-ai-btn').addEventListener('click', openAi);
+    document.getElementById('ai-close').addEventListener('click', closeAi);
+    document.getElementById('ai-cancel').addEventListener('click', closeAi);
+    aiOverlay.addEventListener('click', e => { if (e.target === aiOverlay) closeAi(); });
+
+    document.getElementById('ai-key-change-btn').addEventListener('click', () => {
+      document.getElementById('ai-key-input').value = lsGet(AI.key) || '';
+      showAiKeyInput(true);
+      document.getElementById('ai-key-input').focus();
+    });
+
+    document.getElementById('ai-cats').addEventListener('click', e => {
+      const btn = e.target.closest('[data-aic]');
+      if (!btn) return;
+      const c = btn.dataset.aic;
+      if (aiCats.has(c)) { aiCats.delete(c); if (!aiCats.size) aiCats.add(c); }
+      else aiCats.add(c);
+      renderAiCats();
+    });
+
+    document.querySelector('.ai-count-row').addEventListener('click', e => {
+      const btn = e.target.closest('[data-cnt]');
+      if (!btn) return;
+      aiCount = +btn.dataset.cnt;
+      document.querySelectorAll('[data-cnt]').forEach(b => b.classList.toggle('on', +b.dataset.cnt === aiCount));
+    });
+
+    document.getElementById('ai-generate').addEventListener('click', async () => {
+      // Resolve API key
+      let apiKey = '';
+      if (aiKeyEditing || !(lsGet(AI.key) || '').trim()) {
+        apiKey = (document.getElementById('ai-key-input').value || '').trim();
+      } else {
+        apiKey = (lsGet(AI.key) || '').trim();
+      }
+      if (!apiKey) {
+        setAiStatus('Enter your Anthropic API key first', 'err');
+        showAiKeyInput(true);
+        document.getElementById('ai-key-input').focus();
+        return;
+      }
+
+      const generateBtn = document.getElementById('ai-generate');
+      generateBtn.disabled = true;
+      generateBtn.innerHTML = '<span class="ai-spinner"></span>Generating…';
+      setAiStatus('');
+      document.getElementById('ai-results').style.display = 'none';
+      generatedIdeas = [];
+
+      const topic = (document.getElementById('ai-topic').value || '').trim();
+      const cats = [...aiCats].join(', ');
+      const topicLine = topic ? ` Focus specifically on: ${topic}.` : ' Cover a range of angles.';
+      const prompt = `You are a creative content strategist for a Nintendo Switch gear and accessories TikTok channel.
+
+Generate exactly ${aiCount} unique, engaging Nintendo Switch TikTok video ideas.${topicLine}
+Favour these content styles: ${cats}.
+
+Requirements:
+- Titles must be punchy, specific, and scroll-stopping — conversational, curiosity-driven, or story-led
+- Each idea must feel concrete and filmable, like something a real creator would actually shoot
+- Tags must only come from this exact list: gear, review, tutorial, education, story, lifestyle, comedy, gaming, challenge, trend, reaction, collab, series
+- Assign 1–3 tags per idea
+
+Return ONLY a valid JSON array with no explanation, no markdown code fences, and no extra text:
+[{"t":"title here","tags":["tag1","tag2"]},...]`;
+
+      try {
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'x-api-key': apiKey,
+            'anthropic-version': '2023-06-01',
+            'anthropic-dangerous-allow-browser': 'true',
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'claude-haiku-4-5-20251001',
+            max_tokens: 2048,
+            messages: [{ role: 'user', content: prompt }],
+          }),
+        });
+
+        if (!res.ok) {
+          let msg = 'HTTP ' + res.status;
+          try { const d = await res.json(); msg = d?.error?.message || msg; } catch(e) {}
+          if (res.status === 401) {
+            setAiStatus('Invalid API key — check and try again', 'err');
+            showAiKeyInput(true);
+          } else if (res.status === 429) {
+            setAiStatus('Rate limited — wait a moment and try again', 'err');
+          } else {
+            setAiStatus('Error: ' + msg, 'err');
+          }
+          return;
+        }
+
+        const data = await res.json();
+        const text = (data.content?.[0]?.text || '').trim();
+
+        let parsed;
+        try {
+          parsed = JSON.parse(text);
+        } catch(e) {
+          const match = text.match(/\[[\s\S]*\]/);
+          if (match) parsed = JSON.parse(match[0]);
+          else throw new Error('Response was not valid JSON');
+        }
+        if (!Array.isArray(parsed) || !parsed.length) throw new Error('No ideas in response');
+
+        generatedIdeas = parsed
+          .filter(x => x && typeof x.t === 'string' && x.t.trim())
+          .map(x => ({
+            t: x.t.trim(),
+            tags: Array.isArray(x.tags) ? x.tags.filter(t => CAT_LIST.includes(t)) : ['gear'],
+          }));
+        if (!generatedIdeas.length) throw new Error('No valid ideas returned');
+
+        // Save key now that it worked
+        lsSet(AI.key, apiKey);
+        showAiKeyInput(false);
+
+        // Render generated list
+        document.getElementById('ai-results-list').innerHTML = generatedIdeas.map((idea, idx) => {
+          const tagHtml = idea.tags.map(t => {
+            const c = TC[t] || {cls:'tgear', l:t};
+            return `<span class="tag ${c.cls}">${c.l}</span>`;
+          }).join('');
+          return `<div class="ai-idea-row">
+            <input type="checkbox" class="ai-idea-cb" id="aich-${idx}" data-aidx="${idx}" checked>
+            <label class="ai-idea-lbl" for="aich-${idx}">
+              <div class="ai-idea-text">${escapeHTML(idea.t)}</div>
+              <div class="ai-idea-tags">${tagHtml}</div>
+            </label>
+          </div>`;
+        }).join('');
+
+        document.getElementById('ai-select-toggle').textContent = 'Deselect all';
+        document.getElementById('ai-results').style.display = '';
+        setAiStatus(`✓ ${generatedIdeas.length} ideas generated`, 'ok');
+
+      } catch (err) {
+        setAiStatus('Failed: ' + err.message, 'err');
+      } finally {
+        generateBtn.disabled = false;
+        generateBtn.innerHTML = '✨ Generate';
+      }
+    });
+
+    document.getElementById('ai-select-toggle').addEventListener('click', () => {
+      const cbs = [...document.querySelectorAll('.ai-idea-cb')];
+      const allChecked = cbs.every(cb => cb.checked);
+      cbs.forEach(cb => cb.checked = !allChecked);
+      document.getElementById('ai-select-toggle').textContent = allChecked ? 'Select all' : 'Deselect all';
+    });
+
+    document.getElementById('ai-add-selected').addEventListener('click', () => {
+      const selected = [...document.querySelectorAll('.ai-idea-cb:checked')].map(cb => +cb.dataset.aidx);
+      if (!selected.length) { setAiStatus('Select at least one idea', 'err'); return; }
+      selected.forEach(idx => { if (generatedIdeas[idx]) customIdeas.push(generatedIdeas[idx]); });
+      saveCustom();
+      closeAi();
+      render();
+      showToast(`💡 ${selected.length} idea${selected.length !== 1 ? 's' : ''} added`);
+    });
+
     // ── Escape closes modals ──
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') { closeAdd(); closeSync(); }
+      if (e.key === 'Escape') { closeAdd(); closeSync(); closeAi(); }
     });
 
     // ── Boot ──

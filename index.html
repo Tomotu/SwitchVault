@@ -4210,7 +4210,22 @@
 
     // === PWA SERVICE WORKER ===
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/SwitchVault/sw.js').catch(() => {});
+      navigator.serviceWorker.register('/SwitchVault/sw.js').then(reg => {
+        // When a new SW takes over, reload so stale cached pages are evicted.
+        reg.addEventListener('updatefound', () => {
+          const newWorker = reg.installing;
+          if (!newWorker) return;
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'activated') {
+              window.location.reload();
+            }
+          });
+        });
+      }).catch(() => {});
+      // Also listen for the SW telling us to reload (cross-tab).
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        window.location.reload();
+      });
     }
 
     // === STAGGER ANIMATION ON LOAD ===

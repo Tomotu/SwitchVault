@@ -287,6 +287,10 @@
       font-size: 12px; font-weight: 600; border: 1px solid;
     }
 
+    /* ── PERFORMANCE INSIGHTS ── */
+    .insights-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    @media (max-width: 460px) { .insights-grid { grid-template-columns: 1fr; } }
+
     /* ── TOP VIDEOS ── */
     .top-video-row {
       display: flex; align-items: center; gap: 12px;
@@ -402,6 +406,25 @@
         <div class="scal-day" style="background:rgba(106,138,88,.6)"></div>
         <div class="scal-day done"></div>
         <span style="font-size:9px;color:var(--txt2)">More</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Performance insights -->
+  <div class="section" id="insights-section" style="display:none">
+    <div class="section-title">Performance insights</div>
+    <div class="insights-grid">
+      <div class="hstat">
+        <div class="hstat-n gold" id="ins-avg-views">0</div>
+        <div class="hstat-l">Avg Views</div>
+      </div>
+      <div class="hstat">
+        <div class="hstat-n green" id="ins-like-rate">0%</div>
+        <div class="hstat-l">Avg Like Rate</div>
+      </div>
+      <div class="hstat">
+        <div class="hstat-n" id="ins-best-day" style="font-size:16px;line-height:1.4">—</div>
+        <div class="hstat-l">Best Day to Post</div>
       </div>
     </div>
   </div>
@@ -749,6 +772,43 @@
       });
     }
 
+    // ── Performance insights (from tracked video stats) ──
+    function renderInsights() {
+      const section = document.getElementById('insights-section');
+      const doneArr = [...done];
+      const withViews = doneArr.filter(i => (vstats[i]?.views || 0) > 0);
+      if (!withViews.length) { section.style.display = 'none'; return; }
+
+      const n = withViews.length;
+      const totalViews = withViews.reduce((a, i) => a + (vstats[i].views || 0), 0);
+      const totalLikes = withViews.reduce((a, i) => a + (vstats[i].likes || 0), 0);
+      const avgViews = Math.round(totalViews / n);
+      const likeRate = totalViews > 0 ? (totalLikes / totalViews * 100) : 0;
+
+      // Best weekday by average views, using each video's Posted date
+      const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+      const dayTotals = {}, dayCounts = {};
+      withViews.forEach(i => {
+        const s = vstats[i];
+        if (!s.postDate) return;
+        const d = new Date(s.postDate + 'T00:00:00');
+        if (isNaN(d)) return;
+        const wd = d.getDay();
+        dayTotals[wd] = (dayTotals[wd] || 0) + (s.views || 0);
+        dayCounts[wd] = (dayCounts[wd] || 0) + 1;
+      });
+      let bestDay = '—', bestAvg = -1;
+      Object.keys(dayTotals).forEach(wd => {
+        const avg = dayTotals[wd] / dayCounts[wd];
+        if (avg > bestAvg) { bestAvg = avg; bestDay = DAYS[wd]; }
+      });
+
+      document.getElementById('ins-avg-views').textContent = avgViews.toLocaleString();
+      document.getElementById('ins-like-rate').textContent = likeRate.toFixed(1) + '%';
+      document.getElementById('ins-best-day').textContent = bestDay;
+      section.style.display = '';
+    }
+
     // ── Top Videos ──
     function renderTopVideos() {
       const container = document.getElementById('top-videos-list');
@@ -837,6 +897,7 @@
     renderTopCategories();
     renderCatGrid();
     renderStreakCal();
+    renderInsights();
     renderTopVideos();
     renderBadges();
   </script>

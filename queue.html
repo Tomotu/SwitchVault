@@ -284,8 +284,41 @@
       padding: 8px 18px; font-size: 13px; font-weight: 500;
       pointer-events: none; opacity: 0; transition: opacity .2s;
       white-space: nowrap; z-index: 500;
+      display: flex; align-items: center; gap: 14px;
     }
     .toast.show { opacity: 1; }
+    .toast.has-action { pointer-events: auto; }
+    .toast-action {
+      background: none; border: none; color: var(--gold); cursor: pointer;
+      font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700;
+      padding: 0; pointer-events: auto; letter-spacing: .02em;
+    }
+    .toast-action:hover { text-decoration: underline; }
+
+    /* ── DUE BANNER ── */
+    .q-due-wrap {
+      padding: 14px clamp(12px,3vw,24px) 0;
+      max-width: 720px; margin: 0 auto;
+      position: relative; z-index: 1;
+    }
+    .q-due-banner {
+      display: flex; align-items: center; gap: 12px;
+      background: rgba(200,168,112,.08); border: 1px solid rgba(200,168,112,.25);
+      border-radius: 10px; padding: 11px 14px;
+    }
+    .q-due-banner.overdue { background: rgba(160,69,63,.08); border-color: rgba(160,69,63,.28); }
+    .q-due-ico { font-size: 20px; flex-shrink: 0; line-height: 1; }
+    .q-due-text { flex: 1; min-width: 0; font-size: 12px; color: var(--txt); line-height: 1.5; }
+    .q-due-text b { color: var(--gold); }
+    .q-due-banner.overdue .q-due-text b { color: var(--acc); }
+    .q-due-btn {
+      background: none; border: 1px solid var(--b2); border-radius: 6px;
+      color: var(--txt2); cursor: pointer; font-size: 11px; font-weight: 600;
+      padding: 5px 11px; white-space: nowrap; flex-shrink: 0;
+      font-family: 'Inter', sans-serif; transition: all .15s;
+    }
+    .q-due-btn:hover { background: var(--s3); color: var(--txt); }
+    @media (min-width: 900px) { .q-due-wrap { max-width: 1120px; } }
 
     /* ── LIGHT MODE ── */
     html.light {
@@ -405,6 +438,9 @@
     </div>
   </div>
 
+  <!-- Due / overdue reminder banner -->
+  <div class="q-due-wrap" id="q-due-wrap"></div>
+
   <!-- Queue content -->
   <div id="q-body" class="q-body"></div>
 
@@ -460,11 +496,23 @@
     }
 
     let _toastTimer;
-    function showToast(msg) {
+    function showToast(msg, action) {
       const el = document.getElementById('toast');
-      el.textContent = msg; el.classList.add('show');
+      el.innerHTML = '';
+      el.classList.toggle('has-action', !!action);
+      const span = document.createElement('span');
+      span.textContent = msg;
+      el.appendChild(span);
+      if (action) {
+        const btn = document.createElement('button');
+        btn.className = 'toast-action';
+        btn.textContent = action.label;
+        btn.addEventListener('click', () => { el.classList.remove('show'); action.fn(); });
+        el.appendChild(btn);
+      }
+      el.classList.add('show');
       clearTimeout(_toastTimer);
-      _toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+      _toastTimer = setTimeout(() => el.classList.remove('show'), action ? 4500 : 2200);
     }
 
     // Load
@@ -546,9 +594,38 @@
       return [...arr].reverse();
     }
 
+    // Due-today / overdue reminder banner (reflects the full queue, ignores filters)
+    function renderDueBanner() {
+      const wrap = document.getElementById('q-due-wrap');
+      const queueAll = [...favs].filter(i => !producing.has(i) && !done.has(i));
+      const today = new Date().toISOString().slice(0,10);
+      const overdue  = queueAll.filter(i => scheds[i] && scheds[i] < today);
+      const dueToday = queueAll.filter(i => scheds[i] === today);
+      if (!overdue.length && !dueToday.length) { wrap.innerHTML = ''; return; }
+      const isOverdue = overdue.length > 0;
+      const parts = [];
+      if (overdue.length)  parts.push(`<b>${overdue.length}</b> overdue`);
+      if (dueToday.length) parts.push(`<b>${dueToday.length}</b> due today`);
+      wrap.innerHTML = `<div class="q-due-banner${isOverdue ? ' overdue' : ''}">
+        <span class="q-due-ico">${isOverdue ? '⏰' : '🔔'}</span>
+        <span class="q-due-text">${parts.join(' · ')} in your queue — ${isOverdue ? 'time to film!' : 'ready to record today.'}</span>
+        <button class="q-due-btn" id="q-due-jump">View →</button>
+      </div>`;
+      document.getElementById('q-due-jump').addEventListener('click', () => {
+        sortMode = 'scheduled';
+        document.querySelectorAll('[data-sort]').forEach(b => b.classList.toggle('on', b.dataset.sort === 'scheduled'));
+        searchQ = ''; searchEl.value = ''; clearEl.style.display = 'none';
+        filterCat = 'all';
+        document.querySelectorAll('[data-qc]').forEach(b => b.classList.toggle('on', b.dataset.qc === 'all'));
+        render();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+
     // Render
     function render() {
       const body = document.getElementById('q-body');
+      renderDueBanner();
 
       // Queue = favs - producing - done
       const queueAll = [...favs].filter(i => !producing.has(i) && !done.has(i));
@@ -670,7 +747,9 @@
         favs.delete(i);
         saveState();
         render();
-        showToast('Removed from queue');
+        showToast('Removed from queue', { label: 'Undo', fn: () => {
+          favs.add(i); saveState(); render();
+        }});
         return;
       }
       if (editToggle) {

@@ -269,8 +269,16 @@
       padding: 8px 18px; font-size: 13px; font-weight: 500;
       pointer-events: none; opacity: 0; transition: opacity .2s;
       white-space: nowrap; z-index: 500;
+      display: flex; align-items: center; gap: 14px;
     }
     .toast.show { opacity: 1; }
+    .toast.has-action { pointer-events: auto; }
+    .toast-action {
+      background: none; border: none; color: var(--gold); cursor: pointer;
+      font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700;
+      padding: 0; pointer-events: auto; letter-spacing: .02em;
+    }
+    .toast-action:hover { text-decoration: underline; }
 
     /* ── OVERLAY (modals) ── */
     .overlay {
@@ -316,6 +324,7 @@
     .sync-status.ok { color: var(--teal); }
     .sync-status.err { color: var(--acc); }
     .sync-hint { font-size: 11px; color: var(--mut); margin-top: 10px; line-height: 1.6; }
+    .backup-section { border-top: 1px solid var(--b1); margin-top: 16px; padding-top: 16px; }
 
     /* ── IMPORT IDEAS ── */
     .import-step {
@@ -493,6 +502,17 @@
         <code>phrase</code> (text, primary key) and <code>data</code> (jsonb).
         Credentials stay on this device only.
       </div>
+
+      <div class="backup-section">
+        <label style="margin-top:0">Local backup</label>
+        <p class="sub" style="margin-bottom:10px">Save or restore your whole vault as a file — no account needed.</p>
+        <div class="modal-actions" style="margin-top:0">
+          <button class="mbtn" id="backup-export">⬇ Export backup</button>
+          <button class="mbtn" id="backup-import">⬆ Import backup</button>
+        </div>
+        <input type="file" id="backup-file" accept="application/json,.json" style="display:none">
+        <div class="sync-hint">Importing replaces matching data on this device, then reloads.</div>
+      </div>
     </div>
   </div>
 
@@ -599,13 +619,33 @@
     }
     function totalIdeas() { return window.ALL_IDEAS.length + customIdeas.length; }
 
-    // ── Toast ──
+    // ── Toast (optional action button, e.g. Undo) ──
     let _toastTimer;
-    function showToast(msg) {
+    function showToast(msg, action) {
       const el = document.getElementById('toast');
-      el.textContent = msg; el.classList.add('show');
+      el.innerHTML = '';
+      el.classList.toggle('has-action', !!action);
+      const span = document.createElement('span');
+      span.textContent = msg;
+      el.appendChild(span);
+      if (action) {
+        const btn = document.createElement('button');
+        btn.className = 'toast-action';
+        btn.textContent = action.label;
+        btn.addEventListener('click', () => { el.classList.remove('show'); action.fn(); });
+        el.appendChild(btn);
+      }
+      el.classList.add('show');
       clearTimeout(_toastTimer);
-      _toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+      _toastTimer = setTimeout(() => el.classList.remove('show'), action ? 4500 : 2200);
+    }
+
+    // ── Duplicate detection (case-insensitive title match) ──
+    function isDuplicateTitle(title) {
+      const t = title.trim().toLowerCase();
+      if (!t) return false;
+      if (window.ALL_IDEAS.some(x => x.t.toLowerCase() === t)) return true;
+      return customIdeas.some(x => x && x.t.toLowerCase() === t);
     }
 
     // ── Load ──
@@ -794,10 +834,19 @@
       }
       if (reject) {
         const i = +reject.dataset.reject;
-        if (rejected.has(i)) { rejected.delete(i); showToast('Un-rejected'); }
-        else { rejected.add(i); favs.delete(i); showToast('Rejected'); }
-        saveSets();
-        (filterStatus === 'all') ? refreshCard(i) : render();
+        if (rejected.has(i)) {
+          rejected.delete(i); saveSets();
+          (filterStatus === 'all') ? refreshCard(i) : render();
+          showToast('Un-rejected');
+        } else {
+          const wasApproved = favs.has(i);
+          rejected.add(i); favs.delete(i); saveSets();
+          (filterStatus === 'all') ? refreshCard(i) : render();
+          showToast('Rejected', { label: 'Undo', fn: () => {
+            rejected.delete(i); if (wasApproved) favs.add(i); saveSets();
+            (filterStatus === 'all') ? refreshCard(i) : render();
+          }});
+        }
         return;
       }
       if (editTog) {
@@ -916,6 +965,7 @@
     document.getElementById('add-save').addEventListener('click', () => {
       const title = document.getElementById('add-title').value.trim();
       if (!title) { showToast('Enter a title first'); return; }
+      if (isDuplicateTitle(title)) { showToast('That idea already exists'); return; }
       customIdeas.push({ t: title, tags: [...addCats] });
       saveCustom();
       closeAdd();
@@ -1035,6 +1085,60 @@
     document.getElementById('sync-push').addEventListener('click', syncPush);
     document.getElementById('sync-pull').addEventListener('click', syncPull);
 
+    // ── Local backup / restore (whole vault as a file) ──
+    // Supabase credentials are deliberately excluded so backups are safe to share.
+    const BACKUP_EXCLUDE = new Set([SB.url, SB.key, SB.phrase]);
+    function exportBackup() {
+      const data = {};
+      try {
+        for (let k = 0; k < localStorage.length; k++) {
+          const key = localStorage.key(k);
+          if (key && key.indexOf('sv_') === 0 && !BACKUP_EXCLUDE.has(key)) {
+            data[key] = localStorage.getItem(key);
+          }
+        }
+      } catch (e) {}
+      const payload = { app: 'SwitchVault', version: 1, exportedAt: new Date().toISOString(), data };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `switchvault-backup-${new Date().toISOString().slice(0,10)}.json`;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('⬇ Backup downloaded');
+    }
+    function importBackup(file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const parsed = JSON.parse(reader.result);
+          const data = parsed && parsed.data ? parsed.data : null;
+          if (!data || typeof data !== 'object') throw new Error('bad');
+          let count = 0;
+          Object.keys(data).forEach(key => {
+            if (key.indexOf('sv_') === 0 && !BACKUP_EXCLUDE.has(key) && typeof data[key] === 'string') {
+              lsSet(key, data[key]); count++;
+            }
+          });
+          if (!count) { setSyncStatus('No vault data found in that file', 'err'); return; }
+          setSyncStatus(`✓ Restored ${count} items — reloading…`, 'ok');
+          showToast('⬆ Backup restored');
+          setTimeout(() => location.reload(), 900);
+        } catch (e) {
+          setSyncStatus('Invalid backup file', 'err');
+        }
+      };
+      reader.readAsText(file);
+    }
+    document.getElementById('backup-export').addEventListener('click', exportBackup);
+    document.getElementById('backup-import').addEventListener('click', () => document.getElementById('backup-file').click());
+    document.getElementById('backup-file').addEventListener('change', e => {
+      const f = e.target.files && e.target.files[0];
+      if (f) importBackup(f);
+      e.target.value = '';
+    });
+
     // ── Import Ideas modal ──
     const IDEA_TEMPLATE = [
       {"t":"","tags":["gear"]},
@@ -1153,9 +1257,20 @@ Return only the filled JSON array, no explanation, no code fences, no extra text
     document.getElementById('ai-add-selected').addEventListener('click', () => {
       const selected = [...document.querySelectorAll('.ai-idea-cb:checked')].map(cb => +cb.dataset.aidx);
       if (!selected.length) { setAiStatus('Select at least one idea', 'err'); return; }
-      selected.forEach(idx => { if (generatedIdeas[idx]) customIdeas.push(generatedIdeas[idx]); });
+      let added = 0, skipped = 0;
+      const seen = new Set();
+      selected.forEach(idx => {
+        const idea = generatedIdeas[idx];
+        if (!idea) return;
+        const key = idea.t.trim().toLowerCase();
+        if (isDuplicateTitle(idea.t) || seen.has(key)) { skipped++; return; }
+        seen.add(key); customIdeas.push(idea); added++;
+      });
       saveCustom(); closeAi(); render();
-      showToast(`💡 ${selected.length} idea${selected.length !== 1 ? 's' : ''} added`);
+      if (!added) showToast('All selected ideas already exist');
+      else showToast(skipped
+        ? `💡 ${added} added · ${skipped} duplicate${skipped !== 1 ? 's' : ''} skipped`
+        : `💡 ${added} idea${added !== 1 ? 's' : ''} added`);
     });
 
     // ── Escape closes modals ──

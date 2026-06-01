@@ -116,6 +116,31 @@
     .streak-main { font-family: 'Anton', sans-serif; font-size: 22px; color: var(--gold); line-height: 1; }
     .streak-sub  { font-size: 11px; color: var(--txt2); margin-top: 2px; }
 
+    /* ── WEEKLY GOAL ── */
+    .week-goal {
+      display: flex; align-items: center; gap: 16px;
+      margin: 16px clamp(12px,3vw,24px) 0;
+      background: var(--s2); border: 1px solid var(--b1);
+      border-radius: 10px; padding: 14px 16px;
+      position: relative; z-index: 1;
+    }
+    .wg-main { flex: 1; min-width: 0; }
+    .wg-top { display: flex; align-items: baseline; gap: 6px; margin-bottom: 6px; }
+    .wg-label { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--txt2); }
+    .wg-nums { font-family: 'Anton', sans-serif; font-size: 26px; color: var(--txt); line-height: 1; }
+    .wg-sep { color: var(--txt2); font-size: 18px; margin: 0 2px; }
+    .wg-track { height: 6px; background: var(--b2); border-radius: 3px; overflow: hidden; }
+    .wg-fill { height: 100%; border-radius: 3px; background: var(--gold); transition: width .4s; }
+    .wg-status { font-size: 11px; color: var(--txt2); margin-top: 5px; }
+    .wg-edit { display: flex; flex-direction: column; align-items: center; gap: 3px; flex-shrink: 0; }
+    .wg-edit-label { font-size: 9px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--txt2); }
+    .wg-input {
+      width: 48px; background: var(--s1); border: 1px solid var(--b2);
+      border-radius: 6px; color: var(--txt); font-size: 15px; font-weight: 700;
+      text-align: center; padding: 5px 4px; outline: none;
+    }
+    .wg-input:focus { border-color: var(--teal); }
+
     /* ── SECTION ── */
     .section {
       padding: 24px clamp(12px,3vw,24px) 0;
@@ -376,6 +401,22 @@
     </div>
   </div>
 
+  <!-- Weekly goal tracker -->
+  <div class="week-goal" id="week-goal">
+    <div class="wg-main">
+      <div class="wg-top">
+        <span class="wg-label">This week</span>
+      </div>
+      <div class="wg-nums"><span id="wg-done">0</span><span class="wg-sep">/</span><span id="wg-target">2</span></div>
+      <div class="wg-track"><div class="wg-fill" id="wg-fill" style="width:0%"></div></div>
+      <div class="wg-status" id="wg-status">Set your weekly posting goal →</div>
+    </div>
+    <div class="wg-edit">
+      <span class="wg-edit-label">Goal</span>
+      <input class="wg-input" id="wg-input" type="number" min="1" max="52" value="2">
+    </div>
+  </div>
+
   <!-- Weekly chart -->
   <div class="section">
     <div class="section-title">Done per week — last 8 weeks</div>
@@ -488,6 +529,7 @@
       scheds:'sv_scheds', streak:'sv_streak', custom:'sv_custom',
       streakhist:'sv_streakhist', achiev:'sv_achievements', light:'sv_light',
       producing:'sv_producing', rejected:'sv_rejected', durations:'sv_durations',
+      wgoal:'sv_wgoal',
     };
 
     const TC = {
@@ -526,6 +568,7 @@
     // ── Load state ──
     let favs = new Set(), done = new Set(), producing = new Set(), pris = {}, scheds = {}, notes = {}, durations = {};
     let streakData = {}, streakHistory = [], achievements = {}, customIdeas = [], vstats = {};
+    let weekGoal = 2;
 
     try { const v=lsGet(KEYS.favs);       if(v) favs         = new Set(JSON.parse(v)); } catch(e){}
     try { const v=lsGet(KEYS.done);       if(v) done         = new Set(JSON.parse(v)); } catch(e){}
@@ -537,6 +580,7 @@
     try { const v=lsGet(KEYS.streak);     if(v) streakData   = JSON.parse(v); } catch(e){}
     try { const v=lsGet(KEYS.streakhist); if(v) streakHistory= JSON.parse(v); } catch(e){}
     try { const v=lsGet(KEYS.achiev);     if(v) achievements = JSON.parse(v); } catch(e){}
+    try { const v=lsGet(KEYS.wgoal);      if(v) weekGoal = Math.max(1, +v || 2); } catch(e){}
     try { const v=lsGet(KEYS.custom);     if(v) customIdeas  = JSON.parse(v); } catch(e){}
     try { const v=lsGet('sv_vstats');     if(v) vstats       = JSON.parse(v); } catch(e){}
 
@@ -892,11 +936,50 @@
       navigator.clipboard?.writeText(lines.join('\n')).then(() => showToast('Week schedule copied'));
     });
 
+    function renderWeekGoal() {
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      const weekStart = new Date(today);
+      weekStart.setDate(today.getDate() - today.getDay());
+      const ws = weekStart.toISOString().slice(0,10);
+      const we = new Date(weekStart);
+      we.setDate(weekStart.getDate() + 7);
+      const weStr = we.toISOString().slice(0,10);
+      const thisWeek = streakHistory.filter(h => h.date >= ws && h.date < weStr).length;
+
+      document.getElementById('wg-done').textContent = thisWeek;
+      document.getElementById('wg-target').textContent = weekGoal;
+      document.getElementById('wg-input').value = weekGoal;
+      const pct = Math.min(100, weekGoal > 0 ? Math.round(thisWeek / weekGoal * 100) : 0);
+      const fill = document.getElementById('wg-fill');
+      fill.style.width = pct + '%';
+
+      const statusEl = document.getElementById('wg-status');
+      if (thisWeek >= weekGoal) {
+        statusEl.textContent = '🎉 Goal reached this week!';
+        statusEl.style.color = 'var(--teal)';
+        fill.style.background = 'var(--teal)';
+      } else {
+        const daysLeft = 6 - today.getDay();
+        const needed = weekGoal - thisWeek;
+        statusEl.textContent = `${needed} more to go · ${daysLeft + 1} day${daysLeft + 1 !== 1 ? 's' : ''} left`;
+        statusEl.style.color = needed > daysLeft + 1 ? 'var(--acc)' : 'var(--txt2)';
+        fill.style.background = 'var(--gold)';
+      }
+    }
+
+    document.getElementById('wg-input').addEventListener('change', function() {
+      weekGoal = Math.max(1, parseInt(this.value, 10) || 2);
+      lsSet(KEYS.wgoal, weekGoal);
+      renderWeekGoal();
+    });
+
     // ── Init ──
     renderWeekChart();
     renderTopCategories();
     renderCatGrid();
     renderStreakCal();
+    renderWeekGoal();
     renderInsights();
     renderTopVideos();
     renderBadges();

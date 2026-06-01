@@ -127,6 +127,32 @@
     .i-card.rejected { opacity: .55; }
     .i-card.rejected .i-card-edge { background: var(--mut); }
     .i-card.kb-focused { outline: 2px solid var(--gold); outline-offset: -2px; }
+    .i-card { position: relative; }
+    body.bulk-mode .i-card { cursor: pointer; user-select: none; }
+    body.bulk-mode .i-card::after {
+      content: '☐'; position: absolute; top: 10px; right: 12px;
+      font-size: 17px; color: var(--mut); pointer-events: none; z-index: 1;
+    }
+    body.bulk-mode .i-card.bulk-sel::after { content: '☑'; color: var(--gold); }
+    body.bulk-mode .i-card.bulk-sel { border-color: rgba(200,168,112,.4); background: rgba(200,168,112,.06); }
+    body.bulk-mode .i-card.bulk-sel .i-card-edge { background: var(--gold); }
+    .bulk-bar {
+      position: fixed; bottom: 72px; left: 50%; transform: translateX(-50%); z-index: 200;
+      display: flex; align-items: center; gap: 8px;
+      background: var(--s2); border: 1px solid var(--b2);
+      border-radius: 12px; padding: 10px 14px;
+      box-shadow: 0 4px 20px rgba(0,0,0,.5); white-space: nowrap;
+    }
+    .bulk-count { font-size: 12px; font-weight: 700; color: var(--txt2); margin-right: 2px; }
+    .bulk-btn {
+      background: var(--s1); border: 1px solid var(--b2); border-radius: 6px;
+      color: var(--txt2); cursor: pointer; font-size: 11px; font-weight: 600;
+      padding: 5px 12px; white-space: nowrap; transition: all .15s;
+    }
+    .bulk-btn:hover { background: var(--s3); color: var(--txt); }
+    .bulk-btn.primary { background:rgba(106,138,88,.12); border-color:rgba(106,138,88,.3); color:var(--teal); }
+    .bulk-btn.primary:hover { background:rgba(106,138,88,.22); }
+    .bulk-btn.danger  { background:rgba(160,69,63,.08); border-color:rgba(160,69,63,.25); color:var(--acc); }
     .i-card-edge { width: 4px; flex-shrink: 0; background: var(--gold); }
     .i-card-main { flex: 1; padding: 14px 16px; min-width: 0; }
     .i-card-title { font-size: 14px; font-weight: 600; color: var(--txt); margin-bottom: 7px; line-height: 1.35; }
@@ -436,6 +462,7 @@
       <button class="status-btn" data-status="new">✨ New</button>
       <button class="status-btn" data-status="approved">⭐ Approved</button>
       <button class="status-btn" data-status="rejected">✕ Rejected</button>
+      <button class="status-btn" id="i-bulk-toggle" style="margin-left:auto">☐ Select</button>
     </div>
     <div class="i-chips-row" id="i-cats">
       <button class="chip on" data-qc="all">All</button>
@@ -457,6 +484,14 @@
 
   <!-- Add custom idea FAB -->
   <button class="i-fab" id="i-fab" title="Add custom idea" aria-label="Add custom idea">+</button>
+
+  <!-- Bulk action bar -->
+  <div class="bulk-bar" id="bulk-bar" style="display:none">
+    <span class="bulk-count" id="bulk-count">0 selected</span>
+    <button class="bulk-btn primary" id="bulk-queue">⭐ Queue</button>
+    <button class="bulk-btn danger" id="bulk-reject">✕ Reject</button>
+    <button class="bulk-btn" id="bulk-cancel">Cancel</button>
+  </div>
 
   <!-- Toast -->
   <div class="toast" id="toast"></div>
@@ -612,6 +647,7 @@
     let notes = {}, pris = {}, scheds = {}, durations = {}, customIdeas = [];
     let searchQ = '', filterCat = 'all', filterStatus = 'all';
     let kbFocus = -1, _visibleIds = [];
+    let bulkMode = false, bulkSelected = new Set();
 
     // ── LS helpers ──
     function lsGet(k) { try { return localStorage.getItem(k); } catch(e) { return null; } }
@@ -828,6 +864,50 @@
       if (rBtn) { rBtn.classList.toggle('on', rejected.has(i)); rBtn.textContent = rejected.has(i) ? '✕ Rejected' : '✕ Reject'; }
     }
 
+    // ── Bulk select helpers ──
+    function updateBulkBar() {
+      const n = bulkSelected.size;
+      document.getElementById('bulk-count').textContent = n + ' selected';
+      document.getElementById('bulk-bar').style.display = (bulkMode && n > 0) ? '' : (bulkMode ? '' : 'none');
+    }
+    function enterBulkMode() {
+      bulkMode = true; bulkSelected.clear();
+      document.body.classList.add('bulk-mode');
+      document.getElementById('i-bulk-toggle').classList.add('on');
+      document.getElementById('i-bulk-toggle').textContent = '✕ Done';
+      document.getElementById('bulk-bar').style.display = '';
+      updateBulkBar();
+    }
+    function exitBulkMode() {
+      bulkMode = false; bulkSelected.clear();
+      document.body.classList.remove('bulk-mode');
+      document.getElementById('i-bulk-toggle').classList.remove('on');
+      document.getElementById('i-bulk-toggle').textContent = '☐ Select';
+      document.getElementById('bulk-bar').style.display = 'none';
+      document.querySelectorAll('.i-card.bulk-sel').forEach(c => c.classList.remove('bulk-sel'));
+    }
+
+    document.getElementById('i-bulk-toggle').addEventListener('click', () => {
+      bulkMode ? exitBulkMode() : enterBulkMode();
+    });
+    document.getElementById('bulk-cancel').addEventListener('click', exitBulkMode);
+    document.getElementById('bulk-queue').addEventListener('click', () => {
+      let added = 0;
+      bulkSelected.forEach(i => { if (!favs.has(i)) { favs.add(i); rejected.delete(i); added++; } });
+      saveSets(); exitBulkMode(); render();
+      showToast(`⭐ ${added} idea${added !== 1 ? 's' : ''} added to Queue`);
+    });
+    document.getElementById('bulk-reject').addEventListener('click', () => {
+      const snapshot = new Set(bulkSelected);
+      const prevFavs = new Map([...snapshot].map(i => [i, favs.has(i)]));
+      snapshot.forEach(i => { rejected.add(i); favs.delete(i); });
+      saveSets(); exitBulkMode(); render();
+      showToast(`✕ ${snapshot.size} rejected`, { label: 'Undo', fn: () => {
+        snapshot.forEach(i => { rejected.delete(i); if (prevFavs.get(i)) favs.add(i); });
+        saveSets(); render();
+      }});
+    });
+
     // ── Card interactions ──
     document.getElementById('i-body').addEventListener('click', e => {
       const approve = e.target.closest('[data-approve]');
@@ -835,6 +915,17 @@
       const editTog = e.target.closest('[data-toggle-edit]');
       const priBtn  = e.target.closest('[data-pri]');
       const copyBtn = e.target.closest('[data-copy]');
+
+      if (bulkMode) {
+        const card = e.target.closest('.i-card');
+        if (card) {
+          const i = +card.id.replace('icard-', '');
+          if (bulkSelected.has(i)) { bulkSelected.delete(i); card.classList.remove('bulk-sel'); }
+          else { bulkSelected.add(i); card.classList.add('bulk-sel'); }
+          updateBulkBar();
+        }
+        return;
+      }
 
       if (copyBtn) {
         const idea = getIdea(+copyBtn.dataset.copy);
@@ -1322,12 +1413,12 @@ Return only the filled JSON array, no explanation, no code fences, no extra text
 
     // ── Escape closes modals ──
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') { closeAdd(); closeSync(); closeAi(); kbFocus = -1; render(); return; }
+      if (e.key === 'Escape') { closeAdd(); closeSync(); closeAi(); if (bulkMode) { exitBulkMode(); return; } kbFocus = -1; render(); return; }
 
       // Keyboard navigation — only when no modal is open and not typing in an input
       const modalOpen = document.querySelector('.overlay.open') !== null;
       const typing = e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT';
-      if (modalOpen || typing || !_visibleIds.length) return;
+      if (modalOpen || typing || bulkMode || !_visibleIds.length) return;
 
       function moveFocus(delta) {
         const prev = document.getElementById('icard-' + _visibleIds[kbFocus]);

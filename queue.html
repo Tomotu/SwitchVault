@@ -170,6 +170,14 @@
       background: var(--s1); border: 1px solid var(--b2);
       border-radius: 4px; padding: 2px 6px;
     }
+    .q-today-badge {
+      font-size: 9px; font-weight: 700; letter-spacing: .04em;
+      text-transform: uppercase; color: var(--teal);
+      background: rgba(106,138,88,.1); border: 1px solid rgba(106,138,88,.3);
+      border-radius: 4px; padding: 2px 6px;
+    }
+    .q-card.q-today { border-color: rgba(106,138,88,.35); }
+    .q-card.q-today .q-card-edge { background: var(--teal); }
     .q-card-actions { display: flex; gap: 6px; flex-wrap: wrap; }
     .q-drag-handle { display: none; align-items: center; justify-content: center;
       width: 28px; flex-shrink: 0; cursor: grab; color: var(--txt2); font-size: 16px;
@@ -703,11 +711,14 @@
           try { return new Date(scheds[i] + 'T00:00:00').toLocaleDateString('en-US', {month:'short', day:'numeric'}); }
           catch(e) { return scheds[i]; }
         })() : '';
-        const schedHtml = scheds[i] ? `<span class="q-sched-badge">Sched: ${schedFormatted}</span>` : '';
+        const isToday = scheds[i] === today;
+        const schedHtml = scheds[i]
+          ? (isToday ? '<span class="q-today-badge">🎯 Today</span>' : `<span class="q-sched-badge">Sched: ${schedFormatted}</span>`)
+          : '';
         const priLabel = pris[i] === 'h' ? '<span style="margin-right:5px">🔴</span>' : pris[i] === 'm' ? '<span style="margin-right:5px">🟡</span>' : '';
         const noteText = notes[i] || '';
 
-        html += `<div class="q-card" id="qcard-${i}" draggable="${sortMode === 'manual' ? 'true' : 'false'}">
+        html += `<div class="q-card${isToday ? ' q-today' : ''}" id="qcard-${i}" draggable="${sortMode === 'manual' ? 'true' : 'false'}">
           <div class="q-drag-handle" aria-hidden="true">⠿</div>
           <div class="q-card-edge"></div>
           <div class="q-card-main">

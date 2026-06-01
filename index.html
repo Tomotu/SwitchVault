@@ -422,6 +422,7 @@
         <span class="i-count-badge" id="i-count">0 ideas</span>
         <button class="hdr-icon-btn" id="i-sync-btn" title="Cloud sync" aria-label="Cloud sync">☁</button>
         <button class="hdr-icon-btn" id="i-ai-btn" title="Generate ideas with Claude AI" aria-label="Generate ideas with AI">✨</button>
+        <button class="hdr-icon-btn" id="i-inspire-btn" title="Inspire me — pick a random unseen idea" aria-label="Inspire me">🎲</button>
         <button class="i-theme-toggle" id="i-theme-toggle" title="Toggle light/dark">🌙</button>
       </div>
       <div class="sbox">
@@ -1197,6 +1198,35 @@ Return only the filled JSON array, no explanation, no code fences, no extra text
     function closeAi() { aiOverlay.classList.remove('open'); }
 
     document.getElementById('i-ai-btn').addEventListener('click', openAi);
+
+    document.getElementById('i-inspire-btn').addEventListener('click', () => {
+      const n = totalIdeas();
+      // Prefer unreviewed (not approved, not rejected); fall back to not-yet-queued; then anything
+      const pools = [
+        Array.from({length: n}, (_, i) => i).filter(i => getIdea(i) && !favs.has(i) && !rejected.has(i)),
+        Array.from({length: n}, (_, i) => i).filter(i => getIdea(i) && !favs.has(i)),
+        Array.from({length: n}, (_, i) => i).filter(i => getIdea(i)),
+      ];
+      const pool = pools.find(p => p.length) || [];
+      if (!pool.length) { showToast('No ideas to pick from!'); return; }
+      const pick = pool[Math.floor(Math.random() * pool.length)];
+      // Clear filters so the picked idea is visible
+      searchQ = ''; filterCat = 'all'; filterStatus = 'all';
+      document.getElementById('i-search').value = '';
+      document.getElementById('i-clear').style.display = 'none';
+      document.querySelectorAll('[data-status]').forEach(b => b.classList.toggle('on', b.dataset.status === 'all'));
+      document.querySelectorAll('[data-qc]').forEach(b => b.classList.toggle('on', b.dataset.qc === 'all'));
+      kbFocus = -1;
+      render();
+      // Find the pick in visibleIds and focus it
+      const pos = _visibleIds.indexOf(pick);
+      if (pos !== -1) {
+        kbFocus = pos;
+        const el = document.getElementById('icard-' + pick);
+        if (el) { el.classList.add('kb-focused'); el.scrollIntoView({block:'center', behavior:'smooth'}); }
+      }
+      showToast('🎲 Random idea picked!');
+    });
     document.getElementById('ai-close').addEventListener('click', closeAi);
     document.getElementById('ai-cancel').addEventListener('click', closeAi);
     aiOverlay.addEventListener('click', e => { if (e.target === aiOverlay) closeAi(); });

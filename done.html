@@ -159,6 +159,18 @@
       position: relative; z-index: 1;
     }
 
+    /* Month dividers */
+    .d-month-header {
+      display: flex; align-items: center; justify-content: space-between;
+      font-family: 'Anton', sans-serif; font-size: 12px; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--txt2);
+      border-bottom: 1px solid var(--b1);
+      padding-bottom: 6px; margin: 20px 0 12px;
+    }
+    .d-month-header:first-child { margin-top: 0; }
+    .d-month-count { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600;
+      color: var(--mut); letter-spacing: 0; }
+
     /* Cards */
     .d-card {
       background: var(--s2); border: 1px solid var(--b1);
@@ -519,6 +531,12 @@
       } catch(e) { return latest.date; }
     }
 
+    function getDoneDateISO(i) {
+      const entries = streakHistory.filter(h => h.id === i);
+      if (entries.length) return entries[entries.length - 1].date;
+      return vstats[i]?.postDate || null;
+    }
+
     function updateHeroStats() {
       const doneArr = [...done];
       const totalDone = doneArr.length;
@@ -596,19 +614,30 @@
         return;
       }
 
-      let html = '';
+      // Group by month (newest first)
+      const monthGroups = new Map(); // 'YYYY-MM' -> ids[]
+      const ungrouped = [];
       filtered.forEach(i => {
-        const idea = getIdea(i);
-        if (!idea) return;
+        const iso = getDoneDateISO(i);
+        if (iso) {
+          const mk = iso.slice(0, 7);
+          if (!monthGroups.has(mk)) monthGroups.set(mk, []);
+          monthGroups.get(mk).push(i);
+        } else {
+          ungrouped.push(i);
+        }
+      });
+      const sortedMonths = [...monthGroups.keys()].sort().reverse();
 
+      function cardHTML(i) {
+        const idea = getIdea(i);
+        if (!idea) return '';
         const tags = idea.tags.map(t => {
           const c = TC[t] || {cls:'tgaming', l:t};
           return `<span class="tag ${c.cls}">${c.l}</span>`;
         }).join('');
-
         const dateStr = getDoneDate(i);
         const dateHtml = dateStr ? `<div class="d-card-date">Done: ${dateStr}</div>` : '';
-
         const durHtml  = durations[i] ? `<span class="d-dur-badge ${durations[i]}">${DUR_LABELS[durations[i]] || durations[i]}</span>` : '';
         const schedFormatted = scheds[i] ? (() => {
           try { return new Date(scheds[i] + 'T00:00:00').toLocaleDateString('en-US', {month:'short', day:'numeric'}); }
@@ -616,11 +645,9 @@
         })() : '';
         const schedHtml = scheds[i] ? `<span class="d-sched-badge">Sched: ${schedFormatted}</span>` : '';
         const metaHtml  = (durHtml || schedHtml) ? `<div class="d-card-meta">${durHtml}${schedHtml}</div>` : '';
-
         const s = getVStats(i);
         const totalEngagement = (s.views || 0) + (s.likes || 0) + (s.comments || 0) + (s.shares || 0);
-
-        html += `<div class="d-card">
+        return `<div class="d-card">
           <div class="d-card-edge"></div>
           <div class="d-card-main">
             <div class="d-card-title">${idea.t}</div>
@@ -659,7 +686,29 @@
             </div>
           </div>
         </div>`;
+      }
+
+      function monthLabel(mk) {
+        try {
+          return new Date(mk + '-01T00:00:00').toLocaleDateString('en-US', {month:'long', year:'numeric'});
+        } catch(e) { return mk; }
+      }
+
+      let html = '';
+      const showDividers = filtered.length > 1 && (monthGroups.size > 1 || (monthGroups.size === 1 && ungrouped.length));
+      sortedMonths.forEach(mk => {
+        const ids = monthGroups.get(mk);
+        if (showDividers) {
+          html += `<div class="d-month-header"><span>${monthLabel(mk)}</span><span class="d-month-count">${ids.length} video${ids.length > 1 ? 's' : ''}</span></div>`;
+        }
+        html += ids.map(cardHTML).join('');
       });
+      if (ungrouped.length) {
+        if (showDividers) {
+          html += `<div class="d-month-header"><span>Unknown date</span><span class="d-month-count">${ungrouped.length} video${ungrouped.length > 1 ? 's' : ''}</span></div>`;
+        }
+        html += ungrouped.map(cardHTML).join('');
+      }
 
       body.innerHTML = html;
     }

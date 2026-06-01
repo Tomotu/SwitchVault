@@ -653,9 +653,12 @@
       // Queue = favs - producing - done
       const queueAll = [...favs].filter(i => !producing.has(i) && !done.has(i));
 
-      // Update count badge
+      // Update count badge with total estimated filming time
       const countEl = document.getElementById('q-count');
-      countEl.textContent = queueAll.length === 1 ? '1 idea' : queueAll.length + ' ideas';
+      const DUR_H = {quick: 2, medium: 4, full: 8};
+      const totalH = queueAll.reduce((s, i) => s + (DUR_H[durations[i]] || 0), 0);
+      const timeStr = totalH > 0 ? ` · ~${totalH}h` : '';
+      countEl.textContent = (queueAll.length === 1 ? '1 idea' : queueAll.length + ' ideas') + timeStr;
 
       if (!queueAll.length) {
         body.innerHTML = `<div class="q-empty">

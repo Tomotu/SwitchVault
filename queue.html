@@ -171,6 +171,15 @@
       border-radius: 4px; padding: 2px 6px;
     }
     .q-card-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+    .q-drag-handle { display: none; align-items: center; justify-content: center;
+      width: 28px; flex-shrink: 0; cursor: grab; color: var(--txt2); font-size: 16px;
+      user-select: none; letter-spacing: -2px; padding: 0 2px; }
+    .q-drag-handle:active { cursor: grabbing; }
+    body.drag-mode .q-drag-handle { display: flex; }
+    body.drag-mode .q-card { transition: opacity .15s; }
+    body.drag-mode .q-card.dragging { opacity: .35; }
+    body.drag-mode .q-card.drag-over { border-color: var(--gold); background: var(--s3); }
+    .kb-focused { outline: 2px solid var(--gold) !important; outline-offset: -2px; }
     .q-btn {
       background: var(--s1); border: 1px solid var(--b2); border-radius: 6px;
       color: var(--txt2); cursor: pointer; font-size: 11px; font-weight: 600;
@@ -435,6 +444,7 @@
       <button class="sort-btn on" data-sort="priority">⭐ Priority first</button>
       <button class="sort-btn" data-sort="scheduled">📅 Scheduled</button>
       <button class="sort-btn" data-sort="recent">📥 Recent</button>
+      <button class="sort-btn" data-sort="manual">⠿ Manual</button>
     </div>
   </div>
 
@@ -462,6 +472,7 @@
       favs:'sv_favs', done:'sv_done', notes:'sv_notes', pris:'sv_pris',
       scheds:'sv_scheds', custom:'sv_custom', durations:'sv_durations',
       rejected:'sv_rejected', producing:'sv_producing', light:'sv_light',
+      qorder:'sv_qorder',
     };
     const TC = {
       gaming:   {cls:'tgaming',   l:'Gaming'},
@@ -484,6 +495,7 @@
     let favs = new Set(), done = new Set(), producing = new Set(), rejected = new Set();
     let notes = {}, pris = {}, scheds = {}, durations = {}, customIdeas = [];
     let searchQ = '', filterCat = 'all', sortMode = 'priority';
+    let qorder = [], _dragSrc = null;
 
     // Utils
     function lsGet(k) { try { return localStorage.getItem(k); } catch(e) { return null; } }
@@ -526,6 +538,7 @@
       try { const v = lsGet(KEYS.scheds);    if(v) scheds    = JSON.parse(v); } catch(e){}
       try { const v = lsGet(KEYS.durations); if(v) durations = JSON.parse(v); } catch(e){}
       try { const v = lsGet(KEYS.custom);    if(v) customIdeas = JSON.parse(v); } catch(e){}
+      try { const v = lsGet(KEYS.qorder);   if(v) qorder = JSON.parse(v); } catch(e){}
       const lightOn = lsGet(KEYS.light) === '1';
       document.documentElement.classList.toggle('light', lightOn);
     }
@@ -590,6 +603,15 @@
           return sa < sb ? -1 : sa > sb ? 1 : 0;
         });
       }
+      if (sortMode === 'manual') {
+        return [...arr].sort((a, b) => {
+          const ia = qorder.indexOf(a), ib = qorder.indexOf(b);
+          if (ia === -1 && ib === -1) return 0;
+          if (ia === -1) return 1;
+          if (ib === -1) return -1;
+          return ia - ib;
+        });
+      }
       // recent: reverse order
       return [...arr].reverse();
     }
@@ -625,6 +647,7 @@
     // Render
     function render() {
       const body = document.getElementById('q-body');
+      document.body.classList.toggle('drag-mode', sortMode === 'manual');
       renderDueBanner();
 
       // Queue = favs - producing - done
@@ -681,7 +704,8 @@
         const priLabel = pris[i] === 'h' ? '<span style="margin-right:5px">🔴</span>' : pris[i] === 'm' ? '<span style="margin-right:5px">🟡</span>' : '';
         const noteText = notes[i] || '';
 
-        html += `<div class="q-card" id="qcard-${i}">
+        html += `<div class="q-card" id="qcard-${i}" draggable="${sortMode === 'manual' ? 'true' : 'false'}">
+          <div class="q-drag-handle" aria-hidden="true">⠿</div>
           <div class="q-card-edge"></div>
           <div class="q-card-main">
             <div class="q-card-title">${priLabel}${idea.t}</div>
@@ -826,11 +850,61 @@
     // Sort buttons
     document.querySelectorAll('[data-sort]').forEach(btn => {
       btn.addEventListener('click', function() {
+        if (this.dataset.sort === 'manual' && !qorder.length) {
+          // Seed manual order from current DOM (before mode switch)
+          qorder = [...document.querySelectorAll('#q-body .q-card')]
+            .map(c => +c.id.replace('qcard-', ''))
+            .filter(n => !isNaN(n));
+          lsSet(KEYS.qorder, JSON.stringify(qorder));
+        }
         sortMode = this.dataset.sort;
         document.querySelectorAll('[data-sort]').forEach(b => b.classList.toggle('on', b.dataset.sort === sortMode));
         render();
       });
     });
+
+    // Drag-to-reorder (manual sort mode)
+    (function() {
+      const qBody = document.getElementById('q-body');
+      qBody.addEventListener('dragstart', e => {
+        const card = e.target.closest('.q-card');
+        if (!card || sortMode !== 'manual') { e.preventDefault(); return; }
+        _dragSrc = +card.id.replace('qcard-', '');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', _dragSrc);
+        setTimeout(() => card.classList.add('dragging'), 0);
+      });
+      qBody.addEventListener('dragend', e => {
+        const card = e.target.closest('.q-card');
+        if (card) card.classList.remove('dragging');
+        qBody.querySelectorAll('.drag-over').forEach(c => c.classList.remove('drag-over'));
+        _dragSrc = null;
+      });
+      qBody.addEventListener('dragover', e => {
+        e.preventDefault();
+        const card = e.target.closest('.q-card');
+        if (!card || sortMode !== 'manual') return;
+        qBody.querySelectorAll('.drag-over').forEach(c => c.classList.remove('drag-over'));
+        card.classList.add('drag-over');
+      });
+      qBody.addEventListener('drop', e => {
+        e.preventDefault();
+        const card = e.target.closest('.q-card');
+        if (!card || sortMode !== 'manual' || _dragSrc === null) return;
+        const dst = +card.id.replace('qcard-', '');
+        if (_dragSrc === dst) return;
+        const current = [...qBody.querySelectorAll('.q-card')]
+          .map(c => +c.id.replace('qcard-', ''));
+        const si = current.indexOf(_dragSrc);
+        const di = current.indexOf(dst);
+        if (si === -1 || di === -1) return;
+        current.splice(si, 1);
+        current.splice(di, 0, _dragSrc);
+        qorder = current;
+        lsSet(KEYS.qorder, JSON.stringify(qorder));
+        render();
+      });
+    })();
 
     // Theme toggle
     (function() {

@@ -126,6 +126,7 @@
     .i-card.approved .i-card-edge { background: var(--teal); }
     .i-card.rejected { opacity: .55; }
     .i-card.rejected .i-card-edge { background: var(--mut); }
+    .i-card.kb-focused { outline: 2px solid var(--gold); outline-offset: -2px; }
     .i-card-edge { width: 4px; flex-shrink: 0; background: var(--gold); }
     .i-card-main { flex: 1; padding: 14px 16px; min-width: 0; }
     .i-card-title { font-size: 14px; font-weight: 600; color: var(--txt); margin-bottom: 7px; line-height: 1.35; }
@@ -609,6 +610,7 @@
     let favs = new Set(), done = new Set(), producing = new Set(), rejected = new Set();
     let notes = {}, pris = {}, scheds = {}, durations = {}, customIdeas = [];
     let searchQ = '', filterCat = 'all', filterStatus = 'all';
+    let kbFocus = -1, _visibleIds = [];
 
     // ── LS helpers ──
     function lsGet(k) { try { return localStorage.getItem(k); } catch(e) { return null; } }
@@ -727,6 +729,7 @@
             <button class="i-btn primary${isApproved ? ' on' : ''}" data-approve="${i}">${isApproved ? '⭐ Approved' : '⭐ Approve'}</button>
             <button class="i-btn danger${isRejected ? ' on' : ''}" data-reject="${i}">${isRejected ? '✕ Rejected' : '✕ Reject'}</button>
             <button class="i-btn" data-toggle-edit="${i}">✏ Edit</button>
+            <button class="i-btn" data-copy="${i}" title="Copy title to clipboard">📋</button>
           </div>
           <div class="i-edit-panel" id="iedit-${i}" style="display:none">
             <div class="i-edit-row">
@@ -781,9 +784,16 @@
           ? `<div class="i-empty"><div class="i-empty-ico">🔍</div><div class="i-empty-title">No matches</div>Try a different search, category, or status filter.</div>`
           : `<div class="i-empty"><div class="i-empty-ico">💡</div><div class="i-empty-title">No ideas yet</div><p>Tap + to add your first idea.</p></div>`;
         body.innerHTML = msg;
+        _visibleIds = []; kbFocus = -1;
         return;
       }
+      _visibleIds = idxs;
+      if (kbFocus >= _visibleIds.length) kbFocus = _visibleIds.length - 1;
       body.innerHTML = idxs.map(cardHTML).join('');
+      if (kbFocus >= 0) {
+        const el = document.getElementById('icard-' + _visibleIds[kbFocus]);
+        if (el) el.classList.add('kb-focused');
+      }
     }
 
     // ── In-place card refresh (no full re-render) ──
@@ -823,6 +833,13 @@
       const reject  = e.target.closest('[data-reject]');
       const editTog = e.target.closest('[data-toggle-edit]');
       const priBtn  = e.target.closest('[data-pri]');
+      const copyBtn = e.target.closest('[data-copy]');
+
+      if (copyBtn) {
+        const idea = getIdea(+copyBtn.dataset.copy);
+        if (idea) navigator.clipboard.writeText(idea.t).then(() => showToast('📋 Title copied'));
+        return;
+      }
 
       if (approve) {
         const i = +approve.dataset.approve;
@@ -1275,7 +1292,45 @@ Return only the filled JSON array, no explanation, no code fences, no extra text
 
     // ── Escape closes modals ──
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') { closeAdd(); closeSync(); closeAi(); }
+      if (e.key === 'Escape') { closeAdd(); closeSync(); closeAi(); kbFocus = -1; render(); return; }
+
+      // Keyboard navigation — only when no modal is open and not typing in an input
+      const modalOpen = document.querySelector('.overlay.open') !== null;
+      const typing = e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT';
+      if (modalOpen || typing || !_visibleIds.length) return;
+
+      function moveFocus(delta) {
+        const prev = document.getElementById('icard-' + _visibleIds[kbFocus]);
+        if (prev) prev.classList.remove('kb-focused');
+        kbFocus = Math.max(0, Math.min(_visibleIds.length - 1, kbFocus + delta));
+        const el = document.getElementById('icard-' + _visibleIds[kbFocus]);
+        if (el) { el.classList.add('kb-focused'); el.scrollIntoView({block:'nearest', behavior:'smooth'}); }
+      }
+
+      if (e.key === 'j' || e.key === 'ArrowDown') { e.preventDefault(); moveFocus(kbFocus < 0 ? 0 : 1); }
+      else if (e.key === 'k' || e.key === 'ArrowUp') { e.preventDefault(); moveFocus(kbFocus < 0 ? 0 : -1); }
+      else if ((e.key === 's' || e.key === ' ') && kbFocus >= 0) {
+        e.preventDefault();
+        const i = _visibleIds[kbFocus];
+        if (favs.has(i)) { favs.delete(i); showToast('Removed from queue'); }
+        else { favs.add(i); rejected.delete(i); showToast('⭐ Approved → added to Queue'); }
+        saveSets();
+        (filterStatus === 'all') ? refreshCard(i) : render();
+      }
+      else if (e.key === 'r' && kbFocus >= 0) {
+        e.preventDefault();
+        const i = _visibleIds[kbFocus];
+        if (rejected.has(i)) { rejected.delete(i); saveSets(); (filterStatus === 'all') ? refreshCard(i) : render(); showToast('Un-rejected'); }
+        else {
+          const wasApproved = favs.has(i);
+          rejected.add(i); favs.delete(i); saveSets();
+          (filterStatus === 'all') ? refreshCard(i) : render();
+          showToast('Rejected', { label: 'Undo', fn: () => {
+            rejected.delete(i); if (wasApproved) favs.add(i); saveSets();
+            (filterStatus === 'all') ? refreshCard(i) : render();
+          }});
+        }
+      }
     });
 
     // ── Boot ──

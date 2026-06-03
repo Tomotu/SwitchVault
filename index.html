@@ -812,9 +812,14 @@
       const body = document.getElementById('i-body');
       const idxs = visibleIndexes();
 
-      const approvedCount = favs.size;
-      document.getElementById('i-count').textContent =
-        approvedCount === 1 ? '1 approved' : approvedCount + ' approved';
+      // Show count of currently visible ideas with a context label
+      const n = idxs.length;
+      const label = filterStatus === 'approved' ? 'approved'
+                  : filterStatus === 'rejected' ? 'rejected'
+                  : filterStatus === 'new'      ? 'new'
+                  : searchQ || filterCat !== 'all' ? 'found'
+                  : 'ideas';
+      document.getElementById('i-count').textContent = n === 1 ? `1 ${label}` : `${n} ${label}`;
 
       if (!idxs.length) {
         const msg = searchQ || filterCat !== 'all' || filterStatus !== 'all'
@@ -1058,7 +1063,10 @@
       addOverlay.classList.add('open');
       setTimeout(() => document.getElementById('add-title').focus(), 50);
     }
-    function closeAdd() { addOverlay.classList.remove('open'); }
+    function closeAdd() {
+      addOverlay.classList.remove('open');
+      document.getElementById('add-title').value = '';
+    }
     document.getElementById('i-fab').addEventListener('click', openAdd);
     document.getElementById('add-close').addEventListener('click', closeAdd);
     document.getElementById('add-cancel').addEventListener('click', closeAdd);
@@ -1071,8 +1079,10 @@
       if (!addCats.size) addCats.add(c); // keep at least one
       renderAddCats();
     });
-    document.getElementById('add-save').addEventListener('click', () => {
-      const title = document.getElementById('add-title').value.trim();
+    document.getElementById('add-save').addEventListener('click', e => {
+      e.preventDefault();
+      const titleEl = document.getElementById('add-title');
+      const title = titleEl.value.trim();
       if (!title) { showToast('Enter a title first'); return; }
       if (isDuplicateTitle(title)) { showToast('That idea already exists'); return; }
       customIdeas.push({ t: title, tags: [...addCats] });
@@ -1080,6 +1090,13 @@
       closeAdd();
       render();
       showToast('💡 Idea added');
+    });
+
+    // Also submit on Ctrl+Enter / Cmd+Enter inside the title textarea
+    document.getElementById('add-title').addEventListener('keydown', e => {
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+        document.getElementById('add-save').click();
+      }
     });
 
     // ── Cloud sync (Supabase REST, no SDK) ──

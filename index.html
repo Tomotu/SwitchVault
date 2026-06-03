@@ -138,11 +138,12 @@
     body.bulk-mode .i-card.bulk-sel .i-card-edge { background: var(--gold); }
     .bulk-bar {
       position: fixed; bottom: 72px; left: 50%; transform: translateX(-50%); z-index: 200;
-      display: flex; align-items: center; gap: 8px;
+      display: none; align-items: center; gap: 8px;
       background: var(--s2); border: 1px solid var(--b2);
       border-radius: 12px; padding: 10px 14px;
       box-shadow: 0 4px 20px rgba(0,0,0,.5); white-space: nowrap;
     }
+    body.bulk-mode .bulk-bar { display: flex; }
     .bulk-count { font-size: 12px; font-weight: 700; color: var(--txt2); margin-right: 2px; }
     .bulk-btn {
       background: var(--s1); border: 1px solid var(--b2); border-radius: 6px;
@@ -486,7 +487,7 @@
   <button class="i-fab" id="i-fab" title="Add custom idea" aria-label="Add custom idea">+</button>
 
   <!-- Bulk action bar -->
-  <div class="bulk-bar" id="bulk-bar" style="display:none">
+  <div class="bulk-bar" id="bulk-bar">
     <span class="bulk-count" id="bulk-count">0 selected</span>
     <button class="bulk-btn primary" id="bulk-queue">⭐ Queue</button>
     <button class="bulk-btn danger" id="bulk-reject">✕ Reject</button>
@@ -871,16 +872,13 @@
 
     // ── Bulk select helpers ──
     function updateBulkBar() {
-      const n = bulkSelected.size;
-      document.getElementById('bulk-count').textContent = n + ' selected';
-      document.getElementById('bulk-bar').style.display = (bulkMode && n > 0) ? '' : (bulkMode ? '' : 'none');
+      document.getElementById('bulk-count').textContent = bulkSelected.size + ' selected';
     }
     function enterBulkMode() {
       bulkMode = true; bulkSelected.clear();
       document.body.classList.add('bulk-mode');
       document.getElementById('i-bulk-toggle').classList.add('on');
       document.getElementById('i-bulk-toggle').textContent = '✕ Done';
-      document.getElementById('bulk-bar').style.display = '';
       updateBulkBar();
     }
     function exitBulkMode() {
@@ -888,7 +886,6 @@
       document.body.classList.remove('bulk-mode');
       document.getElementById('i-bulk-toggle').classList.remove('on');
       document.getElementById('i-bulk-toggle').textContent = '☐ Select';
-      document.getElementById('bulk-bar').style.display = 'none';
       document.querySelectorAll('.i-card.bulk-sel').forEach(c => c.classList.remove('bulk-sel'));
     }
 

@@ -626,10 +626,9 @@
     }
 
     // Due-today / overdue reminder banner (reflects the full queue, ignores filters)
-    function renderDueBanner() {
+    function renderDueBanner(today) {
       const wrap = document.getElementById('q-due-wrap');
       const queueAll = [...favs].filter(i => !producing.has(i) && !done.has(i));
-      const today = new Date().toISOString().slice(0,10);
       const overdue  = queueAll.filter(i => scheds[i] && scheds[i] < today);
       const dueToday = queueAll.filter(i => scheds[i] === today);
       if (!overdue.length && !dueToday.length) { wrap.innerHTML = ''; return; }
@@ -656,8 +655,9 @@
     // Render
     function render() {
       const body = document.getElementById('q-body');
+      const today = new Date().toISOString().slice(0,10);
       document.body.classList.toggle('drag-mode', sortMode === 'manual');
-      renderDueBanner();
+      renderDueBanner(today);
 
       // Queue = favs - producing - done
       const queueAll = [...favs].filter(i => !producing.has(i) && !done.has(i));

@@ -189,21 +189,6 @@
     .scal-day.done  { background: var(--teal); }
     .scal-day.today { outline: 1px solid var(--gold); outline-offset: 1px; }
 
-    /* ── BADGES ── */
-    .badge-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px,1fr)); gap: 8px; }
-    .badge-item {
-      background: var(--s2); border: 1px solid var(--b1); border-radius: var(--r-lg);
-      padding: 12px 10px; text-align: center;
-      transition: border-color .15s, box-shadow .12s;
-    }
-    .badge-item:hover { border-color: var(--b2); box-shadow: var(--shadow); }
-    .badge-item.earned { border-color: rgba(200,168,112,.3); background: rgba(200,168,112,.05); }
-    .badge-item.locked { opacity: .4; filter: grayscale(.7); }
-    .badge-ico  { font-size: 26px; margin-bottom: 5px; }
-    .badge-name { font-size: 11px; font-weight: 600; color: var(--txt); margin-bottom: 2px; }
-    .badge-desc { font-size: 9px; color: var(--txt2); line-height: 1.4; }
-    .badge-date { font-size: 9px; color: var(--teal); margin-top: 3px; }
-
     /* ── QUICK ACTIONS ── */
     .quick-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .qa-btn {

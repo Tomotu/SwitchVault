@@ -460,7 +460,6 @@
     </div>
     <div class="i-status-row">
       <button class="status-btn on" data-status="all">All</button>
-      <button class="status-btn" data-status="new">✨ New</button>
       <button class="status-btn" data-status="approved">⭐ Approved</button>
       <button class="status-btn" data-status="rejected">✕ Rejected</button>
       <button class="status-btn" id="i-bulk-toggle" style="margin-left:auto">☐ Select</button>
@@ -628,6 +627,7 @@
       scheds:'sv_scheds', custom:'sv_custom', durations:'sv_durations',
       rejected:'sv_rejected', producing:'sv_producing', light:'sv_light',
       vstats:'sv_vstats', streakhist:'sv_streakhist', checklist:'sv_checklist',
+      titles:'sv_titles',
     };
     // Supabase credentials live only in localStorage, never in code.
     const SB = { url:'sv_sb_url', key:'sv_sb_key', phrase:'sv_sb_phrase' };
@@ -645,7 +645,7 @@
 
     // ── State ──
     let favs = new Set(), done = new Set(), producing = new Set(), rejected = new Set();
-    let notes = {}, pris = {}, scheds = {}, durations = {}, customIdeas = [];
+    let notes = {}, pris = {}, scheds = {}, durations = {}, customIdeas = [], titles = {};
     let searchQ = '', filterCat = 'all', filterStatus = 'all';
     let kbFocus = -1, _visibleIds = [];
     let bulkMode = false, bulkSelected = new Set();
@@ -699,10 +699,13 @@
       try { const v = lsGet(KEYS.scheds);    if(v) scheds    = JSON.parse(v); } catch(e){}
       try { const v = lsGet(KEYS.durations); if(v) durations = JSON.parse(v); } catch(e){}
       try { const v = lsGet(KEYS.custom);    if(v) customIdeas = JSON.parse(v); } catch(e){}
+      try { const v = lsGet(KEYS.titles);   if(v) titles      = JSON.parse(v); } catch(e){}
       document.documentElement.classList.toggle('light', lsGet(KEYS.light) === '1');
     }
 
     // ── Save ──
+    function saveTitles() { lsSet(KEYS.titles, JSON.stringify(titles)); }
+    function getIdeaTitle(i) { return titles[i] || getIdea(i)?.t || ''; }
     function saveSets() {
       lsSet(KEYS.favs, JSON.stringify([...favs]));
       lsSet(KEYS.done, JSON.stringify([...done]));
@@ -725,12 +728,12 @@
         const idea = getIdea(i);
         if (!idea) continue;
         if (filterCat !== 'all' && !idea.tags.includes(filterCat)) continue;
-        if (searchQ && !idea.t.toLowerCase().includes(searchQ)) continue;
+        if (searchQ && !getIdeaTitle(i).toLowerCase().includes(searchQ)) continue;
         const isApproved = favs.has(i);
         const isRejected = rejected.has(i);
         if (filterStatus === 'approved' && !isApproved) continue;
         if (filterStatus === 'rejected' && !isRejected) continue;
-        if (filterStatus === 'new' && (isApproved || isRejected)) continue;
+        if (filterStatus !== 'approved' && filterStatus !== 'rejected' && (isApproved || isRejected)) continue;
         out.push(i);
       }
       return out;
@@ -753,13 +756,14 @@
       const schedHtml = scheds[i] ? `<span class="i-sched-badge">Sched: ${schedFmt}</span>` : '';
       const priLabel = pris[i] === 'h' ? '🔴 ' : pris[i] === 'm' ? '🟡 ' : '';
       const noteText = notes[i] || '';
+      const titleText = getIdeaTitle(i);
 
       const cls = 'i-card' + (isApproved ? ' approved' : '') + (isRejected ? ' rejected' : '');
 
       return `<div class="${cls}" id="icard-${i}">
         <div class="i-card-edge"></div>
         <div class="i-card-main">
-          <div class="i-card-title">${priLabel}${escapeHTML(idea.t)}</div>
+          <div class="i-card-title">${priLabel}${escapeHTML(titleText)}</div>
           <div class="i-card-tags">${tags}</div>
           <div class="i-card-note"${noteText ? '' : ' style="display:none"'}>${escapeHTML(noteText)}</div>
           <div class="i-card-meta"${(durHtml || schedHtml) ? '' : ' style="display:none"'}>${durHtml}${schedHtml}</div>
@@ -767,9 +771,12 @@
             <button class="i-btn primary${isApproved ? ' on' : ''}" data-approve="${i}">${isApproved ? '⭐ Approved' : '⭐ Approve'}</button>
             <button class="i-btn danger${isRejected ? ' on' : ''}" data-reject="${i}">${isRejected ? '✕ Rejected' : '✕ Reject'}</button>
             <button class="i-btn" data-toggle-edit="${i}">✏ Edit</button>
-            <button class="i-btn" data-copy="${i}" title="Copy title to clipboard">📋</button>
           </div>
           <div class="i-edit-panel" id="iedit-${i}" style="display:none">
+            <div class="i-edit-row" style="align-items:flex-start">
+              <span class="i-edit-label" style="padding-top:5px">Title</span>
+              <textarea class="i-edit-note" data-title-edit="${i}" rows="2">${escapeHTML(titleText)}</textarea>
+            </div>
             <div class="i-edit-row">
               <span class="i-edit-label">Priority</span>
               <div class="i-pri-btns">
@@ -815,12 +822,12 @@
 
       // Show count of currently visible ideas with a context label
       const n = idxs.length;
-      const label = filterStatus === 'approved' ? 'approved'
-                  : filterStatus === 'rejected' ? 'rejected'
-                  : filterStatus === 'new'      ? 'new'
-                  : searchQ || filterCat !== 'all' ? 'found'
-                  : 'ideas';
-      document.getElementById('i-count').textContent = n === 1 ? `1 ${label}` : `${n} ${label}`;
+      let countText;
+      if (filterStatus === 'approved') countText = n === 1 ? '1 approved' : `${n} approved`;
+      else if (filterStatus === 'rejected') countText = n === 1 ? '1 rejected' : `${n} rejected`;
+      else if (searchQ || filterCat !== 'all') countText = n === 1 ? '1 found' : `${n} found`;
+      else countText = n === 1 ? '1 new idea' : `${n} new ideas`;
+      document.getElementById('i-count').textContent = countText;
 
       if (!idxs.length) {
         const msg = searchQ || filterCat !== 'all' || filterStatus !== 'all'
@@ -852,7 +859,7 @@
       const title = card.querySelector('.i-card-title');
       if (title) {
         const priLabel = pris[i] === 'h' ? '🔴 ' : pris[i] === 'm' ? '🟡 ' : '';
-        title.innerHTML = priLabel + escapeHTML(idea.t);
+        title.innerHTML = priLabel + escapeHTML(getIdeaTitle(i));
       }
       const meta = card.querySelector('.i-card-meta');
       if (meta) {
@@ -916,7 +923,6 @@
       const reject  = e.target.closest('[data-reject]');
       const editTog = e.target.closest('[data-toggle-edit]');
       const priBtn  = e.target.closest('[data-pri]');
-      const copyBtn = e.target.closest('[data-copy]');
 
       if (bulkMode) {
         const card = e.target.closest('.i-card');
@@ -929,33 +935,27 @@
         return;
       }
 
-      if (copyBtn) {
-        const idea = getIdea(+copyBtn.dataset.copy);
-        if (idea) navigator.clipboard.writeText(idea.t).then(() => showToast('📋 Title copied'));
-        return;
-      }
-
       if (approve) {
         const i = +approve.dataset.approve;
-        if (favs.has(i)) { favs.delete(i); showToast('Removed from queue'); }
-        else { favs.add(i); rejected.delete(i); showToast('⭐ Approved → added to Queue'); }
-        saveSets();
-        (filterStatus === 'all') ? refreshCard(i) : render();
+        if (favs.has(i)) {
+          favs.delete(i); saveSets(); render();
+          showToast('Removed from queue');
+        } else {
+          favs.add(i); rejected.delete(i); saveSets(); render();
+          showToast('⭐ Approved → added to Queue');
+        }
         return;
       }
       if (reject) {
         const i = +reject.dataset.reject;
         if (rejected.has(i)) {
-          rejected.delete(i); saveSets();
-          (filterStatus === 'all') ? refreshCard(i) : render();
+          rejected.delete(i); saveSets(); render();
           showToast('Un-rejected');
         } else {
           const wasApproved = favs.has(i);
-          rejected.add(i); favs.delete(i); saveSets();
-          (filterStatus === 'all') ? refreshCard(i) : render();
+          rejected.add(i); favs.delete(i); saveSets(); render();
           showToast('Rejected', { label: 'Undo', fn: () => {
-            rejected.delete(i); if (wasApproved) favs.add(i); saveSets();
-            (filterStatus === 'all') ? refreshCard(i) : render();
+            rejected.delete(i); if (wasApproved) favs.add(i); saveSets(); render();
           }});
         }
         return;
@@ -985,6 +985,7 @@
       const dur = e.target.closest('[data-dur]');
       const sch = e.target.closest('[data-sched]');
       const nt  = e.target.closest('[data-note]');
+      const te  = e.target.closest('[data-title-edit]');
       if (dur) {
         const i = +dur.dataset.dur;
         if (dur.value) durations[i] = dur.value; else delete durations[i];
@@ -1000,6 +1001,22 @@
         const val = nt.value.trim();
         if (val) notes[i] = val; else delete notes[i];
         saveMetadata(); refreshCard(i); return;
+      }
+      if (te) {
+        const i = +te.dataset.titleEdit;
+        const val = te.value.trim();
+        if (val && val !== getIdea(i)?.t) titles[i] = val;
+        else delete titles[i];
+        saveTitles();
+        const card = document.getElementById('icard-' + i);
+        if (card) {
+          const titleEl = card.querySelector('.i-card-title');
+          if (titleEl) {
+            const priLabel = pris[i] === 'h' ? '🔴 ' : pris[i] === 'm' ? '🟡 ' : '';
+            titleEl.innerHTML = priLabel + escapeHTML(getIdeaTitle(i));
+          }
+        }
+        return;
       }
     });
 
@@ -1144,7 +1161,7 @@
       const read = k => { try { return JSON.parse(lsGet(k) || 'null'); } catch(e) { return null; } };
       return {
         favs:[...favs], done:[...done], producing:[...producing], rejected:[...rejected],
-        notes, pris, scheds, durations, custom: customIdeas,
+        notes, pris, scheds, durations, custom: customIdeas, titles,
         vstats: read(KEYS.vstats) || {}, streakhist: read(KEYS.streakhist) || [],
         checklist: read(KEYS.checklist) || {},
       };
@@ -1160,7 +1177,8 @@
       if (d.scheds)    scheds    = { ...scheds, ...d.scheds };
       if (d.durations) durations = { ...durations, ...d.durations };
       if (Array.isArray(d.custom) && d.custom.length >= customIdeas.length) customIdeas = d.custom;
-      saveSets(); saveMetadata(); saveCustom();
+      if (d.titles && typeof d.titles === 'object') titles = { ...titles, ...d.titles };
+      saveSets(); saveMetadata(); saveCustom(); saveTitles();
       if (d.vstats)     lsSet(KEYS.vstats, JSON.stringify(d.vstats));
       if (d.streakhist) lsSet(KEYS.streakhist, JSON.stringify(d.streakhist));
       if (d.checklist)  lsSet(KEYS.checklist, JSON.stringify(d.checklist));
@@ -1306,14 +1324,8 @@ Return only the filled JSON array, no explanation, no code fences, no extra text
 
     document.getElementById('i-inspire-btn').addEventListener('click', () => {
       const n = totalIdeas();
-      // Prefer unreviewed (not approved, not rejected); fall back to not-yet-queued; then anything
-      const pools = [
-        Array.from({length: n}, (_, i) => i).filter(i => getIdea(i) && !favs.has(i) && !rejected.has(i)),
-        Array.from({length: n}, (_, i) => i).filter(i => getIdea(i) && !favs.has(i)),
-        Array.from({length: n}, (_, i) => i).filter(i => getIdea(i)),
-      ];
-      const pool = pools.find(p => p.length) || [];
-      if (!pool.length) { showToast('No ideas to pick from!'); return; }
+      const pool = Array.from({length: n}, (_, i) => i).filter(i => getIdea(i) && !favs.has(i) && !rejected.has(i));
+      if (!pool.length) { showToast('No unreviewed ideas left!'); return; }
       const pick = pool[Math.floor(Math.random() * pool.length)];
       // Clear filters so the picked idea is visible
       searchQ = ''; filterCat = 'all'; filterStatus = 'all';
@@ -1447,22 +1459,18 @@ Return only the filled JSON array, no explanation, no code fences, no extra text
       else if ((e.key === 's' || e.key === ' ') && kbFocus >= 0) {
         e.preventDefault();
         const i = _visibleIds[kbFocus];
-        if (favs.has(i)) { favs.delete(i); showToast('Removed from queue'); }
-        else { favs.add(i); rejected.delete(i); showToast('⭐ Approved → added to Queue'); }
-        saveSets();
-        (filterStatus === 'all') ? refreshCard(i) : render();
+        if (favs.has(i)) { favs.delete(i); saveSets(); render(); showToast('Removed from queue'); }
+        else { favs.add(i); rejected.delete(i); saveSets(); render(); showToast('⭐ Approved → added to Queue'); }
       }
       else if (e.key === 'r' && kbFocus >= 0) {
         e.preventDefault();
         const i = _visibleIds[kbFocus];
-        if (rejected.has(i)) { rejected.delete(i); saveSets(); (filterStatus === 'all') ? refreshCard(i) : render(); showToast('Un-rejected'); }
+        if (rejected.has(i)) { rejected.delete(i); saveSets(); render(); showToast('Un-rejected'); }
         else {
           const wasApproved = favs.has(i);
-          rejected.add(i); favs.delete(i); saveSets();
-          (filterStatus === 'all') ? refreshCard(i) : render();
+          rejected.add(i); favs.delete(i); saveSets(); render();
           showToast('Rejected', { label: 'Undo', fn: () => {
-            rejected.delete(i); if (wasApproved) favs.add(i); saveSets();
-            (filterStatus === 'all') ? refreshCard(i) : render();
+            rejected.delete(i); if (wasApproved) favs.add(i); saveSets(); render();
           }});
         }
       }

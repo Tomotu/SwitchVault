@@ -263,10 +263,11 @@
       position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
       background: var(--b2); color: var(--txt); border-radius: 20px;
       padding: 8px 18px; font-size: 13px; font-weight: 500;
-      pointer-events: none; opacity: 0; transition: opacity .2s;
+      pointer-events: none; opacity: 0; visibility: hidden;
+      transition: opacity .2s, visibility .2s;
       white-space: nowrap; z-index: 500;
     }
-    .toast.show { opacity: 1; }
+    .toast.show { opacity: 1; visibility: visible; }
 
     /* ── LIGHT MODE ── */
     html.light {

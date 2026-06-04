@@ -253,10 +253,11 @@
       position: fixed; bottom: 76px; left: 50%; transform: translateX(-50%) translateY(20px);
       background: var(--b2); color: var(--txt); border-radius: 20px;
       padding: 8px 18px; font-size: 13px; font-weight: 500;
-      pointer-events: none; opacity: 0; transition: opacity .2s, transform .2s;
+      pointer-events: none; opacity: 0; visibility: hidden;
+      transition: opacity .2s, transform .2s, visibility .2s;
       white-space: nowrap; z-index: 500;
     }
-    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
 
     /* ── LIGHT MODE ── */
     html.light {
@@ -503,12 +504,6 @@
     </div>
   </div>
 
-  <!-- Achievements -->
-  <div class="section" style="padding-bottom:20px">
-    <div class="section-title">Achievements</div>
-    <div class="badge-grid" id="badge-grid"></div>
-  </div>
-
   <!-- Toast -->
   <div class="toast" id="toast"></div>
 
@@ -549,25 +544,11 @@
     };
     const catList = ['gaming','gear','series','education','story','lifestyle','review','tutorial','comedy','challenge','collab','reaction','trend'];
 
-    const ACHIEVEMENTS_DEF = [
-      { id:'first',  name:'First Star',      ico:'⭐', desc:'Star your first idea' },
-      { id:'done5',  name:'Getting Started', ico:'✅', desc:'Complete 5 ideas' },
-      { id:'done25', name:'Content Grinder', ico:'📹', desc:'Complete 25 ideas' },
-      { id:'done100',name:'Century',         ico:'💯', desc:'Complete 100 ideas' },
-      { id:'streak3',name:'On Fire',         ico:'🔥', desc:'3-day done streak' },
-      { id:'streak7',name:'Week Warrior',    ico:'⚡', desc:'7-day done streak' },
-      { id:'allcat', name:'Category King',   ico:'👑', desc:'Do an idea in every category' },
-      { id:'sched10',name:'Planner',         ico:'📅', desc:'Schedule 10 ideas' },
-      { id:'pri10',  name:'Prioritiser',     ico:'🎯', desc:'Set priority on 10 ideas' },
-      { id:'note10', name:'Scribe',          ico:'📝', desc:'Add notes to 10 ideas' },
-      { id:'fav50',  name:'Fan Favourite',   ico:'💛', desc:'Star 50 ideas' },
-    ];
-
     function lsGet(k) { try { return localStorage.getItem(k); } catch(e) { return null; } }
 
     // ── Load state ──
     let favs = new Set(), done = new Set(), producing = new Set(), pris = {}, scheds = {}, notes = {}, durations = {};
-    let streakData = {}, streakHistory = [], achievements = {}, customIdeas = [], vstats = {};
+    let streakData = {}, streakHistory = [], customIdeas = [], vstats = {};
     let weekGoal = 2;
 
     try { const v=lsGet(KEYS.favs);       if(v) favs         = new Set(JSON.parse(v)); } catch(e){}
@@ -579,7 +560,6 @@
     try { const v=lsGet(KEYS.durations);  if(v) durations    = JSON.parse(v); } catch(e){}
     try { const v=lsGet(KEYS.streak);     if(v) streakData   = JSON.parse(v); } catch(e){}
     try { const v=lsGet(KEYS.streakhist); if(v) streakHistory= JSON.parse(v); } catch(e){}
-    try { const v=lsGet(KEYS.achiev);     if(v) achievements = JSON.parse(v); } catch(e){}
     try { const v=lsGet(KEYS.wgoal);      if(v) weekGoal = Math.max(1, +v || 2); } catch(e){}
     try { const v=lsGet(KEYS.custom);     if(v) customIdeas  = JSON.parse(v); } catch(e){}
     try { const v=lsGet('sv_vstats');     if(v) vstats       = JSON.parse(v); } catch(e){}
@@ -783,39 +763,6 @@
       container.appendChild(wrapper);
     }
 
-    // ── Achievements ──
-    function renderBadges() {
-      const catCounts = {};
-      catList.forEach(c => catCounts[c] = 0);
-      window.ALL_IDEAS.forEach(idea => idea.tags.forEach(t => { if (catCounts[t] !== undefined) catCounts[t]++; }));
-      const catsWithDone = new Set([...done].map(i => window.ALL_IDEAS[i]?.tags[0]).filter(Boolean));
-
-      const checks = {
-        first:   favs.size >= 1,
-        done5:   done.size >= 5,
-        done25:  done.size >= 25,
-        done100: done.size >= 100,
-        streak3: strCount >= 3,
-        streak7: strCount >= 7,
-        allcat:  catList.every(c => catsWithDone.has(c)),
-        sched10: Object.keys(scheds).length >= 10,
-        pri10:   Object.keys(pris).length >= 10,
-        note10:  Object.keys(notes).length >= 10,
-        fav50:   favs.size >= 50,
-      };
-
-      const grid = document.getElementById('badge-grid');
-      grid.innerHTML = '';
-      ACHIEVEMENTS_DEF.forEach(a => {
-        const earned = achievements[a.id];
-        const progress = checks[a.id];
-        const div = document.createElement('div');
-        div.className = 'badge-item ' + (earned ? 'earned' : progress ? 'earned' : 'locked');
-        div.innerHTML = `<div class="badge-ico">${a.ico}</div><div class="badge-name">${a.name}</div><div class="badge-desc">${a.desc}</div>${earned ? `<div class="badge-date">${earned}</div>` : ''}`;
-        grid.appendChild(div);
-      });
-    }
-
     // ── Performance insights (from tracked video stats) ──
     function renderInsights() {
       const section = document.getElementById('insights-section');
@@ -982,7 +929,6 @@
     renderWeekGoal();
     renderInsights();
     renderTopVideos();
-    renderBadges();
   </script>
 </body>
 </html>

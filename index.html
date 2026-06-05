@@ -14,30 +14,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="SwitchVault">
+  <link rel="stylesheet" href="shared.css">
   <style>
-    :root {
-      --bg:#0E0E0D; --s1:#171614; --s2:#1e1e1c; --s3:#262422;
-      --b0:#1c1b19; --b1:#282523; --b2:#363330; --b3:#484440;
-      --acc:#A0453F; --acc2:#7C2F2F; --gold:#C8A870; --gold2:#E6E1D6;
-      --teal:#6A8A58; --blue:#7A9878; --pur:#A0453F;
-      --txt:#E6E1D6; --txt2:#A09080; --mut:#605850; --mut2:#3A3530;
-      --hi:#D8C8B2; --r:6px;
-      --r-lg:12px;
-      --shadow:0 6px 24px rgba(0,0,0,.22);
-      --ring:0 0 0 2px var(--teal);
-    }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; overflow-x: hidden; }
-    :focus-visible { outline: none; box-shadow: var(--ring); }
-    button, a, input, textarea, select, [tabindex] { outline: none; }
-    body {
-      background: var(--bg); color: var(--txt);
-      font-family: 'Inter', sans-serif; font-size: 14px;
-      line-height: 1.55; min-height: 100vh;
-      overflow-x: hidden; max-width: 100%;
-      padding-bottom: 80px;
-      -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
-    }
 
     /* ── TOOLBAR ── */
     .i-toolbar {
@@ -212,21 +190,6 @@
     .i-edit-note { resize: vertical; min-height: 44px; }
     html.light .i-edit-sel, html.light .i-edit-date, html.light .i-edit-note { background: var(--s1); }
 
-    /* Tag pills */
-    .tag { font-size: 8px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 2px 6px; border-radius: 3px; }
-    .tgaming    { color:#80BC78; background:rgba(112,170,104,.09);  border:1px solid rgba(112,170,104,.18); }
-    .tgear      { color:#D87068; background:rgba(200,96,88,.09);    border:1px solid rgba(200,96,88,.18); }
-    .ttutorial  { color:#8AB888; background:rgba(106,150,96,.09);   border:1px solid rgba(106,150,96,.17); }
-    .treview    { color:#D8B870; background:rgba(200,168,96,.08);   border:1px solid rgba(200,168,96,.16); }
-    .tlifestyle { color:#C8A880; background:rgba(190,160,112,.08);  border:1px solid rgba(190,160,112,.16); }
-    .tstory     { color:#C87868; background:rgba(184,112,96,.09);   border:1px solid rgba(184,112,96,.17); }
-    .teducation { color:#B0C870; background:rgba(160,184,96,.08);   border:1px solid rgba(160,184,96,.15); }
-    .tchallenge { color:#D87070; background:rgba(200,96,96,.09);    border:1px solid rgba(200,96,96,.17); }
-    .treaction  { color:#96A890; background:rgba(138,152,136,.08);  border:1px solid rgba(138,152,136,.16); }
-    .ttrend     { color:#C89868; background:rgba(190,144,96,.08);   border:1px solid rgba(190,144,96,.16); }
-    .tcomedy    { color:#D8C8A0; background:rgba(200,184,144,.08);  border:1px solid rgba(200,184,144,.16); }
-    .tcollab    { color:#C89080; background:rgba(184,136,120,.09);  border:1px solid rgba(184,136,120,.17); }
-    .tseries    { color:#8AA888; background:rgba(120,160,128,.08);  border:1px solid rgba(120,160,128,.16); }
 
     /* Empty state */
     .i-empty { text-align: center; color: var(--txt2); font-size: 13px; padding: 64px 24px; line-height: 1.9; position: relative; z-index: 1; }
@@ -261,33 +224,14 @@
     }
 
     /* ── HEADER ICON BTN / THEME TOGGLE ── */
-    .hdr-icon-btn, .i-theme-toggle {
+    .i-theme-toggle {
       background: none; border: 1px solid var(--b2); border-radius: 6px;
       color: var(--txt2); cursor: pointer; font-size: 14px; padding: 4px 8px;
       transition: all .15s; flex-shrink: 0; text-decoration: none;
       display: inline-flex; align-items: center;
     }
-    .hdr-icon-btn:hover, .i-theme-toggle:hover { background: var(--s3); color: var(--txt); }
+    .i-theme-toggle:hover { background: var(--s3); color: var(--txt); }
 
-    /* ── BOTTOM NAV ── */
-    .bottom-nav {
-      display: flex; position: fixed; bottom: 0; left: 50%; right: auto; z-index: 150;
-      background: var(--s2); border-top: 1px solid var(--b1);
-      padding: 6px 0 env(safe-area-inset-bottom, 6px);
-      justify-content: space-around; align-items: center;
-      max-width: 560px; width: 100%;
-      transform: translateX(-50%);
-      border-radius: 14px 14px 0 0; box-shadow: 0 -2px 12px rgba(0,0,0,.2);
-    }
-    @media (max-width: 640px) {
-      .bottom-nav { max-width: 100%; left: 0; right: 0; transform: none; border-radius: 0; box-shadow: none; }
-    }
-    .bnav-btn {
-      background: none; border: none; color: var(--txt2); cursor: pointer;
-      display: flex; flex-direction: column; align-items: center; gap: 2px;
-      padding: 4px 8px; font-size: 18px; transition: color .15s; min-width: 48px; text-decoration: none;
-    }
-    .bnav-btn span { font-size: 10px; font-weight: 600; letter-spacing: .04em; display: block; }
     .bnav-btn.active { color: var(--gold); }
 
     /* ── TOAST ── */
@@ -389,16 +333,7 @@
     .ai-idea-text { font-size: 13px; color: var(--txt); line-height: 1.4; }
     .ai-idea-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 5px; }
 
-    /* ── LIGHT MODE ── */
-    html.light {
-      --bg:#F6F3EE; --s1:#FFFDF9; --s2:#F0EDE6; --s3:#E8E4DC;
-      --b0:#E0DCD2; --b1:#D4CEC4; --b2:#C0BAB0; --b3:#A8A298;
-      --txt:#2A2520; --txt2:#706860; --mut:#A09080; --mut2:#D4CEC4; --hi:#3A3028;
-      --shadow:0 6px 24px rgba(60,50,40,.08);
-    }
 
-    /* ── FADE IN ── */
-    @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
     .i-body, .toast { animation: fadeIn .25s ease both; }
 
     /* ── MOBILE ── */
@@ -423,9 +358,6 @@
       #i-body { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; }
       #i-body .i-card { margin-bottom: 0; }
       .i-empty { grid-column: 1 / -1; }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
     }
   </style>
 </head>
@@ -607,6 +539,7 @@
     <a class="bnav-btn" href="stats.html"><span>📊</span><span>Stats</span></a>
   </nav>
 
+  <script src="shared.js"></script>
   <script src="data.js"></script>
   <script>
     'use strict';
@@ -652,8 +585,6 @@
     let bulkMode = false, bulkSelected = new Set();
 
     // ── LS helpers ──
-    function lsGet(k) { try { return localStorage.getItem(k); } catch(e) { return null; } }
-    function lsSet(k, v) { try { localStorage.setItem(k, v); } catch(e) {} }
 
     function getIdea(i) {
       return i < window.ALL_IDEAS.length ? window.ALL_IDEAS[i] : customIdeas[i - window.ALL_IDEAS.length];

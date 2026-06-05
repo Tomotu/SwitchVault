@@ -13,35 +13,14 @@
   <meta name="theme-color" content="#0E0E0D">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="stylesheet" href="shared.css">
   <style>
     :root {
-      --bg:#0E0E0D; --s1:#171614; --s2:#1e1e1c; --s3:#262422;
-      --b0:#1c1b19; --b1:#282523; --b2:#363330; --b3:#484440;
-      --acc:#A0453F; --acc2:#7C2F2F; --gold:#C8A870; --gold2:#E6E1D6;
-      --teal:#6A8A58; --blue:#7A9878; --pur:#A0453F;
-      --txt:#E6E1D6; --txt2:#A09080; --mut:#605850; --mut2:#3A3530;
-      --hi:#D8C8B2; --r:6px;
-      --r-lg:12px;
-      --shadow:0 6px 24px rgba(0,0,0,.22);
-      --ring:0 0 0 2px var(--teal);
       --cat-gaming:#70AA68; --cat-gear:#C86058; --cat-series:#8AA888;
       --cat-education:#AABB80; --cat-story:#B87060; --cat-lifestyle:#C8A880;
       --cat-review:#D8B870; --cat-tutorial:#80A870; --cat-comedy:#D8C8A0;
       --cat-challenge:#D86060; --cat-collab:#C89080; --cat-reaction:#8A9888;
       --cat-trend:#C89060;
-    }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :focus-visible { outline: none; box-shadow: var(--ring); }
-    button, a, input, [tabindex] { outline: none; }
-    html { scroll-behavior: smooth; overflow-x: hidden; }
-    body {
-      background: var(--bg); color: var(--txt);
-      font-family: 'Inter', sans-serif; font-size: 14px;
-      line-height: 1.55; min-height: 100vh;
-      overflow-x: hidden; max-width: 100%;
-      padding-bottom: 80px;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
     }
     body::before {
       content: ''; position: fixed; inset: 0; opacity: .035;
@@ -203,34 +182,6 @@
     .qa-btn.primary { background: rgba(106,138,88,.12); border-color: rgba(106,138,88,.28); color: var(--teal); }
     .qa-btn.accent  { background: rgba(160,69,63,.08); border-color: rgba(160,69,63,.22); color: var(--acc); }
 
-    /* ── BOTTOM NAV ── */
-    .bottom-nav {
-      display: flex; position: fixed; bottom: 0; left: 50%; right: auto; z-index: 150;
-      background: var(--s2); border-top: 1px solid var(--b1);
-      padding: 6px 0 env(safe-area-inset-bottom, 6px);
-      justify-content: space-around; align-items: center;
-      max-width: 560px; width: 100%;
-      transform: translateX(-50%);
-      border-radius: 14px 14px 0 0;
-      box-shadow: 0 -2px 12px rgba(0,0,0,.2);
-    }
-    @media (max-width: 640px) {
-      .bottom-nav {
-        max-width: 100%;
-        left: 0;
-        right: 0;
-        transform: none;
-        border-radius: 0;
-        box-shadow: none;
-      }
-    }
-    .bnav-btn {
-      background: none; border: none; color: var(--txt2); cursor: pointer;
-      display: flex; flex-direction: column; align-items: center; gap: 2px;
-      padding: 4px 8px; font-size: 18px; transition: color .15s; min-width: 48px;
-      text-decoration: none;
-    }
-    .bnav-btn span { font-size: 10px; font-weight: 600; letter-spacing: .04em; display: block; }
     .bnav-btn.active { color: var(--teal); }
 
     /* ── TOAST ── */
@@ -245,12 +196,6 @@
     .toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
 
     /* ── LIGHT MODE ── */
-    html.light {
-      --bg:#F6F3EE; --s1:#FFFDF9; --s2:#F0EDE6; --s3:#E8E4DC;
-      --b0:#E0DCD2; --b1:#D4CEC4; --b2:#C0BAB0; --b3:#A8A298;
-      --txt:#2A2520; --txt2:#706860; --mut:#A09080; --mut2:#D4CEC4; --hi:#3A3028;
-      --shadow:0 6px 24px rgba(60,50,40,.08);
-    }
     html.light body::before { display: none; }
 
     /* ── THEME TOGGLE ── */
@@ -260,20 +205,11 @@
       transition: all .15s; flex-shrink: 0;
     }
     .stats-theme-toggle:hover { background: var(--s3); color: var(--txt); }
-    .hdr-icon-btn {
-      background: none; border: 1px solid var(--b2); border-radius: 6px;
-      color: var(--txt2); cursor: pointer; font-size: 14px; padding: 4px 8px;
-      transition: all .15s; flex-shrink: 0; text-decoration: none;
-      display: inline-flex; align-items: center;
-    }
-    .hdr-icon-btn:hover { background: var(--s3); color: var(--txt); }
-
     /* ── CARD HOVER ── */
     .hstat { transition: background .15s, border-color .15s, box-shadow .12s; }
     .hstat:hover { background: var(--s3); border-color: var(--b2); box-shadow: var(--shadow); }
 
     /* ── FADE IN ── */
-    @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
     .hero-stats, .overall-progress, .streak-banner, .section, .toast { animation: fadeIn .25s ease both; }
     .hero-stats { animation-delay: .05s; }
     .overall-progress { animation-delay: .08s; }
@@ -321,10 +257,6 @@
     }
     .top-video-views small { font-family: 'Inter', sans-serif; font-size: 9px; color: var(--txt2); display: block; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
 
-    /* ── REDUCED MOTION ── */
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
-    }
   </style>
 </head>
 <body>
@@ -501,15 +433,16 @@
     <a class="bnav-btn active" href="stats.html"><span>📊</span><span>Stats</span></a>
   </nav>
 
+  <script src="shared.js"></script>
   <script src="data.js"></script>
   <script>
     // ── Keys (same as index.html) ──
     const KEYS = {
       favs:'sv_favs', done:'sv_done', notes:'sv_notes', pris:'sv_pris',
       scheds:'sv_scheds', streak:'sv_streak', custom:'sv_custom',
-      streakhist:'sv_streakhist', achiev:'sv_achievements', light:'sv_light',
+      streakhist:'sv_streakhist', light:'sv_light',
       producing:'sv_producing', rejected:'sv_rejected', durations:'sv_durations',
-      wgoal:'sv_wgoal',
+      wgoal:'sv_wgoal', vstats:'sv_vstats',
     };
 
     const TC = {
@@ -529,8 +462,6 @@
     };
     const catList = ['gaming','gear','series','education','story','lifestyle','review','tutorial','comedy','challenge','collab','reaction','trend'];
 
-    function lsGet(k) { try { return localStorage.getItem(k); } catch(e) { return null; } }
-
     // ── Load state ──
     let favs = new Set(), done = new Set(), producing = new Set(), pris = {}, scheds = {}, notes = {}, durations = {};
     let streakData = {}, streakHistory = [], customIdeas = [], vstats = {};
@@ -547,7 +478,7 @@
     try { const v=lsGet(KEYS.streakhist); if(v) streakHistory= JSON.parse(v); } catch(e){}
     try { const v=lsGet(KEYS.wgoal);      if(v) weekGoal = Math.max(1, +v || 2); } catch(e){}
     try { const v=lsGet(KEYS.custom);     if(v) customIdeas  = JSON.parse(v); } catch(e){}
-    try { const v=lsGet('sv_vstats');     if(v) vstats       = JSON.parse(v); } catch(e){}
+    try { const v=lsGet(KEYS.vstats);     if(v) vstats       = JSON.parse(v); } catch(e){}
 
     const lightOn = lsGet(KEYS.light) === '1';
     document.documentElement.classList.toggle('light', lightOn);

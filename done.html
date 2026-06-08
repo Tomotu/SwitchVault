@@ -43,20 +43,24 @@
     @media (min-width: 480px) { .hero-stats { grid-template-columns: repeat(4, 1fr); } }
     .hstat {
       background: var(--s2); border: 1px solid var(--b1);
-      border-radius: var(--r-lg); padding: 14px 16px;
-      text-align: center;
+      border-radius: var(--r-lg); padding: 16px 16px 14px;
+      text-align: center; position: relative; overflow: hidden;
       transition: background .12s, border-color .15s, box-shadow .15s;
+    }
+    .hstat::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: var(--b2);
     }
     .hstat:hover { background: var(--s3); border-color: var(--b2); box-shadow: var(--shadow); }
     .hstat-n {
-      font-family: 'Anton', sans-serif; font-size: 28px; font-weight: 400;
-      color: var(--txt); line-height: 1; margin-bottom: 4px;
+      font-family: 'Anton', sans-serif; font-size: 30px; font-weight: 400;
+      color: var(--txt); line-height: 1; margin-bottom: 6px;
       overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
-    .hstat-n.green { color: var(--teal); }
-    .hstat-n.gold  { color: var(--gold); }
-    .hstat-n.red   { color: var(--acc); }
-    .hstat-l { font-size: 9px; text-transform: uppercase; letter-spacing: .08em; color: var(--txt2); font-weight: 600; }
+    .hstat-n.green { color: var(--teal); text-shadow: 0 0 20px rgba(106,138,88,.2); }
+    .hstat-n.gold  { color: var(--gold); text-shadow: 0 0 20px rgba(200,168,112,.2); }
+    .hstat-n.red   { color: var(--acc);  text-shadow: 0 0 20px rgba(160,69,63,.2); }
+    .hstat-l { font-size: 9px; text-transform: uppercase; letter-spacing: .08em; color: var(--txt2); font-weight: 700; }
 
     /* ── SEARCH ── */
     .sbox {

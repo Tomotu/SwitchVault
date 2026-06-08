@@ -51,17 +51,21 @@
     @media (min-width: 480px) { .hero-stats { grid-template-columns: repeat(4, 1fr); } }
     .hstat {
       background: var(--s2); border: 1px solid var(--b1);
-      border-radius: var(--r-lg); padding: 14px 16px;
-      text-align: center;
+      border-radius: var(--r-lg); padding: 16px 16px 14px;
+      text-align: center; position: relative; overflow: hidden;
+    }
+    .hstat::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: var(--b2); border-radius: 0;
     }
     .hstat-n {
-      font-family: 'Anton', sans-serif; font-size: 32px; font-weight: 400;
-      color: var(--txt); line-height: 1; margin-bottom: 4px;
+      font-family: 'Anton', sans-serif; font-size: 34px; font-weight: 400;
+      color: var(--txt); line-height: 1; margin-bottom: 6px;
     }
-    .hstat-n.green { color: var(--teal); }
-    .hstat-n.gold  { color: var(--gold); }
-    .hstat-n.red   { color: var(--acc); }
-    .hstat-l { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--txt2); font-weight: 600; }
+    .hstat-n.green { color: var(--teal); text-shadow: 0 0 20px rgba(106,138,88,.25); }
+    .hstat-n.gold  { color: var(--gold); text-shadow: 0 0 20px rgba(200,168,112,.25); }
+    .hstat-n.red   { color: var(--acc);  text-shadow: 0 0 20px rgba(160,69,63,.25); }
+    .hstat-l { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--txt2); font-weight: 700; }
 
     /* ── PROGRESS BAR ── */
     .overall-progress {
@@ -138,10 +142,10 @@
     .week-chart { display: flex; flex-direction: column; gap: 7px; }
     .wc-row { display: flex; align-items: center; gap: 8px; }
     .wc-label { width: 48px; font-size: 10px; color: var(--txt2); text-align: right; flex-shrink: 0; font-variant-numeric: tabular-nums; }
-    .wc-track { flex: 1; height: 20px; background: var(--s2); border-radius: 4px; overflow: hidden; position: relative; }
-    .wc-fill { height: 100%; border-radius: 4px; background: var(--acc); transition: width .5s ease; min-width: 0; }
-    .wc-val { width: 20px; font-size: 11px; color: var(--txt2); text-align: right; flex-shrink: 0; }
-    .wc-row.current .wc-fill { background: var(--teal); }
+    .wc-track { flex: 1; height: 22px; background: var(--b0); border-radius: 6px; overflow: hidden; position: relative; }
+    .wc-fill { height: 100%; border-radius: 6px; background: linear-gradient(90deg, var(--gold), #E6C880); transition: width .5s ease; min-width: 0; }
+    .wc-val { width: 24px; font-size: 12px; font-weight: 600; color: var(--txt2); text-align: right; flex-shrink: 0; }
+    .wc-row.current .wc-fill { background: linear-gradient(90deg, var(--teal), #8AAA68); }
     .wc-row.current .wc-label { color: var(--teal); font-weight: 700; }
 
     /* ── CAT BREAKDOWN ── */
@@ -172,14 +176,15 @@
     .quick-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .qa-btn {
       background: var(--s2); border: 1px solid var(--b1); border-radius: var(--r-lg);
-      color: var(--txt2); cursor: pointer; font-size: 12px; font-weight: 500;
-      padding: 14px 12px; text-align: center; text-decoration: none;
-      transition: background .15s, border-color .15s, box-shadow .12s; display: block;
+      color: var(--txt2); cursor: pointer; font-size: 12px; font-weight: 600;
+      padding: 16px 12px; text-align: center; text-decoration: none;
+      transition: background .15s, border-color .15s, box-shadow .12s, transform .1s; display: block;
     }
     .qa-btn:hover { background: var(--s3); border-color: var(--b2); color: var(--txt); box-shadow: var(--shadow); }
-    .qa-btn:active { filter: brightness(.93); }
-    .qa-ico { font-size: 22px; display: block; margin-bottom: 5px; }
-    .qa-btn.primary { background: rgba(106,138,88,.12); border-color: rgba(106,138,88,.28); color: var(--teal); }
+    .qa-btn:active { filter: brightness(.9); transform: scale(.97); }
+    .qa-ico { font-size: 24px; display: block; margin-bottom: 7px; }
+    .qa-btn.primary { background: rgba(106,138,88,.12); border-color: rgba(106,138,88,.28); color: var(--teal); font-weight: 700; }
+    .qa-btn.primary:hover { background: rgba(106,138,88,.2); border-color: rgba(106,138,88,.45); }
     .qa-btn.accent  { background: rgba(160,69,63,.08); border-color: rgba(160,69,63,.22); color: var(--acc); }
 
     .bnav-btn.active { color: var(--teal); }

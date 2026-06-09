@@ -110,45 +110,49 @@
     /* ── CHECKLIST ── */
     .p-checklist {
       background: var(--s1); border: 1px solid var(--b1);
-      border-radius: var(--r-lg); padding: 10px 12px; margin-bottom: 10px;
+      border-radius: var(--r-lg); padding: 4px 12px; margin-bottom: 10px;
     }
     .p-check-item {
-      display: flex; align-items: center; gap: 10px;
-      padding: 11px 0; cursor: pointer; user-select: none;
+      display: flex; align-items: center; gap: 12px;
+      padding: 11px 4px; cursor: pointer; user-select: none;
       border-bottom: 1px solid var(--b0);
+      border-radius: 6px; transition: background .1s;
+      margin: 0 -4px; padding-left: 8px; padding-right: 8px;
     }
     .p-check-item:last-child { border-bottom: none; }
+    .p-check-item:hover { background: var(--s2); }
     .p-check-item:hover .p-check-box { border-color: var(--teal); }
     .p-check-box {
-      width: 18px; height: 18px; border-radius: 4px; flex-shrink: 0;
-      border: 2px solid var(--b2); background: var(--s2);
+      width: 20px; height: 20px; border-radius: 5px; flex-shrink: 0;
+      border: 1.5px solid var(--b3); background: var(--s2);
       display: flex; align-items: center; justify-content: center;
-      transition: all .15s; font-size: 11px;
+      transition: all .15s var(--ease); font-size: 12px; font-weight: 700;
     }
     .p-check-box.checked {
       background: var(--teal); border-color: var(--teal); color: #fff;
     }
     .p-check-label {
-      font-size: 13px; color: var(--txt2); transition: color .15s;
+      font-size: 13px; color: var(--txt); transition: color .15s;
+      font-weight: 500;
     }
     .p-check-item.done-step .p-check-label {
-      color: var(--mut); text-decoration: line-through;
+      color: var(--mut); text-decoration: line-through; font-weight: 400;
     }
 
     /* Mini progress bar */
-    .p-mini-prog { margin-top: 8px; margin-bottom: 4px; }
+    .p-mini-prog { margin-top: 10px; margin-bottom: 4px; }
+    .p-mini-prog-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+    .p-mini-prog-steps { font-size: 10px; color: var(--txt2); }
+    .p-mini-prog-pct { font-size: 10px; font-weight: 700; color: var(--txt2); }
     .p-mini-prog-track {
-      width: 100%; height: 5px; background: var(--b1); border-radius: 3px; overflow: hidden;
+      width: 100%; height: 4px; background: var(--b1); border-radius: 3px; overflow: hidden;
     }
     .p-mini-prog-fill {
       height: 100%; border-radius: 3px;
-      background: var(--teal);
-      transition: width .3s ease;
+      background: linear-gradient(90deg, var(--teal), var(--blue));
+      transition: width .35s var(--ease);
     }
-    .p-mini-prog-fill.all-done { background: #4CAF50; }
-    .p-mini-prog-label {
-      font-size: 10px; color: var(--txt2); margin-top: 4px; text-align: right;
-    }
+    .p-mini-prog-fill.all-done { background: linear-gradient(90deg, #4CAF50, #6dbb6d); }
 
     .p-card-actions { display: flex; gap: 6px; flex-wrap: wrap; }
     .p-btn {
@@ -183,14 +187,15 @@
 
     /* ── TOAST ── */
     .toast {
-      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
-      background: var(--b2); color: var(--txt); border-radius: 20px;
-      padding: 8px 18px; font-size: 13px; font-weight: 500;
+      position: fixed; bottom: 80px; left: 50%;
+      transform: translateX(-50%) translateY(12px);
+      background: var(--s3); border: 1px solid var(--b3); color: var(--txt);
+      border-radius: 20px; padding: 9px 18px; font-size: 13px; font-weight: 500;
       pointer-events: none; opacity: 0; visibility: hidden;
-      transition: opacity .2s, visibility .2s;
-      white-space: nowrap; z-index: 500;
+      transition: opacity .22s var(--ease), transform .22s var(--ease), visibility .22s;
+      white-space: nowrap; z-index: 500; box-shadow: 0 4px 20px rgba(0,0,0,.35);
     }
-    .toast.show { opacity: 1; visibility: visible; }
+    .toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
 
     /* ── LIGHT MODE ── */
     html.light .p-check-box { background: var(--s1); }
@@ -437,10 +442,13 @@
             ${noteHtml}${metaHtml}
             <div class="p-checklist">${checkItems}</div>
             <div class="p-mini-prog">
+              <div class="p-mini-prog-header">
+                <span class="p-mini-prog-steps">${doneCount} / ${totalSteps} steps</span>
+                <span class="p-mini-prog-pct">${pct}%</span>
+              </div>
               <div class="p-mini-prog-track">
                 <div class="p-mini-prog-fill${allDone ? ' all-done' : ''}" style="width:${pct}%"></div>
               </div>
-              <div class="p-mini-prog-label">${doneCount} / ${totalSteps} steps</div>
             </div>
             <div class="p-card-actions">
               <button class="p-btn primary" data-finish="${i}">✓ Mark Done</button>
@@ -478,12 +486,14 @@
       const pct = Math.round(doneCount / totalSteps * 100);
       const allDone = doneCount === totalSteps;
       const fillEl = card.querySelector('.p-mini-prog-fill');
-      const labelEl = card.querySelector('.p-mini-prog-label');
+      const stepsEl = card.querySelector('.p-mini-prog-steps');
+      const pctEl = card.querySelector('.p-mini-prog-pct');
       if (fillEl) {
         fillEl.style.width = pct + '%';
         fillEl.className = 'p-mini-prog-fill' + (allDone ? ' all-done' : '');
       }
-      if (labelEl) labelEl.textContent = doneCount + ' / ' + totalSteps + ' steps';
+      if (stepsEl) stepsEl.textContent = doneCount + ' / ' + totalSteps + ' steps';
+      if (pctEl) pctEl.textContent = pct + '%';
 
       updateProgressBar();
     }

@@ -72,12 +72,12 @@
     }
     .sbox input {
       width: 100%; background: var(--s2); border: 1px solid var(--b1);
-      border-radius: var(--r); color: var(--txt);
-      font-family: 'Inter', sans-serif; font-size: 14px;
-      padding: 8px 32px 8px 36px; outline: none; transition: border-color .15s;
+      border-radius: 10px; color: var(--txt);
+      font-size: 14px;
+      padding: 9px 34px 9px 36px; outline: none; transition: border-color .15s, box-shadow .15s;
     }
     .sbox input::placeholder { color: var(--mut); }
-    .sbox input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(106,138,88,.1); }
+    .sbox input:focus { border-color: var(--b3); box-shadow: 0 0 0 3px rgba(106,138,88,.1); }
     .sbox-clear {
       position: absolute; right: 8px; background: none; border: none;
       color: var(--mut); cursor: pointer; font-size: 12px; padding: 4px;
@@ -87,23 +87,25 @@
 
     /* ── SORT + FILTER BAR ── */
     .d-controls {
-      padding: 12px clamp(12px,3vw,24px) 0;
-      display: flex; flex-direction: column; gap: 8px;
+      padding: 14px clamp(12px,3vw,24px) 0;
+      display: flex; flex-direction: column; gap: 0;
       position: relative; z-index: 1;
     }
     .d-sort-bar {
-      display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none;
+      display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none;
+      border-bottom: 1px solid var(--b1); padding: 0;
     }
     .d-sort-bar::-webkit-scrollbar { display: none; }
     .sort-btn {
-      background: var(--s2); border: 1px solid var(--b1);
-      border-radius: 6px; color: var(--txt2); cursor: pointer;
-      font-size: 11px; font-weight: 600; padding: 5px 11px;
-      white-space: nowrap; transition: all .15s; flex-shrink: 0;
+      background: none; border: none; border-bottom: 2px solid transparent;
+      border-radius: 0; color: var(--txt2); cursor: pointer;
+      font-size: 12px; font-weight: 500; padding: 8px 12px 10px;
+      white-space: nowrap; transition: color .15s, border-color .15s;
+      flex-shrink: 0; letter-spacing: .01em; margin-bottom: -1px;
     }
-    .sort-btn:hover { background: var(--s3); color: var(--txt); }
-    .sort-btn.on { background:rgba(106,138,88,.1); border-color:rgba(106,138,88,.3); color:var(--teal); }
-    .sort-btn:active { filter: brightness(.93); }
+    .sort-btn:hover { color: var(--txt); }
+    .sort-btn.on { color: var(--teal); border-bottom-color: var(--teal); font-weight: 700; }
+    .sort-btn:active { opacity: .7; }
 
     .d-cats-row {
       display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px;
@@ -129,29 +131,32 @@
 
     /* Month dividers */
     .d-month-header {
-      display: flex; align-items: center; justify-content: space-between;
-      font-family: 'Anton', sans-serif; font-size: 12px; letter-spacing: .08em;
-      text-transform: uppercase; color: var(--txt2);
-      border-bottom: 1px solid var(--b1);
-      padding-bottom: 6px; margin: 20px 0 12px;
+      display: flex; align-items: center; gap: 8px;
+      font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--txt2); margin: 22px 0 12px;
     }
-    .d-month-header:first-child { margin-top: 0; }
-    .d-month-count { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600;
-      color: var(--mut); letter-spacing: 0; }
+    .d-month-header:first-child { margin-top: 4px; }
+    .d-month-header::after { content: ''; flex: 1; height: 1px; background: var(--b1); }
+    .d-month-count {
+      font-size: 10px; font-weight: 600; color: var(--mut);
+      background: var(--s2); border: 1px solid var(--b1);
+      border-radius: 10px; padding: 1px 7px; letter-spacing: 0;
+    }
 
     /* Cards */
     .d-card {
       background: var(--s2); border: 1px solid var(--b1);
-      border-radius: var(--r-lg); margin-bottom: 14px;
+      border-radius: var(--r-lg); margin-bottom: 12px;
       display: flex; overflow: hidden;
-      transition: background .12s, border-color .15s, box-shadow .15s;
+      transition: background .12s, border-color .15s, box-shadow .15s, transform .1s;
     }
-    .d-card:hover { background: var(--s3); border-color: var(--b2); box-shadow: var(--shadow); }
-    .d-card-edge { width: 4px; flex-shrink: 0; background: var(--teal); }
-    .d-card-main { flex: 1; padding: 14px 16px; min-width: 0; }
+    .d-card:hover { background: var(--s3); border-color: var(--b2); box-shadow: 0 4px 24px rgba(0,0,0,.22); }
+    .d-card:active { transform: scale(.998); }
+    .d-card-edge { width: 5px; flex-shrink: 0; background: var(--teal); }
+    .d-card-main { flex: 1; padding: 14px 16px 12px; min-width: 0; }
     .d-card-title {
-      font-size: 14px; font-weight: 600; color: var(--txt);
-      margin-bottom: 7px; line-height: 1.35;
+      font-size: 15px; font-weight: 600; color: var(--txt);
+      margin-bottom: 8px; line-height: 1.4;
     }
     .d-card-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 9px; }
     .d-card-date {
@@ -173,29 +178,30 @@
     }
 
     /* Stats entry */
-    .vstats-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:10px; }
-    .vstats-field { display:flex; flex-direction:column; gap:3px; }
-    .vstats-label { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--txt2); }
+    .vstats-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px; }
+    .vstats-field { display:flex; flex-direction:column; gap:4px; }
+    .vstats-label { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--txt2); }
     .vstats-input {
       width:100%; background:var(--s1); border:1px solid var(--b1);
-      border-radius:4px; color:var(--txt); font-family:'Inter',sans-serif;
-      font-size:13px; padding:5px 8px; outline:none;
-      transition:border-color .15s;
+      border-radius:6px; color:var(--txt);
+      font-size:13px; padding:6px 9px; outline:none;
+      transition:border-color .15s, box-shadow .15s;
     }
-    .vstats-input:focus { border-color:var(--teal); }
+    .vstats-input:focus { border-color:var(--teal); box-shadow: 0 0 0 3px rgba(106,138,88,.1); }
     .vstats-total-row {
       grid-column:1/-1; font-size:10px; color:var(--txt2);
-      padding-top:4px; border-top:1px solid var(--b1); margin-top:2px;
+      padding-top:6px; border-top:1px solid var(--b1); margin-top:2px;
+      font-weight: 600; letter-spacing: .03em;
     }
 
     .d-card-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
     .d-btn {
-      background: var(--s1); border: 1px solid var(--b2); border-radius: 6px;
-      color: var(--txt2); cursor: pointer; font-size: 11px; font-weight: 600;
-      padding: 6px 13px; white-space: nowrap; transition: all .15s; letter-spacing: .02em;
+      background: var(--s1); border: 1px solid var(--b2); border-radius: 8px;
+      color: var(--txt2); cursor: pointer; font-size: 12px; font-weight: 600;
+      padding: 7px 15px; white-space: nowrap; transition: all .15s; letter-spacing: .02em;
     }
-    .d-btn:hover { background: var(--s3); color: var(--txt); }
-    .d-btn:active { filter: brightness(.93); }
+    .d-btn:hover { background: var(--s3); color: var(--txt); border-color: var(--b3); }
+    .d-btn:active { filter: brightness(.9); transform: scale(.97); }
 
     /* Empty state */
     .d-empty {
@@ -218,14 +224,15 @@
 
     /* ── TOAST ── */
     .toast {
-      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
-      background: var(--b2); color: var(--txt); border-radius: 20px;
-      padding: 8px 18px; font-size: 13px; font-weight: 500;
+      position: fixed; bottom: 80px; left: 50%;
+      transform: translateX(-50%) translateY(12px);
+      background: var(--s3); border: 1px solid var(--b3); color: var(--txt);
+      border-radius: 20px; padding: 9px 18px; font-size: 13px; font-weight: 500;
       pointer-events: none; opacity: 0; visibility: hidden;
-      transition: opacity .2s, visibility .2s;
-      white-space: nowrap; z-index: 500;
+      transition: opacity .22s var(--ease), transform .22s var(--ease), visibility .22s;
+      white-space: nowrap; z-index: 500; box-shadow: 0 4px 20px rgba(0,0,0,.35);
     }
-    .toast.show { opacity: 1; visibility: visible; }
+    .toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
 
     /* ── LIGHT MODE ── */
     html.light .vstats-input { background: var(--s2); }

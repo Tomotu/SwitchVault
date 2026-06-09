@@ -88,41 +88,52 @@
     /* ── STREAK BANNER ── */
     .streak-banner {
       margin: 16px clamp(12px,3vw,24px) 0;
-      background: rgba(200,168,112,.08); border: 1px solid rgba(200,168,112,.2);
-      border-radius: 10px; padding: 12px 16px;
+      background: rgba(200,168,112,.07); border: 1px solid rgba(200,168,112,.18);
+      border-left: 3px solid rgba(200,168,112,.6);
+      border-radius: 10px; padding: 13px 16px;
       display: flex; align-items: center; gap: 12px;
       position: relative; z-index: 1;
+      transition: background .15s;
     }
+    .streak-banner:hover { background: rgba(200,168,112,.11); }
     .streak-banner.hidden { display: none; }
-    .streak-flame-big { font-size: 28px; }
+    .streak-flame-big { font-size: 28px; line-height: 1; }
     .streak-info { flex: 1; }
-    .streak-main { font-family: 'Anton', sans-serif; font-size: 22px; color: var(--gold); line-height: 1; }
-    .streak-sub  { font-size: 11px; color: var(--txt2); margin-top: 2px; }
+    .streak-main { font-family: 'Anton', sans-serif; font-size: 24px; color: var(--gold); line-height: 1; }
+    .streak-sub  { font-size: 11px; color: var(--txt2); margin-top: 3px; line-height: 1.5; }
 
     /* ── WEEKLY GOAL ── */
     .week-goal {
       display: flex; align-items: center; gap: 16px;
       margin: 16px clamp(12px,3vw,24px) 0;
       background: var(--s2); border: 1px solid var(--b1);
-      border-radius: 10px; padding: 14px 16px;
+      border-radius: 12px; padding: 16px 18px;
       position: relative; z-index: 1;
+      transition: background .12s, border-color .15s;
     }
+    .week-goal:hover { background: var(--s3); border-color: var(--b2); }
     .wg-main { flex: 1; min-width: 0; }
-    .wg-top { display: flex; align-items: baseline; gap: 6px; margin-bottom: 6px; }
-    .wg-label { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--txt2); }
-    .wg-nums { font-family: 'Anton', sans-serif; font-size: 26px; color: var(--txt); line-height: 1; }
-    .wg-sep { color: var(--txt2); font-size: 18px; margin: 0 2px; }
-    .wg-track { height: 6px; background: var(--b2); border-radius: 3px; overflow: hidden; }
-    .wg-fill { height: 100%; border-radius: 3px; background: var(--gold); transition: width .4s; }
-    .wg-status { font-size: 11px; color: var(--txt2); margin-top: 5px; }
-    .wg-edit { display: flex; flex-direction: column; align-items: center; gap: 3px; flex-shrink: 0; }
+    .wg-top { display: flex; align-items: baseline; gap: 6px; margin-bottom: 8px; }
+    .wg-label { font-size: 10px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--txt2); }
+    .wg-nums { font-family: 'Anton', sans-serif; font-size: 28px; color: var(--txt); line-height: 1; }
+    .wg-sep { color: var(--mut); font-size: 20px; margin: 0 1px; }
+    .wg-track { height: 7px; background: var(--b2); border-radius: 4px; overflow: hidden; }
+    .wg-fill {
+      height: 100%; border-radius: 4px;
+      background: linear-gradient(90deg, var(--gold), #E6C880);
+      transition: width .5s var(--ease);
+    }
+    .wg-fill.done { background: linear-gradient(90deg, var(--teal), #8AAA68); }
+    .wg-status { font-size: 11px; color: var(--txt2); margin-top: 6px; line-height: 1.5; }
+    .wg-edit { display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0; }
     .wg-edit-label { font-size: 9px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--txt2); }
     .wg-input {
-      width: 48px; background: var(--s1); border: 1px solid var(--b2);
-      border-radius: 6px; color: var(--txt); font-size: 15px; font-weight: 700;
-      text-align: center; padding: 5px 4px; outline: none;
+      width: 52px; background: var(--s1); border: 1px solid var(--b2);
+      border-radius: 8px; color: var(--txt); font-size: 16px; font-weight: 700;
+      text-align: center; padding: 6px 4px; outline: none;
+      transition: border-color .15s, box-shadow .15s;
     }
-    .wg-input:focus { border-color: var(--teal); }
+    .wg-input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(106,138,88,.1); }
 
     /* ── SECTION ── */
     .section {
@@ -191,12 +202,13 @@
 
     /* ── TOAST ── */
     .toast {
-      position: fixed; bottom: 76px; left: 50%; transform: translateX(-50%) translateY(20px);
-      background: var(--b2); color: var(--txt); border-radius: 20px;
-      padding: 8px 18px; font-size: 13px; font-weight: 500;
+      position: fixed; bottom: 76px; left: 50%;
+      transform: translateX(-50%) translateY(12px);
+      background: var(--s3); border: 1px solid var(--b3); color: var(--txt);
+      border-radius: 20px; padding: 9px 18px; font-size: 13px; font-weight: 500;
       pointer-events: none; opacity: 0; visibility: hidden;
-      transition: opacity .2s, transform .2s, visibility .2s;
-      white-space: nowrap; z-index: 500;
+      transition: opacity .22s var(--ease), transform .22s var(--ease), visibility .22s;
+      white-space: nowrap; z-index: 500; box-shadow: 0 4px 20px rgba(0,0,0,.35);
     }
     .toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
 

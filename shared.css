@@ -11,6 +11,7 @@
   --r-lg:12px;
   --shadow:0 6px 24px rgba(0,0,0,.22);
   --ring:0 0 0 2px var(--teal);
+  --ease:cubic-bezier(.22,1,.36,1);
 }
 
 /* Reset */
@@ -18,6 +19,7 @@
 html { scroll-behavior: smooth; overflow-x: hidden; }
 :focus-visible { outline: none; box-shadow: var(--ring); }
 button, a, input, textarea, select, [tabindex] { outline: none; }
+button, input, textarea, select { font-family: inherit; }
 body {
   background: var(--bg); color: var(--txt);
   font-family: 'Inter', sans-serif; font-size: 14px;
@@ -29,12 +31,12 @@ body {
 
 /* Header icon button */
 .hdr-icon-btn {
-  background: none; border: 1px solid var(--b2); border-radius: 6px;
-  color: var(--txt2); cursor: pointer; font-size: 14px; padding: 4px 8px;
+  background: none; border: 1px solid var(--b2); border-radius: 8px;
+  color: var(--txt2); cursor: pointer; font-size: 14px; padding: 5px 10px;
   transition: all .15s; flex-shrink: 0; text-decoration: none;
-  display: inline-flex; align-items: center;
+  display: inline-flex; align-items: center; gap: 4px;
 }
-.hdr-icon-btn:hover { background: var(--s3); color: var(--txt); }
+.hdr-icon-btn:hover { background: var(--s3); color: var(--txt); border-color: var(--b3); }
 
 /* Bottom nav */
 .bottom-nav {
@@ -101,3 +103,10 @@ html.light {
   background: currentColor;
   opacity: .7;
 }
+
+/* Shared section heading */
+.sec-hd {
+  font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--txt2); display: flex; align-items: center; gap: 8px; margin-bottom: 14px;
+}
+.sec-hd::after { content: ''; flex: 1; height: 1px; background: var(--b1); }
